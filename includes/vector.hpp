@@ -46,7 +46,7 @@ namespace ft
 
 			~vector()
 			{
-				;
+				this->clear();
 			}
 
 			explicit vector ( allocator_type const & alloc = allocator_type() )
@@ -73,8 +73,8 @@ namespace ft
 			/* vector & problem
  			ft::vector<value_type> &	operator=( ft::vector const & );
 			*/
-			reference					operator[]( size_type n ) { return (_p[n]); }
-			const_reference				operator[]( size_type n ) const { return (_p[n]); }
+			reference					operator[]( size_type n ) { return (*(this->_p + n)); }
+			const_reference				operator[]( size_type n ) const { return (*(this->_p + n)); }
 
 			bool						operator== (const vector<value_type, allocator_type>& rhs);
 			bool						operator!= (const vector<value_type, allocator_type>& rhs);
@@ -91,7 +91,12 @@ namespace ft
 			size_type		max_size( void ) const { return (this->_alloc.max_size()); }
 
 			void			resize( size_type n, value_type val = value_type()) ;
-			size_type		capacity( void ) const;
+
+			size_type		capacity( void ) const
+			{
+				return (this->_block);
+			}
+
 			bool			empty( void ) const;
 			void			reserve( size_type n );
 
@@ -117,16 +122,18 @@ namespace ft
 
 				if (this->_size == this->_block)
 				{
-					if (this->_size == 0)
-						new_block = sizeof(value_type);
-					else
-						new_block = this->_block * 2;
+					this->_size == 0 ? new_block = 1 : new_block = this->_block * 2;
 					tmp = this->_alloc.allocate(new_block);
-					std::memcpy(tmp, this->_p, this->_size);
+					for (size_type i = 0; i < this->_size; i++)
+					{
+						this->_alloc.construct(tmp + i, this->_p[i]);
+						this->_alloc.destroy(this->_p + i);
+					}
 					this->_alloc.deallocate(this->_p, this->_size);
 					this->_p = tmp;
+					this->_block = new_block;
 				}
-				this->_p[this->_size++] = val;
+				this->_alloc.construct(this->_p + this->_size++, val);
 			}
 
 			void			pop_back( void );
@@ -141,7 +148,16 @@ namespace ft
 			/* Vector & problem
 			void			swap( ft::vector & );
 			 */
-			void			clear( void );
+
+			void			clear( void )
+			{
+				for (size_type i = 0; i < this->_size; i++)
+					this->_alloc.destroy(this->_p + i);
+				this->_alloc.deallocate(this->_p, this->_block);
+				this->_block = 0;
+				this->_size = 0;
+				this->_p = NULL;
+			}
 
 			// Allocator
 
