@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstddef>
 #include <cstring>
+#include <string>
 
 namespace ft
 {
@@ -46,7 +47,15 @@ namespace ft
 
 			~vector()
 			{
-				this->clear();
+				if (this->_size)
+				{
+					for (size_type i = 0; i < this->_size; i++)
+						this->_alloc.destroy(this->_p + i);
+					this->_alloc.deallocate(this->_p, this->_block);
+				}
+				this->_block = 0;
+				this->_size = 0;
+				this->_p = NULL;
 			}
 
 			explicit vector ( allocator_type const & alloc = allocator_type() )
@@ -71,17 +80,17 @@ namespace ft
 		/* Operators */
 
 			/* vector & problem
- 			ft::vector<value_type> &	operator=( ft::vector const & );
+ 			ft::vector &	operator=( ft::vector const & ref );
 			*/
 			reference					operator[]( size_type n ) { return (*(this->_p + n)); }
 			const_reference				operator[]( size_type n ) const { return (*(this->_p + n)); }
 
-			bool						operator== (const vector<value_type, allocator_type>& rhs);
-			bool						operator!= (const vector<value_type, allocator_type>& rhs);
-			bool						operator<  (const vector<value_type, allocator_type>& rhs);
-			bool						operator<= (const vector<value_type, allocator_type>& rhs);
-			bool						operator>  (const vector<value_type, allocator_type>& rhs);
-			bool						operator>= (const vector<value_type, allocator_type>& rhs);
+			// bool						operator== (const vector<value_type, allocator_type>& rhs);
+			// bool						operator!= (const vector<value_type, allocator_type>& rhs);
+			// bool						operator<  (const vector<value_type, allocator_type>& rhs);
+			// bool						operator<= (const vector<value_type, allocator_type>& rhs);
+			// bool						operator>  (const vector<value_type, allocator_type>& rhs);
+			// bool						operator>= (const vector<value_type, allocator_type>& rhs);
 
 		/* Functions */
 
@@ -89,32 +98,84 @@ namespace ft
 
 			size_type		size( void ) const { return (this->_size); }
 			size_type		max_size( void ) const { return (this->_alloc.max_size()); }
-
-			void			resize( size_type n, value_type val = value_type()) ;
-
-			size_type		capacity( void ) const
+			size_type		capacity( void ) const { return (this->_block); }
+			bool			empty( void ) const { return (this->_size != 0); }
+			void			resize( size_type n, value_type val = value_type())
 			{
-				return (this->_block);
+				pointer	tmp;
+
+				if (n > this->max_size())
+					throw std::length_error("vector::_M_fill_insert");
+				if (n < this->_size)
+				{
+					while (--this->_size > n)
+					{
+						this->_alloc.destroy(this->_p + this->_size);
+						*(this->_p + this->_size) = 0;
+					}
+					this->_alloc.destroy(this->_p + this->_size);
+					*(this->_p + this->_size) = 0;
+				}
+				else
+				{
+					tmp = this->_alloc.allocate(n);
+					for (size_type i = 0; i < this->_size; i++)
+					{
+						this->_alloc.construct(tmp + i, this->_p[i]);
+						this->_alloc.destroy(this->_p + i);
+					}
+					for (size_type i = this->_size; i < n; i++)
+						this->_alloc.construct(tmp + i, val);
+					this->_alloc.deallocate(this->_p, this->_block);
+					this->_p = tmp;
+					this->_size = n;
+				}
 			}
 
-			bool			empty( void ) const;
-			void			reserve( size_type n );
+			void			reserve( size_type n )
+			{
+				pointer	tmp;
+
+				if (n > this->_block)
+				{
+					if (n > this->max_size())
+						throw std::length_error("vector::reserve");
+					tmp = this->_alloc.allocate(n);
+					for (size_type i = 0; i < this->_size; i++)
+					{
+						this->_alloc.construct(tmp + i, this->_p[i]);
+						this->_alloc.destroy(this->_p + i);
+					}
+					this->_alloc.deallocate(this->_p, this->_block);
+					this->_p = tmp;
+					this->_block = n;
+				}
+			}
 
 			// Element acess
 
-			reference		at( size_type n );
-			const_reference	at( size_type n ) const;
-			reference		front( void );
-			const_reference	front( void ) const;
-			reference		back( void );
-			const_reference	back( void ) const;
+			reference		at( size_type n )
+			{
+				if (n >= this->_size)
+					throw std::out_of_range("vector::_M_range_check: __n >= this->size()");
+				return (this->_p[n]);
+			}
+			const_reference	at( size_type n ) const
+			{
+				if (n >= this->_size)
+					throw std::out_of_range("vector::_M_range_check: __n >= this->size()");
+				return (this->_p[n]);
+			}
+			reference		front( void ){ return (*this->_p); }
+			const_reference	front( void ) const { return (*this->_p); }
+			reference		back( void ) { return (this->_p[this->_size - 1]); }
+			const_reference	back( void ) const { return (this->_p[this->_size - 1]); }
 
 			// Modifiers
 
 			template< class InputIterator >
 			void			assign( InputIterator first, InputIterator last );
 			void			assign( size_type n, const_reference val );
-
 			void			push_back( const_reference val )
 			{
 				pointer		tmp;
@@ -129,14 +190,14 @@ namespace ft
 						this->_alloc.construct(tmp + i, this->_p[i]);
 						this->_alloc.destroy(this->_p + i);
 					}
-					this->_alloc.deallocate(this->_p, this->_size);
+					this->_alloc.deallocate(this->_p, this->_block);
 					this->_p = tmp;
 					this->_block = new_block;
 				}
 				this->_alloc.construct(this->_p + this->_size++, val);
 			}
+			void			pop_back( void ) { this->_alloc.destroy(this->_p + --this->_size); }
 
-			void			pop_back( void );
 			/* Requires iterators
 			iterator		insert( iterator positon, const_reference val );
 			void			insert( iterator positon, size_type n, const_reference val );
@@ -149,15 +210,7 @@ namespace ft
 			void			swap( ft::vector & );
 			 */
 
-			void			clear( void )
-			{
-				for (size_type i = 0; i < this->_size; i++)
-					this->_alloc.destroy(this->_p + i);
-				this->_alloc.deallocate(this->_p, this->_block);
-				this->_block = 0;
-				this->_size = 0;
-				this->_p = NULL;
-			}
+			void			clear( void ) { this->~vector(); }
 
 			// Allocator
 
