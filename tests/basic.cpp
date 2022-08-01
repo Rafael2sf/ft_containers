@@ -1,16 +1,21 @@
-#include "../includes/vector.hpp"
+#include <iostream>
+#include <iomanip>
+
+#include "../includes/type_traits.hpp"
+//#include <type_traits>
+
+template <class T, class U = void>
+struct Foo {
+	static const int value = 0;
+};
+
+template <class T>
+struct Foo<T, typename ft::enable_if<ft::is_integral<T>::value>::type> {
+	static const int value = 1;
+};
 
 int	main( void )
 {
-	std::vector<int>	a;
-
-	a.reserve(10);
-	std::cout << a.capacity() << std::endl;
-	for (int i = 0; i < 10; i++)
-		a.push_back(i);
-	a.resize(0);
-	// for (int i = 0; i < 5; i++)
-	// 	std::cout << a.at(i) << std::endl;
-	std::cout << a.capacity() << " " << a.size() << std::endl;
+	std::cout << Foo<int>::value << std::endl;
 	return (0);
 }
