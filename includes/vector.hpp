@@ -23,7 +23,7 @@ namespace ft
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
 
-			// typedef size_t										size_type;
+			typedef size_t										size_type;
 			// typedef ptrdiff_t									difference_type;
 
 		/* Iterators */
@@ -60,20 +60,22 @@ namespace ft
 			}
 
 			explicit vector ( allocator_type const & alloc = allocator_type() )
-			:_p(NULL), _size(0), _block(0), _alloc(alloc)
+			:_p(NULL), _size(0), _block(0),_alloc(alloc)
 			{}
 
 			explicit vector ( size_t n, value_type const & val = value_type(),
 				allocator_type const & alloc = allocator_type() )
+			: _alloc(alloc)
 			{}
 
 			template< class InputIterator >
 			vector ( InputIterator first, InputIterator last,
 				allocator_type const & alloc = allocator_type() )
+			: _alloc(alloc)
 			{}
-			
+
 			/* Vector & problem
- 			vector ( ft::vector const & )
+ 			vector ( ft::vector const & rhs )
 			{
 				;
 			} */
@@ -83,6 +85,7 @@ namespace ft
 			/* vector & problem
  			ft::vector &	operator=( ft::vector const & ref );
 			*/
+
 			reference					operator[]( size_type n ) { return (*(this->_p + n)); }
 			const_reference				operator[]( size_type n ) const { return (*(this->_p + n)); }
 

@@ -3,8 +3,8 @@
 namespace ft
 {
 	/* ft::enable_if */
-	template <bool T, class U = void> struct enable_if {};
-	template <class T> struct enable_if<true, T> { typedef T type; };
+	template <bool T, class U = void> struct enable_if 		{};
+	template <class T> struct enable_if<true, T> 			{ typedef T type; };
 
 	/* ft::remove_cv */
 
