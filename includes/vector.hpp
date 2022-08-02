@@ -1,11 +1,12 @@
 #pragma once
 
-#include <iostream>
 #include <memory>
 #include <vector>
 #include <cstddef>
-#include <cstring>
-#include <string>
+#include <algorithm>
+
+#include "vector_iterators.hpp"
+#include "type_traits.hpp"
 
 namespace ft
 {
@@ -22,88 +23,12 @@ namespace ft
 			typedef typename allocator_type::const_reference	const_reference;
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
-
 			typedef size_t										size_type;
-			// typedef ptrdiff_t									difference_type;
-
-		/* Iterators */
-
-		template<class U>
-		class vector_iterator
-		{
-			public:
-
-				typedef std::random_access_iterator_tag iterator_category;
-				typedef U								value_type;
-				typedef ptrdiff_t						difference_type;
-				typedef U *								pointer;
-				typedef U &								reference;
-
-				~vector_iterator() {}
-				vector_iterator( void ): _p(NULL) {}
-				vector_iterator( vector_iterator const & ref ) { *this = ref; }
-				vector_iterator( pointer const & ref ): _p(ref) {}
-
-				reference	operator*( void ) { return (*(this->_p)); }
-				pointer		operator->( void ) { return (this->_p); }
-				reference	operator[](const int n) { return (this->_p + n); }
-
-				bool		operator==( vector_iterator const & rhs ) const { return(this->_p == rhs._p); }
-				bool		operator!=( vector_iterator const & rhs ) const { return(!(*this == rhs)); }
-				bool		operator<( vector_iterator const & rhs ) const { return (this->_p < rhs._p); }
-				bool		operator>( vector_iterator const & rhs ) const { return (this->_p > rhs._p); }
-				bool		operator<=( vector_iterator const & rhs ) const { return (this->_p <= rhs._p); }
-				bool		operator>=( vector_iterator const & rhs ) const { return (this->_p >= rhs._p); }
-
-				vector_iterator &	operator=( vector_iterator const & rhs ) { 
-					this->_p = rhs._p;
-					return (*this);
-				}
-				vector_iterator &	operator++( void ) {
-					this->_p++;
-					return (*this);
-				}
-				vector_iterator		operator++( int ) {
-					vector_iterator<U>	tmp(*this);
-					this->_p++;
-					return (tmp);
-				}
-				vector_iterator &	operator--( void ) {
-					this->_p--;
-					return (*this);
-				}
-				vector_iterator		operator--( int ) {
-					vector_iterator<U>	tmp(*this);
-					this->_p--;
-					return (tmp);
-				}
-				vector_iterator		operator+( difference_type rhs ) {
-					vector_iterator	tmp(rhs);
-					tmp._p += rhs;
-					return (tmp);
-				}
-				vector_iterator &	operator+=( difference_type rhs ) {
-					this->_p += rhs;
-					return (*this);
-				}
-				vector_iterator		operator-( difference_type rhs ) {
-					vector_iterator	tmp(rhs);
-					tmp._p -= rhs;
-					return (tmp);
-				}
-				vector_iterator &	operator-=( difference_type rhs ) {
-					this->_p -= rhs;
-					return (*this);
-				}
-
-			private:
-				pointer	_p;
-		};
-
-		typedef vector_iterator<T>						iterator;
-		// typedef MyConstIterator<value_type>				const_iterator;
-		// typedef std::reverse_iterator<iterator>			reverse_iterator;
-		// typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
+			typedef ptrdiff_t									difference_type;
+			typedef vector_iterator<value_type>					iterator;
+		// typedef ft::vector_const_iterator<value_type>		const_iterator;
+		// typedef std::reverse_iterator<iterator>				reverse_iterator;
+		// typedef std::reverse_iterator<const_iterator>		const_reverse_iterator;
 
 		private:
 
@@ -121,10 +46,7 @@ namespace ft
 			~vector()
 			{
 				if (this->_size)
-				{
-					for (size_type i = 0; i < this->_size; i++)
-						this->_alloc.destroy(this->_p + i);
-					this->_alloc.deallocate(this->_p, this->_block);
+				{ft::vector_conhis->_alloc.deallocate(this->_p, this->_block);
 				}
 				this->_block = 0;
 				this->_size = 0;
@@ -132,35 +54,68 @@ namespace ft
 			}
 
 			explicit vector ( allocator_type const & alloc = allocator_type() )
-			:_p(NULL), _size(0), _block(0),_alloc(alloc)
+			:_p(NULL), _size(0), _block(0), _alloc(alloc)
 			{}
 
-			explicit vector ( size_t n, value_type const & val = value_type(),
+			explicit vector ( size_type n, value_type const & val = value_type(),
 				allocator_type const & alloc = allocator_type() )
 			: _alloc(alloc)
 			{
-				pointer	tmp;
-
-				tmp = this->_alloc.allocate(n);
+				if (n > this->max_size())
+					throw std::length_error("cannot create std::vector larger than max_size()");
+				if (n > 0)
+				{
+					this->_p = this->_alloc.allocate(n);
+					for (size_type i = 0; i < n; i++)
+						this->_alloc.construct(this->_p + i, val);
+				}
+				else
+					this->_p = NULL;
+				this->_size = n;
+				this->_block = n;
 			}
 
 			template< class InputIterator >
 			vector ( InputIterator first, InputIterator last,
 				allocator_type const & alloc = allocator_type() )
 			: _alloc(alloc)
-			{}
-
-			/* Vector & problem
- 			vector ( ft::vector const & rhs )
 			{
-				;
-			} */
+				size_type	n;
+
+				n = std::distance(first ,last); // does not work with my iterator
+				if (n > this->max_size())
+					throw std::length_error("cannot create std::vector larger than max_size()");
+				if (n > 0)
+				{
+					// if (ft::is_integral<InputIterator>())
+					// {
+					// 	this->_p = this->_alloc.allocate(n);
+					// 	for (size_type i = 0; i < n; i++)
+					// 		this->_alloc.construct(this->_p + i, last);
+					// }
+					// else
+					// {
+						this->_p = this->_alloc.allocate(n);
+						for (size_t i = 0; i < n && first != last; i++, first++)
+							this->_alloc.construct(this->_p + i, *first);
+					// }
+				}
+				else
+					this->_p = NULL;
+				this->_block = n;
+				this->_size = n;
+			}
+
+ 			vector( vector const & rhs )
+			{
+			}
 
 		/* Operators */
 
-			/* vector & problem
- 			ft::vector &	operator=( ft::vector const & ref );
-			*/
+ 			vector &	operator=( vector const & ref )
+			{
+
+			}
 
 			reference					operator[]( size_type n ) { return (*(this->_p + n)); }
 			const_reference				operator[]( size_type n ) const { return (*(this->_p + n)); }
@@ -234,6 +189,8 @@ namespace ft
 
 			// Element acess
 
+			pointer			data( void ) { return this->_p; }
+			const pointer	data( void ) const { return this->_p; }
 			reference		at( size_type n )
 			{
 				if (n >= this->_size)

@@ -1,5 +1,6 @@
-#include "../includes/vector.hpp"
 #include <iomanip>
+#include <iostream>
+#include "../includes/vector.hpp"
 
 #define SIZE 10000000
 #define TYPE int
