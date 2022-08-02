@@ -28,10 +28,82 @@ namespace ft
 
 		/* Iterators */
 
-			// typedef MyIterator<value_type>					iterator;
-			// typedef MyConstIterator<value_type>				const_iterator;
-			// typedef std::reverse_iterator<iterator>			reverse_iterator;
-			// typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
+		template<class U>
+		class vector_iterator
+		{
+			public:
+
+				typedef std::random_access_iterator_tag iterator_category;
+				typedef U								value_type;
+				typedef ptrdiff_t						difference_type;
+				typedef U *								pointer;
+				typedef U &								reference;
+
+				~vector_iterator() {}
+				vector_iterator( void ): _p(NULL) {}
+				vector_iterator( vector_iterator const & ref ) { *this = ref; }
+				vector_iterator( pointer const & ref ): _p(ref) {}
+
+				reference	operator*( void ) { return (*(this->_p)); }
+				pointer		operator->( void ) { return (this->_p); }
+				reference	operator[](const int n) { return (this->_p + n); }
+
+				bool		operator==( vector_iterator const & rhs ) const { return(this->_p == rhs._p); }
+				bool		operator!=( vector_iterator const & rhs ) const { return(!(*this == rhs)); }
+				bool		operator<( vector_iterator const & rhs ) const { return (this->_p < rhs._p); }
+				bool		operator>( vector_iterator const & rhs ) const { return (this->_p > rhs._p); }
+				bool		operator<=( vector_iterator const & rhs ) const { return (this->_p <= rhs._p); }
+				bool		operator>=( vector_iterator const & rhs ) const { return (this->_p >= rhs._p); }
+
+				vector_iterator &	operator=( vector_iterator const & rhs ) { 
+					this->_p = rhs._p;
+					return (*this);
+				}
+				vector_iterator &	operator++( void ) {
+					this->_p++;
+					return (*this);
+				}
+				vector_iterator		operator++( int ) {
+					vector_iterator<U>	tmp(*this);
+					this->_p++;
+					return (tmp);
+				}
+				vector_iterator &	operator--( void ) {
+					this->_p--;
+					return (*this);
+				}
+				vector_iterator		operator--( int ) {
+					vector_iterator<U>	tmp(*this);
+					this->_p--;
+					return (tmp);
+				}
+				vector_iterator		operator+( difference_type rhs ) {
+					vector_iterator	tmp(rhs);
+					tmp._p += rhs;
+					return (tmp);
+				}
+				vector_iterator &	operator+=( difference_type rhs ) {
+					this->_p += rhs;
+					return (*this);
+				}
+				vector_iterator		operator-( difference_type rhs ) {
+					vector_iterator	tmp(rhs);
+					tmp._p -= rhs;
+					return (tmp);
+				}
+				vector_iterator &	operator-=( difference_type rhs ) {
+					this->_p -= rhs;
+					return (*this);
+				}
+
+			private:
+				pointer	_p;
+		};
+
+		typedef vector_iterator<T>						iterator;
+		// typedef MyConstIterator<value_type>				const_iterator;
+		// typedef std::reverse_iterator<iterator>			reverse_iterator;
+		// typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
 
 		private:
 
@@ -66,7 +138,11 @@ namespace ft
 			explicit vector ( size_t n, value_type const & val = value_type(),
 				allocator_type const & alloc = allocator_type() )
 			: _alloc(alloc)
-			{}
+			{
+				pointer	tmp;
+
+				tmp = this->_alloc.allocate(n);
+			}
 
 			template< class InputIterator >
 			vector ( InputIterator first, InputIterator last,
@@ -215,6 +291,13 @@ namespace ft
 			 */
 
 			void			clear( void ) { this->~vector(); }
+
+			iterator begin( void ) {
+				return iterator(&this->_p[0]);
+			}
+			iterator end( void ) {
+				return iterator(&this->_p[this->_size]);
+			}
 
 			// Allocator
 
