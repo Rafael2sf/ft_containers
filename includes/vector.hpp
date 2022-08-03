@@ -7,6 +7,7 @@
 
 #include "vector_iterators.hpp"
 #include "type_traits.hpp"
+#include <iostream>
 
 namespace ft
 {
@@ -30,9 +31,9 @@ namespace ft
 		// typedef std::reverse_iterator<iterator>				reverse_iterator;
 		// typedef std::reverse_iterator<const_iterator>		const_reverse_iterator;
 
-		private:
-
 		/* Variables */
+
+		private:
 
 			pointer			_p;
 			size_type		_size;
@@ -46,7 +47,10 @@ namespace ft
 			~vector()
 			{
 				if (this->_size)
-				{ft::vector_conhis->_alloc.deallocate(this->_p, this->_block);
+				{
+					for (size_type i = 0; i < this->_size; i++)
+						this->_alloc.destroy(this->_p + i);
+					this->_alloc.deallocate(this->_p, this->_block);
 				}
 				this->_block = 0;
 				this->_size = 0;
@@ -61,6 +65,7 @@ namespace ft
 				allocator_type const & alloc = allocator_type() )
 			: _alloc(alloc)
 			{
+				std::cout << "HERE\n";
 				if (n > this->max_size())
 					throw std::length_error("cannot create std::vector larger than max_size()");
 				if (n > 0)
@@ -75,57 +80,59 @@ namespace ft
 				this->_block = n;
 			}
 
-			template< class InputIterator >
-			vector ( InputIterator first, InputIterator last,
-				allocator_type const & alloc = allocator_type() )
-			: _alloc(alloc)
-			{
-				size_type	n;
+			// template< class InputIterator >
+			// vector ( InputIterator first, InputIterator last,
+			// 	allocator_type const & alloc = allocator_type() )
+			// :_p(NULL), _size(0), _block(0), _alloc(alloc)
+			// {
+			// 	size_type	n;
 
-				n = std::distance(first ,last); // does not work with my iterator
-				if (n > this->max_size())
-					throw std::length_error("cannot create std::vector larger than max_size()");
-				if (n > 0)
-				{
-					// if (ft::is_integral<InputIterator>())
-					// {
-					// 	this->_p = this->_alloc.allocate(n);
-					// 	for (size_type i = 0; i < n; i++)
-					// 		this->_alloc.construct(this->_p + i, last);
-					// }
-					// else
-					// {
-						this->_p = this->_alloc.allocate(n);
-						for (size_t i = 0; i < n && first != last; i++, first++)
-							this->_alloc.construct(this->_p + i, *first);
-					// }
-				}
-				else
-					this->_p = NULL;
-				this->_block = n;
-				this->_size = n;
-			}
+			// 	std::cout << "in constructor" << std::endl;
+			// 	if (ft::is_integral<InputIterator>::value)
+			// 	{
+			// 		*this = vector<T>(static_cast<size_type>(first), last);
+			// 		return ;
+			// 	}
+			// 	else
+			// 	{
+			// 		n = std::distance(first ,last);
+			// 		if (n > this->max_size())
+			// 			throw std::length_error("cannot create std::vector larger than max_size()");
+			// 		this->_p = this->_alloc.allocate(n);
+			// 		for (size_t i = 0; i < n && first != last; i++, first++)
+			// 			this->_alloc.construct(this->_p + i, *first);
+			// 	}					if (n > this->max_size())
+			// 			throw std::length_error("cannot create std::vector larger than max_size()");
+			// 	this->_p = NULL;
+			// 	this->_block = 0;
+			// 	this->_size = 0;
+			// }
 
  			vector( vector const & rhs )
 			{
+				*this = rhs;
 			}
 
 		/* Operators */
 
  			vector &	operator=( vector const & ref )
 			{
-
+				this->_p = NULL;
+				this->_size = 0;
+				this->_block = 0;
+				if (ref._size > 0)
+				{
+					this->_p = this->_alloc.allocate(ref._size);
+					for (size_type i = 0; i < ref._size; i++)
+						this->_alloc.construct(this->_p + i, ref._p[i]);
+					this->_size = ref._size;
+					this->_block = ref._block;
+				}
+				return (*this);
 			}
 
-			reference					operator[]( size_type n ) { return (*(this->_p + n)); }
-			const_reference				operator[]( size_type n ) const { return (*(this->_p + n)); }
-
-			// bool						operator== (const vector<value_type, allocator_type>& rhs);
-			// bool						operator!= (const vector<value_type, allocator_type>& rhs);
-			// bool						operator<  (const vector<value_type, allocator_type>& rhs);
-			// bool						operator<= (const vector<value_type, allocator_type>& rhs);
-			// bool						operator>  (const vector<value_type, allocator_type>& rhs);
-			// bool						operator>= (const vector<value_type, allocator_type>& rhs);
+			reference		operator[]( size_type n ) { return (*(this->_p + n)); }
+			const_reference	operator[]( size_type n ) const { return (*(this->_p + n)); }
 
 		/* Functions */
 
@@ -191,16 +198,12 @@ namespace ft
 
 			pointer			data( void ) { return this->_p; }
 			const pointer	data( void ) const { return this->_p; }
-			reference		at( size_type n )
-			{
-				if (n >= this->_size)
-					throw std::out_of_range("vector::_M_range_check: __n >= this->size()");
+			reference		at( size_type n ) {
+				this->_range_check(n);
 				return (this->_p[n]);
 			}
-			const_reference	at( size_type n ) const
-			{
-				if (n >= this->_size)
-					throw std::out_of_range("vector::_M_range_check: __n >= this->size()");
+			const_reference	at( size_type n ) const {
+				this->_range_check(n);
 				return (this->_p[n]);
 			}
 			reference		front( void ){ return (*this->_p); }
@@ -235,17 +238,81 @@ namespace ft
 			}
 			void			pop_back( void ) { this->_alloc.destroy(this->_p + --this->_size); }
 
+			iterator		insert( iterator position, const_reference val )
+			{
+				iterator	it = this->begin();
+				pointer		tmp;
+				size_type	i;
+				size_type	new_block;
+
+				if (this->_size == 0 || position >= this->end())
+				{
+					this->push_back(val);
+					position = this->end() - 1;
+				}
+				else
+				{
+					new_block = this->_block;
+					if (this->_size == 0)
+						new_block = 1;
+					else if (this->_size == this->_block)
+						new_block = this->_block * 2;
+					
+					if (new_block == this->_block)
+					{
+						T tmp, curr;
+
+						i = std::distance(this->begin(), position);
+						tmp = this->_p[i];
+						this->_alloc.destroy(this->_p + i);
+						this->_alloc.construct(this->_p + i, val);
+						while (++i < this->_size)
+						{
+							curr = this->_p[i];
+							this->_alloc.destroy(this->_p + i);
+							this->_alloc.construct(this->_p + i, tmp);
+							tmp = curr;
+						}
+					}
+					else
+					{
+						i = 0;
+						tmp = this->_alloc.allocate(new_block);
+						while (it != position)
+						{
+							this->_alloc.construct(tmp + i, *it++);
+							this->_alloc.destroy(this->_p + i++);
+						}
+						position = iterator(&tmp[i]);
+						this->_alloc.construct(tmp + i++, val);
+						while (it < this->end())
+						{
+							this->_alloc.construct(tmp + i, *it++);
+							this->_alloc.destroy(this->_p + i++ - 1);
+						}
+						this->_alloc.deallocate(this->_p, this->_block);
+						this->_p = tmp;
+						this->_block = new_block;
+					}
+					this->_size += 1;
+				}
+				return (position);
+			}
+
 			/* Requires iterators
-			iterator		insert( iterator positon, const_reference val );
 			void			insert( iterator positon, size_type n, const_reference val );
 			template< class InputIterator >
 			void			insert( iterator positon, InputIterator first, InputIterator last );
 			iterator		erase( iterator position );
 			iterator		erase( iterator first, iterator last );
 			*/
-			/* Vector & problem
-			void			swap( ft::vector & );
-			 */
+
+			void			swap( vector & ref ) {
+				std::swap<pointer>(this->_p, ref._p);
+				std::swap<allocator_type>(this->_alloc, ref._alloc);
+				std::swap<size_type>(this->_size, ref._size);
+				std::swap<size_type>(this->_block, ref._block);
+			}
 
 			void			clear( void ) { this->~vector(); }
 
@@ -259,5 +326,19 @@ namespace ft
 			// Allocator
 
 			allocator_type	get_allocator( void ) const { return (Alloc(this->_alloc)); }
+
+		protected:
+
+			void	_range_check(size_type n) {
+				if (n >= this->_size)
+					throw std::out_of_range("vector::_M_range_check: __n >= this->size()");
+			}
 	};
+
+	// bool						operator== (const vector<value_type, allocator_type>& rhs);
+	// bool						operator!= (const vector<value_type, allocator_type>& rhs);
+	// bool						operator<  (const vector<value_type, allocator_type>& rhs);
+	// bool						operator<= (const vector<value_type, allocator_type>& rhs);
+	// bool						operator>  (const vector<value_type, allocator_type>& rhs);
+	// bool						operator>= (const vector<value_type, allocator_type>& rhs);
 }

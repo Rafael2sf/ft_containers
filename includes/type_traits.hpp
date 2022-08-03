@@ -1,5 +1,7 @@
 #pragma once
 
+// Fix integral not receive pointers
+
 namespace ft
 {
 	/* ft::enable_if */
@@ -25,10 +27,49 @@ namespace ft
 
 	/* ft::is_integral */
 
-	template <class T> struct is_integral {
-		enum {value = false};
-		operator bool() const { return (value); }
+	template< class T, T v>
+	struct integral_constant
+	{
+		enum {value = v};
+		typedef T	value_type;
+		typedef integral_constant<T, v> type;
+		operator value_type( void ) const { return value; }
 	};
+	template<>
+	struct integral_constant<bool, true>
+	{
+		enum {value = true};
+		typedef bool	value_type;
+		typedef integral_constant<bool, true> type;
+		operator value_type( void ) const { return value; }
+	};
+	template<>
+	struct integral_constant<bool, false>
+	{
+		enum {value = false};
+		typedef bool	value_type;
+		typedef integral_constant<bool, false> type;
+		operator value_type( void ) const { return value; }
+	};
+
+	template <class T> struct is_integral					: integral_constant<T, false>					{};
+	template <class T> struct is_integral<T const> 			: integral_constant<T, is_integral<T>::value>	{};
+	template <class T> struct is_integral<T volatile>		: integral_constant<T, is_integral<T>::value>	{};
+	template <class T> struct is_integral<T const volatile> : integral_constant<T, is_integral<T>::value>	{};
+	template <> struct is_integral<signed int>				: integral_constant<signed int, true>			{};
+	template <> struct is_integral<unsigned int>			: integral_constant<unsigned int, true>			{};
+	template <> struct is_integral<char>					: integral_constant<char, true>					{};
+	template <> struct is_integral<signed char>				: integral_constant<signed char, true>			{};
+	template <> struct is_integral<unsigned char>			: integral_constant<unsigned char, true>		{};
+	template <> struct is_integral<wchar_t>					: integral_constant<wchar_t, true>				{};
+	template <> struct is_integral<short>					: integral_constant<short, true>				{};
+	template <> struct is_integral<unsigned short>			: integral_constant<unsigned short, true>		{};
+	template <> struct is_integral<long>					: integral_constant<long, true>					{};
+	template <> struct is_integral<unsigned long>			: integral_constant<unsigned long, true>		{};
+	template <> struct is_integral<long long>				: integral_constant<long long, true> 			{};
+	template <> struct is_integral<unsigned long long>		: integral_constant<unsigned long long, true>	{};
+
+	/*
 	template <class T>
 	struct is_integral<T const> {
 		enum {value = is_integral<T>::value};
@@ -36,7 +77,8 @@ namespace ft
 	};
 	template <class T>
 	struct is_integral<T volatile> {
-		enum {value = is_integral<T>::value};
+		enum {value = is_integral<T>::value};int
+int
 		operator bool() const { return (value); }
 	};
 	template <class T>
@@ -48,11 +90,13 @@ namespace ft
 		enum {value = true};
 		operator bool() const { return (value); }
 	};
-	template <> struct is_integral<unsigned int> {
+	template <> struct is_integral<unsigned int> { const volatile
 		enum {value = true};
 		operator bool() const { return (value); }
+	};int
+int
 	};
-	template <> struct is_integral<signed char> {
+	template <> struct is_integral<char> {
 		enum {value = true};
 		operator bool() const { return (value); }
 	};
@@ -60,14 +104,7 @@ namespace ft
 		enum {value = true};
 		operator bool() const { return (value); }
 	};
-	template <> struct is_integral<bool> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<wchar_t> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
+	template <> struct is_integral<bool> { const volatile
 	template <> struct is_integral<short> {
 		enum {value = true};
 		operator bool() const { return (value); }
@@ -92,4 +129,5 @@ namespace ft
 		enum {value = true};
 		operator bool() const { return (value); }
 	};
+	*/
 }

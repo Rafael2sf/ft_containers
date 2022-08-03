@@ -1,58 +1,52 @@
 #include <iostream>
-#include <iomanip>
-#include <vector>
-#include <utility>
+// #include <iomanip>
+// #include <vector>
+// #include <utility>
 
 #include "../includes/vector.hpp"
 #include "../includes/iterators.hpp"
+#include "../includes/type_traits.hpp"
+#include "../includes/utility.hpp"
 
-template <typename T>
-class	myAlloc: public std::allocator<T>
-{
-	public:
-		T * allocate(size_t n, const void *idk = 0)
-		{
-			std::cout << "Allocated " << n << "*T bytes" << std::endl;
-			return std::allocator<T>::allocate(n, idk);
-		}
-};
+// template <typename T>
+// class	myAlloc: public std::allocator<T>
+// {
+// 	public:
+// 		T * allocate(size_t n, const void *idk = 0)
+// 		{
+// 			std::cout << "Allocated " << n << "*T bytes" << std::endl;
+// 			return std::allocator<T>::allocate(n, idk);
+// 		}
+// };
+
+// template <class T>
+// void	it_loop(typename ft::vector<T>::iterator it, typename ft::vector<T>::iterator ite)
+// {
+// 	std::cout << "[ ";
+// 	while (it != ite)
+// 		std::cout << *it++ << " ";
+// 	std::cout << "]" << std::endl;
+// }
 
 int	main( void )
 {
-	ft::vector<float> a;
 
-	for (int i = 0; i < 10; i++)
+	ft::vector<int> a;
+
+	for (size_t i = 0; i < 10; i++)
 		a.push_back(i);
 
-	ft::vector<float>::iterator it1 = a.begin();
-	ft::vector<float>::iterator it2 = 1 + it1;
+	ft::vector<int>::iterator pos = a.begin() + 5;
+	a.insert(pos, 42);
 
-	// ft::vector<float> b(10, 10);
-	// for (size_t i = 0; i < a.size(); i++)
-	// 	std::cout << a.at(i) << std::endl;
+	for (ft::vector<int>::iterator it = a.begin(); it != a.end(); it++)
+		std::cout << *it << std::endl;
 
-	//numbers.reserve(100);
-	// for (int i = 0; i < 100; i++)
-	// 	numbers.push_back(i);
-	// for (int i = 0; i < 100; i++)
-	// 	std::cout << i << ": " << numbers[i] << std::endl;
-	// ft::vector<int, myAlloc<int> >::iterator	it1 = numbers.begin();
-	// ft::vector<int, myAlloc<int> >::iterator	it2 = numbers.end();
+	// std::cout << std::endl;
+	// std::cout << a.size() << std::endl;
+	// std::cout << a.capacity() << std::endl;
 
-	// std::cout << *it1 << " " << *it2 << std::endl;
-	// it1++;
-	// it2--;
-	// std::cout << *it1 << " " << *it2 << std::endl;
-	// it1 += 3;
-	// it2 -= 3;
-	// std::cout << *it1 << " " << *it2 << std::endl;
-	// std::cout << (it2 == it1 ? "true" : "false") << std::endl;
-	// std::cout << (it2 != it1 ? "true" : "false") << std::endl;
-	// std::cout << (it2 < it1 ? "true" : "false") << std::endl;
-	// std::cout << (it2 > it1 ? "true" : "false") << std::endl;
-	// std::cout << (it2 <= it1 ? "true" : "false") << std::endl;
-	// std::cout << (it2 >= it1 ? "true" : "false") << std::endl;
-	// it2 = it1;
-	// std::cout << (it2 == it1 ? "true" : "false") << std::endl;
+	// if (ft::is_integral<int>())
+	// 	std::cout << "OK" << std::endl;
 	return (0);
 }
