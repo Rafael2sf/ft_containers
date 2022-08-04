@@ -30,21 +30,22 @@
 
 int	main( void )
 {
+	ft::vector<int>	a;
 
-	ft::vector<int> a;
-
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 16; i++)
 		a.push_back(i);
-
+	//a.reserve(20);
 	ft::vector<int>::iterator pos = a.begin() + 5;
-	a.insert(pos, 42);
+	//ft::vector<int>::iterator ret = a.insert(pos, 42);
+	a.insert(pos, 10, 42);
 
 	for (ft::vector<int>::iterator it = a.begin(); it != a.end(); it++)
 		std::cout << *it << std::endl;
 
-	// std::cout << std::endl;
-	// std::cout << a.size() << std::endl;
-	// std::cout << a.capacity() << std::endl;
+	std::cout << std::endl;
+	std::cout << "size: " << a.size() << std::endl;
+	std::cout << "capacity: " << a.capacity() << std::endl;
+	//std::cout << *ret << std::endl;
 
 	// if (ft::is_integral<int>())
 	// 	std::cout << "OK" << std::endl;
