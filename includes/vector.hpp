@@ -54,16 +54,16 @@ namespace ft
 				}
 				_capacity = 0;
 				_size = 0;
-				_data = NULL;
+				//_data = NULL;
 			}
 
 			explicit vector ( allocator_type const & alloc = allocator_type() )
-			:_data(NULL), _size(0), _capacity(0), _allocator(alloc)
+			: _size(0), _capacity(0), _allocator(alloc)
 			{}
 
 			explicit vector ( size_type n, value_type const & val = value_type(),
 				allocator_type const & alloc = allocator_type() )
-			: _allocator(alloc)
+			: _size(0), _capacity(0), _allocator(alloc)
 			{
 				if (n > 0)
 				{
@@ -81,7 +81,7 @@ namespace ft
 			// template< class InputIterator >
 			// vector ( InputIterator first, InputIterator last,
 			// 	allocator_type const & alloc = allocator_type() )
-			// :_data(NULL), _size(0), _capacity(0), _allocator(alloc)
+			// : _data(NULL), _size(0), _capacity(0), _allocator(alloc)
 			// {
 			// 	size_type	n;
 
@@ -253,15 +253,40 @@ namespace ft
 					vResize(_capacity * 2 > _size + n ? _capacity * 2 : _size + n);
 					position = begin() + pos;
 				}
-				vMove(position + n - 1, position - 1, std::distance(position, end()));
+				if (this->_size != 0)
+					vMove(position + n - 1, position - 1, std::distance(position, end()));
+				_size += n;
 				while (n--)
 					_allocator.construct(&*position++, val);
-				this->_size += n;
+			}
+
+			template< class InputIterator>
+			void insert( iterator position, InputIterator first, InputIterator last )
+			{
+				size_type	pos;
+				size_type	len;
+
+				len = std::distance(first, last);
+				if (len == 0)
+					return ;
+				vMaxCheck(_size + len);
+				if (_size + len >= _capacity)
+				{
+					pos = std::distance(begin(), position);
+					vResize(_capacity * 2 > _size + len ? _capacity * 2 : _size + len);
+					position = begin() + pos;
+				}
+				if (_size > 0)
+					vMove(position + len, position, std::distance(position, end()));
+				while (first != last)
+				{
+					std::cout << *first << std::endl;
+					_allocator.construct(&*position++, *first++);
+				}
+				_size += len;
 			}
 
 			/* Requires iterators
-			template< class InputIterator >
-			void			insert( iterator positon, InputIterator first, InputIterator last );
 			iterator		erase( iterator position );
 			iterator		erase( iterator first, iterator last );
 			*/
@@ -321,7 +346,9 @@ namespace ft
 					vMaxCheck(n);
 					tmp = _allocator.allocate(n);
 					vMove(iterator(tmp), begin(), _size);
-					_allocator.deallocate(_data, _capacity);
+					std::cout << "wtf " << *tmp << std::endl;
+					if (_capacity)
+						_allocator.deallocate(_data, _capacity);
 					_data = tmp;
 					_capacity = n;
 				}
@@ -331,14 +358,14 @@ namespace ft
 				dst must be allocated, src is destroyed but not freed */
 			void vMove( iterator dst, iterator src, size_type len )
 			{
-				if (src == dst)
+				if (src == dst || len == 0)
 					return ;
 				if (dst < src)
 				{
 					while (len--)
 					{
-						_allocator.construct(&*dst++, *src++);
-						_allocator.destroy(&*src);
+						_allocator.construct(&*dst++, *src);
+						_allocator.destroy(&*src++);
 					}
 				}
 				else
@@ -347,8 +374,9 @@ namespace ft
 					src += len;
 					while (len--)
 					{
-						_allocator.construct(&*dst--, *src--);
-						_allocator.destroy(&*src);
+						std::cout << "wtf " << *src << std::endl;
+						_allocator.construct(&*dst--, *src);
+						_allocator.destroy(&*src--);
 					}
 				}
 			}
