@@ -26,6 +26,10 @@ namespace ft
 			vector_iterator( pointer ref )
 			: _p(ref) {}
 
+			pointer const & base( void ) const {
+				return (_p);
+			}
+
 			reference	operator*( void ) {
 				return *_p;
 			}

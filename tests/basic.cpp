@@ -31,11 +31,15 @@
 
 int	main( void )
 {
-	ft::vector<int>	x;
+	std::vector<int>	x;
 	x.push_back(1);
+	x.push_back(2);
 
-	ft::vector<int>::iterator	it1 = x.begin();
-	ft::vector<int>::iterator	it2 = it1;
+	std::vector<int>::iterator	it1 = x.begin() + 1;
+	std::vector<int>::iterator	it2 = it1;
+	(void)it2;
+	std::cout << *it1 << std::endl;
+	std::cout << *it1.base() << std::endl;
 
 	//int	arr[] = {1, 2, 3};
 

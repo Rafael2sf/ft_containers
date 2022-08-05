@@ -39,25 +39,32 @@ namespace ft
 	class reverse_iterator
 	{
 		public:
-		typedef typename Iter::iterator_category	iterator_category;
-		typedef typename Iter::value_type			value_type;
-		typedef typename Iter::difference_type		difference_type;
-		typedef typename Iter::pointer				pointer;
-		typedef typename Iter::reference			reference;
 
-		~vector_iterator() {}
+			typedef Iter												iterator_type;
+			typedef typename iterator_traits<Iter>::iterator_category	iterator_category;
+			typedef typename iterator_traits<Iter>::value_type			value_type;
+			typedef typename iterator_traits<Iter>::difference_type		difference_type;
+			typedef typename iterator_traits<Iter>::pointer				pointer;
+			typedef typename iterator_traits<Iter>::reference			reference;
 
-		vector_iterator( void )
-		: _base(NULL) {}
+			~reverse_iterator() {}
 
-		vector_iterator( vector_iterator const & ref )
-		: _p(ref._p) {}
+			reverse_iterator( void )
+			: _current(NULL) {}
 
-		vector_iterator( pointer ref )
-		: _p(ref) {}
+			explicit reverse_iterator( iterator_type ref )
+			: _current(ref) {}
+
+			// template <class U>
+			// reverse_iterator( reverse_iterator<U> const & other )
+			// : _current(ref) {}
+
+			iterator_type base() const {
+				return (_current.base());
+			}
 
 		protected:
 
-			Iter _base;
+			Iter _current;
 	};
 }
