@@ -27,7 +27,7 @@ namespace ft
 
 	/* ft::is_integral */
 
-	template< class T, T v>
+	template< class T, bool v>
 	struct integral_constant
 	{
 		enum {value = v};
@@ -35,6 +35,16 @@ namespace ft
 		typedef integral_constant<T, v> type;
 		operator value_type( void ) const { return value; }
 	};
+
+	// template< class T, bool v>
+	// struct integral_constant<T*, v>
+	// {
+	// 	enum {value = v};
+	// 	typedef T	value_type;
+	// 	typedef integral_constant<T, v> type;
+	// 	operator value_type( void ) const { return value; }
+	// };
+
 	template<>
 	struct integral_constant<bool, true>
 	{
@@ -68,66 +78,4 @@ namespace ft
 	template <> struct is_integral<unsigned long>			: integral_constant<unsigned long, true>		{};
 	template <> struct is_integral<long long>				: integral_constant<long long, true> 			{};
 	template <> struct is_integral<unsigned long long>		: integral_constant<unsigned long long, true>	{};
-
-	/*
-	template <class T>
-	struct is_integral<T const> {
-		enum {value = is_integral<T>::value};
-		operator bool() const { return (value); }
-	};
-	template <class T>
-	struct is_integral<T volatile> {
-		enum {value = is_integral<T>::value};int
-int
-		operator bool() const { return (value); }
-	};
-	template <class T>
-	struct is_integral<T const volatile> {
-		enum {value = is_integral<T>::value};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<signed int> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<unsigned int> { const volatile
-		enum {value = true};
-		operator bool() const { return (value); }
-	};int
-int
-	};
-	template <> struct is_integral<char> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<unsigned char> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<bool> { const volatile
-	template <> struct is_integral<short> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<unsigned short> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<long> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<unsigned long> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<long long> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	template <> struct is_integral<unsigned long long> {
-		enum {value = true};
-		operator bool() const { return (value); }
-	};
-	*/
 }

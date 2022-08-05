@@ -34,4 +34,30 @@ namespace ft
 		typedef T const *						pointer;
 		typedef T const &						reference;
 	};
+
+	template <class Iter>
+	class reverse_iterator
+	{
+		public:
+		typedef typename Iter::iterator_category	iterator_category;
+		typedef typename Iter::value_type			value_type;
+		typedef typename Iter::difference_type		difference_type;
+		typedef typename Iter::pointer				pointer;
+		typedef typename Iter::reference			reference;
+
+		~vector_iterator() {}
+
+		vector_iterator( void )
+		: _base(NULL) {}
+
+		vector_iterator( vector_iterator const & ref )
+		: _p(ref._p) {}
+
+		vector_iterator( pointer ref )
+		: _p(ref) {}
+
+		protected:
+
+			Iter _base;
+	};
 }

@@ -1,7 +1,8 @@
 #include <iostream>
-// #include <iomanip>
-// #include <vector>
-// #include <utility>
+#include <iomanip>
+#include <vector>
+#include <utility>
+// #include <type_traits>
 
 #include "../includes/vector.hpp"
 #include "../includes/iterators.hpp"
@@ -30,26 +31,35 @@
 
 int	main( void )
 {
-	//ft::vector<int>	a;
-	ft::vector<int>	b;
+	ft::vector<int>	x;
+	x.push_back(1);
 
-	for (size_t i = 1; i < 16; i++)
-		b.push_back(i);
-	// for (size_t i = 0; i < 3; i++)
+	ft::vector<int>::iterator	it1 = x.begin();
+	ft::vector<int>::iterator	it2 = it1;
+
+	//int	arr[] = {1, 2, 3};
+
+	// for (size_t i = 0; i < 10; i++)
+	// 	b.push_back(i);
+	// for (size_t i = 0; i < 16; i++)
 	// 	a.push_back(i);
 
-	//a.push_back(9);
-	//a.insert(a.begin(), b.begin(), b.end());
+	//a.assign(b.begin(), b.end());
+	// a.assign(a.begin(), a.end());
 
-	for (ft::vector<int>::iterator it = b.begin(); it != b.end(); it++)
-		std::cout << "~ " << *it << std::endl;
+	// ft::vector<int>	b(a.begin(), a.end());
 
-	std::cout << std::endl;
-	std::cout << "size: " << b.size() << std::endl;
-	std::cout << "capacity: " << b.capacity() << std::endl;
-	//std::cout << *ret << std::endl;
+	// // std::vector<int>::iterator r = a.erase(a.end(), a.begin());
+	// // if (r == a.end())
+	// // 	std::cout << "end" << std::endl;
+	// // else
+	// // 	std::cout << "r: " << *r << std::endl;
 
-	// if (ft::is_integral<int>())
-	// 	std::cout << "OK" << std::endl;
+	// for (std::vector<int>::iterator it = a.begin(); it != a.end(); it++)
+	// 	std::cout << "~ " << *it << std::endl;
+
+	// std::cout << std::endl;
+	// std::cout << "size: " << a.size() << std::endl;
+	// std::cout << "capacity: " << a.capacity() << std::endl;
 	return (0);
 }

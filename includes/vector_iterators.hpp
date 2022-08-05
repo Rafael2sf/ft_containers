@@ -62,7 +62,7 @@ namespace ft
 				return (_p >= rhs._p); 
 			}
 
-			vector_iterator &	operator=( vector_iterator const & rhs ) { 
+			vector_iterator &	operator=( vector_iterator const & rhs ) {
 				_p = rhs._p;
 				return (*this);
 			}
