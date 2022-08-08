@@ -66,6 +66,7 @@ namespace ft
 	template <class T> struct is_integral<T const> 			: integral_constant<T, is_integral<T>::value>	{};
 	template <class T> struct is_integral<T volatile>		: integral_constant<T, is_integral<T>::value>	{};
 	template <class T> struct is_integral<T const volatile> : integral_constant<T, is_integral<T>::value>	{};
+
 	template <> struct is_integral<signed int>				: integral_constant<signed int, true>			{};
 	template <> struct is_integral<unsigned int>			: integral_constant<unsigned int, true>			{};
 	template <> struct is_integral<char>					: integral_constant<char, true>					{};

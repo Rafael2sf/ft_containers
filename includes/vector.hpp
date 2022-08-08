@@ -28,9 +28,9 @@ namespace ft
 			typedef size_t										size_type;
 			typedef ptrdiff_t									difference_type;
 			typedef vector_iterator<value_type>					iterator;
-		// typedef ft::vector_const_iterator<value_type>		const_iterator;
-		// typedef std::reverse_iterator<iterator>				reverse_iterator;
-		// typedef std::reverse_iterator<const_iterator>		const_reverse_iterator;
+			typedef vector_const_iterator<value_type>			const_iterator;
+			typedef ft::reverse_iterator<iterator>				reverse_iterator;
+			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 
 		/* Variables */
 
@@ -92,9 +92,12 @@ namespace ft
 						this->_allocator.construct(this->_data + i, *first++);
 					this->_size += n;
 				}
-			} */
+			}
+*/
 
-			vector( vector const & rhs ) {
+			vector( vector const & rhs )
+			: _data(0), _size(0), _capacity(0), _allocator(allocator_type())
+			{
 				*this = rhs;
 			}
 
@@ -247,6 +250,7 @@ namespace ft
 			{
 				size_type	pos;
 
+				assert(position >= this->begin() && position < this->end());
 				if (_size == _capacity)
 				{
 					pos = std::distance(this->begin(), position);
@@ -263,6 +267,7 @@ namespace ft
 			{
 				size_type	pos = 0;
 
+				assert(position >= this->begin() && position < this->end());
 				if (_size + n >= _capacity)
 				{
 					pos = std::distance(this->begin(), position);
@@ -282,6 +287,7 @@ namespace ft
 				size_type	pos;
 				size_type	len;
 
+				assert(position >= this->begin() && position < this->end());
 				len = std::distance(first, last);
 				if (len == 0)
 					return ;
@@ -300,7 +306,7 @@ namespace ft
 
 			iterator		erase( iterator position )
 			{
-				//assert(position >= this->begin() && position < this->end());
+				assert(position >= this->begin() && position < this->end());
 				vMove(position, position + 1, std::distance(position, this->end()));
 				_size--;
 				return (position == this->end() - 1 ? this->end() : position);
@@ -312,7 +318,8 @@ namespace ft
 			{
 				size_type	len;
 
-				//assert(position >= this->begin() && position < this->end());
+				assert(first >= this->begin() && first < this->end()
+					&& last >= this->begin() && last < this->end());
 				len = std::distance(first, last);
 				if (!len)
 					return (first);
@@ -335,8 +342,30 @@ namespace ft
 			iterator begin( void ) {
 				return iterator(&_data[0]);
 			}
+			const_iterator begin( void ) const {
+				return const_iterator(&_data[0]);
+			}
+
 			iterator end( void ) {
 				return iterator(&_data[_size]);
+			}
+			const_iterator end( void ) const {
+				return const_iterator(&_data[_size]);
+			}
+
+			reverse_iterator rbegin( void ) {
+				return reverse_iterator(&_data[_size]);
+			}
+			const_reverse_iterator rbegin( void ) const {
+				return const_reverse_iterator(&_data[_size]);
+			}
+
+			reverse_iterator rend( void ) {
+				return reverse_iterator(&_data[0]);
+			}
+
+			const_reverse_iterator rend( void ) const {
+				return const_reverse_iterator(&_data[0]);
 			}
 
 			// Allocator
@@ -417,10 +446,62 @@ namespace ft
 			}
 	};
 
-	// bool						operator== (const vector<value_type, allocator_type>& rhs);
-	// bool						operator!= (const vector<value_type, allocator_type>& rhs);
-	// bool						operator<  (const vector<value_type, allocator_type>& rhs);
-	// bool						operator<= (const vector<value_type, allocator_type>& rhs);
-	// bool						operator>  (const vector<value_type, allocator_type>& rhs);
-	// bool						operator>= (const vector<value_type, allocator_type>& rhs);
+	template <class T, class Alloc>
+	bool operator==(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs)
+	{
+		vector<T, Alloc>::iterator	l_it = lhs.begin();
+		vector<T, Alloc>::iterator	r_it = rhs.begin();
+
+		if (lhs.size != rhs.size)
+			return (false);
+		while (l_it != lhs.end())
+		{
+			if (*l_it++ != *r_it++)
+				return (false);
+		}
+		return (true);
+	}
+
+	template <class T, class Alloc>
+	bool operator<(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs)
+	{
+		vector<T, Alloc>::iterator	l_it = lhs.begin();
+		vector<T, Alloc>::iterator	r_it = rhs.begin();
+
+		while (l_it != lhs.end())
+		{
+			if (*l_it < *r_it)
+				return (true);
+			else if (*r_it < *l_it)
+				return (false);
+			l_it++;
+			r_it++;
+		}
+		return (false);
+	}
+
+	template <class T, class Alloc>
+	bool operator!=(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs) {
+		return !(lhs == rhs);
+	}
+
+	template <class T, class Alloc>
+	bool operator>(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs) {
+		return rhs < lhs;
+	}
+
+	template <class T, class Alloc>
+	bool operator<=(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs) {
+		return !(rhs < lhs);
+	}
+
+	template <class T, class Alloc>
+	bool operator>=(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs) {
+		return !(lhs < rhs);
+	}
+
+	template <class T, class Alloc>
+	void swap( vector<T,Alloc>& x, vector<T,Alloc>& y )  {
+		x.swap(y);
+	}
 }
