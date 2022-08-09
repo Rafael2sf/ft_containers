@@ -1,14 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <vector>
-#include <cstddef>
-#include <algorithm>
 #include <assert.h>
-
 #include "vector_iterators.hpp"
-#include "type_traits.hpp"
-#include <iostream>
 
 namespace ft
 {
@@ -142,7 +136,7 @@ namespace ft
 			}
 
 			bool empty( void ) const {
-				return this->_size != 0;
+				return this->_size == 0;
 			}
 
 			void resize( size_type n, value_type val = value_type())
@@ -449,8 +443,8 @@ namespace ft
 	template <class T, class Alloc>
 	bool operator==(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs)
 	{
-		vector<T, Alloc>::iterator	l_it = lhs.begin();
-		vector<T, Alloc>::iterator	r_it = rhs.begin();
+		typename vector<T, Alloc>::iterator	l_it = lhs.begin();
+		typename vector<T, Alloc>::iterator	r_it = rhs.begin();
 
 		if (lhs.size != rhs.size)
 			return (false);
@@ -465,8 +459,8 @@ namespace ft
 	template <class T, class Alloc>
 	bool operator<(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs)
 	{
-		vector<T, Alloc>::iterator	l_it = lhs.begin();
-		vector<T, Alloc>::iterator	r_it = rhs.begin();
+		typename vector<T, Alloc>::iterator	l_it = lhs.begin();
+		typename vector<T, Alloc>::iterator	r_it = rhs.begin();
 
 		while (l_it != lhs.end())
 		{
