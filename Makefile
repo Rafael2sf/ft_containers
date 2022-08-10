@@ -1,8 +1,75 @@
-SRCS	=	tests/ft_vector2.cpp
-OBJS	=	tests/ft_vector2.o
+# PROGRAM #
 
-all: $(OBJS)
+NAME	=
 
-%.o: %.cpp
-	c++ -Wall -Werror -Wextra -std=c++98 -c $< -o $@
-	sh run_test.sh $<
+# TERMINAL #
+
+RMV		=		rm -f
+MKD		=		mkdir
+PRT		=		printf
+MKE		=		make
+CPY		=		cp
+
+# COLORS #
+
+--GRN	=		[32m
+--RED	=		[31m
+--WHT	=		[39m
+
+# DIRS #
+
+_SRC	=		./tests/
+_OBJ	=		./objs/
+_LIB	=
+_BIN	=		./bin/
+
+# COMPILER #
+
+CXX		=		c++
+AR		=		ar rcs
+CXXFLAGS=		-Wall -Werror -Wextra -std=c++98
+
+# FILES #
+
+SRCS_	=		ft_vector2.cpp \
+				ft_vector3.cpp
+
+SRCS	=		$(addprefix $(_SRC), $(SRCS_))
+STD_SRCS=		$(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $(SRCS))))
+
+OBJS	=		$(patsubst $(_SRC)%.cpp,$(_OBJ)%.o,$(SRCS))
+OBJS	+=		$(patsubst $(_SRC)%.cpp,$(_OBJ)%.o,$(STD_SRCS))
+
+BINS	=		$(patsubst $(_OBJ)%.o, $(_BIN)% ,$(OBJS))
+
+# RULES #
+
+all: $(_OBJ) $(OBJS) $(_BIN) $(BINS)
+
+$(_OBJ)%.o: $(_SRC)%.cpp
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@echo -e "$(--GRN)compiling\t$(<)\t->\t$(@)$(--WHT)"
+
+$(_SRC)std_%.cpp: $(_SRC)ft_%.cpp
+	@cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
+	@echo -e "$(--GRN)creating\t$(<)\t->\t$(@)$(--WHT)"
+
+$(_BIN)%: $(_OBJ)%.o
+	@$(CXX) $(CXXFLAGS) $(<) -o $(@)
+	@echo -e "$(--GRN)executable\t$(<)\t->\t$(@)$(--WHT)"
+
+%/:
+	@$(MKD) $(@)
+
+# CLEAN #
+
+clean:
+	$(RMV) $(OBJS) $(STD_SRCS)
+
+fclean: clean
+	$(RMV) -r $(_OBJ) $(_BIN) $(NAME)
+
+re: fclean all
+
+.PHONY		: all clean fclean re
+.PRECIOUS	: $(STD_SRCS)
