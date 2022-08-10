@@ -73,5 +73,9 @@ int	main( void )
 		vInfo<int>("v2", v2);
 		vPrint<int>("v3", v3);
 	}
+	ft::vector<int> v;
+	int i = 0;
+	while (i < 1000000000)
+		v.push_back(i++);
 	return (0);
 }

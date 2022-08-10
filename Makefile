@@ -5,7 +5,7 @@ NAME	=
 # TERMINAL #
 
 RMV		=		rm -f
-MKD		=		mkdir
+MKD		=		mkdir -p
 PRT		=		printf
 MKE		=		make
 CPY		=		cp
@@ -31,8 +31,7 @@ CXXFLAGS=		-Wall -Werror -Wextra -std=c++98
 
 # FILES #
 
-SRCS_	=		ft_vector2.cpp \
-				ft_vector3.cpp
+SRCS_	=		ft_vector.cpp
 
 SRCS	=		$(addprefix $(_SRC), $(SRCS_))
 STD_SRCS=		$(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $(SRCS))))
@@ -44,9 +43,10 @@ BINS	=		$(patsubst $(_OBJ)%.o, $(_BIN)% ,$(OBJS))
 
 # RULES #
 
-all: $(_OBJ) $(OBJS) $(_BIN) $(BINS)
+all: $(_BIN) $(BINS)
 
 $(_OBJ)%.o: $(_SRC)%.cpp
+	@$(MKD) $(_OBJ)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 	@echo -e "$(--GRN)compiling\t$(<)\t->\t$(@)$(--WHT)"
 
@@ -55,6 +55,7 @@ $(_SRC)std_%.cpp: $(_SRC)ft_%.cpp
 	@echo -e "$(--GRN)creating\t$(<)\t->\t$(@)$(--WHT)"
 
 $(_BIN)%: $(_OBJ)%.o
+	@$(MKD) $(_BIN)
 	@$(CXX) $(CXXFLAGS) $(<) -o $(@)
 	@echo -e "$(--GRN)executable\t$(<)\t->\t$(@)$(--WHT)"
 
@@ -72,4 +73,4 @@ fclean: clean
 re: fclean all
 
 .PHONY		: all clean fclean re
-.PRECIOUS	: $(STD_SRCS)
+.PRECIOUS	: $(STD_SRCS) $(OBJS)
