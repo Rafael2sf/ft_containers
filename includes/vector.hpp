@@ -144,8 +144,9 @@ namespace ft
 				if (n > max_size())
 					throw std::length_error("vector::_M_fill_insert");
 				this->vResize(n);
-				for (size_type i = _size; i < _capacity; i++)
+				for (size_type i = _size; i < n; i++)
 					_allocator.construct(_data + i, val);
+				_size = n;
 			}
 
 			void reserve( size_type n )
@@ -391,7 +392,7 @@ namespace ft
 					while (--_size > n)
 						_allocator.destroy(_data + _size);
 				}
-				else if (n != _capacity)
+				else if (n > _capacity)
 				{
 					vMaxCheck(n);
 					tmp = _allocator.allocate(n);
