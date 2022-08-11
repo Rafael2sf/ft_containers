@@ -18,7 +18,7 @@ namespace ft
 	{
 		while (first1 != last1)
 		{
-			if (!p(*first1++, != *first2++))
+			if (!p(*first1++ != *first2++))
 				return false;
 		}
 		return true;

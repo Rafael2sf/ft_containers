@@ -2,33 +2,33 @@
 #include "../includes/vector.hpp"
 #include <vector>
 
-template<class T>
-struct MyAllocator : public std::allocator<T>
-{
-	typedef typename std::allocator<T>::value_type		value_type;
-	typedef typename std::allocator<T>::reference 		reference;
-	typedef typename std::allocator<T>::const_reference	const_reference;
-	typedef typename std::allocator<T>::pointer			pointer;
-	typedef	typename std::allocator<T>::const_pointer	const_pointer;
-	typedef typename std::allocator<T>::size_type		size_type;
-	typedef typename std::allocator<T>::difference_type	difference_type;
+// template<class T>
+// struct MyAllocator : public std::allocator<T>
+// {
+// 	typedef typename std::allocator<T>::value_type		value_type;
+// 	typedef typename std::allocator<T>::reference 		reference;
+// 	typedef typename std::allocator<T>::const_reference	const_reference;
+// 	typedef typename std::allocator<T>::pointer			pointer;
+// 	typedef	typename std::allocator<T>::const_pointer	const_pointer;
+// 	typedef typename std::allocator<T>::size_type		size_type;
+// 	typedef typename std::allocator<T>::difference_type	difference_type;
 
-	pointer allocate( size_type n, const void * hint = 0 )
-	{
-		std::cout << "[MEM] allocating ( ";
-		std::cout << n << " * " << sizeof(T) << " bytes) ";
-		std::cout << "{" << n * sizeof(T) << "}" << std::endl;
-		return std::allocator<T>::allocate(n, hint);
-	}
+// 	pointer allocate( size_type n, const void * hint = 0 )
+// 	{
+// 		std::cout << "[MEM] allocating ( ";
+// 		std::cout << n << " * " << sizeof(T) << " bytes) ";
+// 		std::cout << "{" << n * sizeof(T) << "}" << std::endl;
+// 		return std::allocator<T>::allocate(n, hint);
+// 	}
 
-	void deallocate( pointer p, std::size_t n )
-	{
-		std::cout << "[MEM] deallocating ( ";
-		std::cout << n << " * " << sizeof(T) << " bytes) ";
-		std::cout << "{" << n * sizeof(T)<< "}" << std::endl;
-		std::allocator<T>::deallocate(p, n);
-	}
-};
+// 	void deallocate( pointer p, std::size_t n )
+// 	{
+// 		std::cout << "[MEM] deallocating ( ";
+// 		std::cout << n << " * " << sizeof(T) << " bytes) ";
+// 		std::cout << "{" << n * sizeof(T)<< "}" << std::endl;
+// 		std::allocator<T>::deallocate(p, n);
+// 	}
+// };
 
 template<class T, class Alloc >
 void	vInfo( std::string const & var, ft::vector<T, Alloc> const & v )
@@ -67,38 +67,119 @@ int	main( void )
 		ft::vector<int>	v0;
 		ft::vector<int>	v1(5, 42);
 		ft::vector<int>	v2(v1);
-		ft::vector<int>	v3;
-		v3 = v2;
+		ft::vector<int>	v3(v2.begin() + 1, v2.end() - 1);
+		ft::vector<int>	v4;
+		v4 = v2;
 		v2.push_back(0);
 		vInfo<int>("v0", v0);
 		vInfo<int>("v1", v1);
 		vInfo<int>("v2", v2);
+		vInfo<int>("v3", v3);
 		vPrint<int>("v3", v3);
+		vPrint<int>("v4", v4);
+		vInfo<int>("v4", v4);
 	}
 	/* capacity related */
 	std::cout << "%% TEST 1 :: CAPACITY %%" << std::endl;
 	{
-		ft::vector<float, MyAllocator<float> >	v0;
+		ft::vector<std::string>	v0;
 		std::cout << (v0.empty() ? "v0 is empty" : "v0 is not empty") << std::endl;
 		v0.reserve(1);
 		for (int i = 1; i < 10; i++)
-			v0.push_back(i + 0.5);
-		vInfo<float, MyAllocator<float> >("v0", v0);
-		vPrint<float, MyAllocator<float> >("v0", v0);
-		v0.resize(5, 42);
-		vInfo<float, MyAllocator<float> >("v0", v0);
-		vPrint<float, MyAllocator<float> >("v0", v0);
-		v0.resize(100);
+			v0.push_back("hello world");
+		vInfo<std::string>("v0", v0);
+		vPrint<std::string>("v0", v0);
+		v0.resize(5);
+		vInfo<std::string>("v0", v0);
+		vPrint<std::string>("v0", v0);
+		v0.resize(100, "resize it is!");
 		v0.reserve(32);
-		vInfo<float, MyAllocator<float> >("v0", v0);
-		vPrint<float, MyAllocator<float> >("v0", v0);
+		vInfo<std::string>("v0", v0);
+		vPrint<std::string>("v0", v0);
 		std::cout << "v0.max_size() == " << v0.max_size() << std::endl;
 		std::cout << (v0.empty() ? "v0 is empty" : "v0 is not empty") << std::endl;
 	}
 	/* element acess */
-	// std::cout << "%% TEST 2 :: ACCESS %%" << std::endl;
-	// {
-	// 	ft::vector<std::string>	v0;
-	// }
+	std::cout << "%% TEST 2 :: ACCESS %%" << std::endl;
+	{
+		ft::vector<double>	v0;
+		for (int i = 0; i < 10; i++)
+			v0.push_back(42.42 + i);
+		std::cout << v0[1] << std::endl;
+		v0[1] = 420;
+		std::cout << v0[1] << std::endl;
+		std::cout << v0.front() << std::endl;
+		std::cout << v0.back() << std::endl;
+		std::cout << v0.at(5) << std::endl;
+		std::cout << v0.at(0) << std::endl;
+		std::cout << v0.at(v0.size() - 1) << std::endl;
+		std::cout << *v0.data() << std::endl;
+	}
+	/* modifiers */
+	std::cout << "%% TEST 3 :: MODIFIERS %%" << std::endl;
+	{
+		ft::vector<char>	v0;
+		ft::vector<char>	v1;
+
+		for (int i = 0; i < 26; i++)
+			v0.push_back('a' + i);
+		vInfo<char>("v0", v0);
+		v1.insert(v1.begin(), '4');
+		vPrint<char>("v1", v1);
+		v1.insert(v1.end(), '2');
+		vPrint<char>("v1", v1);
+		v1.insert(v1.end() - 1, 10, 'x');
+		vPrint<char>("v1", v1);
+		v1.insert(v1.begin(), v0.begin(), v0.end());
+		vPrint<char>("v1", v1);
+		v0.erase(v0.end() - 1);
+		v0.erase(v0.begin());
+		v0.erase(v0.begin() + v0.size() / 2);
+		vPrint<char>("v0", v0);
+		v1.erase(v1.begin(), v1.begin() + 26);
+		vPrint<char>("v1", v1);
+		v1.clear();
+		vPrint<char>("v1", v1);
+		v1 = v0;
+		vPrint<char>("v1", v1);
+		v1.erase(v1.begin(), v1.end());
+		vPrint<char>("v1", v1);
+		v1.swap(v0);
+		vPrint<char>("v1", v1);
+		// v1.assign(10, 100);
+		// vPrint<char>("v1", v1);
+		v1.assign(v1.begin(), v1.end());
+		vPrint<char>("v1", v1);
+		while (v0.size())
+			v0.pop_back();
+		vPrint<char>("v0", v0);
+	}
+	/* extra */
+	std::cout << "%% TEST 4 :: EXTRA %%" << std::endl;
+	{
+		ft::vector<int> v0;
+		ft::vector<int> v1;
+		v0.get_allocator();
+		for (int i = 0; i < 42; i++)
+			v0.push_back(i);
+		vPrint<int>("v0", v0);
+		vPrint<int>("v1", v1);
+		v1.push_back(1);
+		std::cout << "== is " << (v0 == v1 ? "true" : "false") << std::endl;
+		std::cout << "!= is " << (v0 != v1 ? "true" : "false") << std::endl;
+		std::cout << "< is " << (v0 < v1 ? "true" : "false") << std::endl;
+		std::cout << "<= is " << (v0 <= v1 ? "true" : "false") << std::endl;
+		std::cout << "> is " << (v0 > v1 ? "true" : "false") << std::endl;
+		std::cout << ">= is " << (v0 >= v1 ? "true" : "false") << std::endl;
+		v0.swap(v1);
+		vPrint<int>("v0", v0);
+		vPrint<int>("v1", v1);
+		std::cout << "== is " << (v0 == v1 ? "true" : "false") << std::endl;
+		std::cout << "!= is " << (v0 != v1 ? "true" : "false") << std::endl;
+		std::cout << "< is " << (v0 < v1 ? "true" : "false") << std::endl;
+		std::cout << "<= is " << (v0 <= v1 ? "true" : "false") << std::endl;
+		std::cout << "> is " << (v0 > v1 ? "true" : "false") << std::endl;
+		std::cout << ">= is " << (v0 >= v1 ? "true" : "false") << std::endl;
+	}
 	return (0);
 }

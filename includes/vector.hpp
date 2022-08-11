@@ -3,6 +3,7 @@
 #include <memory>
 #include <assert.h>
 #include "vector_iterators.hpp"
+#include "algorithm.hpp"
 
 namespace ft
 {
@@ -56,7 +57,7 @@ namespace ft
 			: _data(0), _size(0), _capacity(0), _allocator(alloc)
 			{}
 
-			explicit vector ( size_type n, value_type const & val = value_type(),
+			explicit vector ( int n, value_type const & val = value_type(),
 				allocator_type const & alloc = allocator_type() )
 			: _data(0), _size(0), _capacity(0), _allocator(alloc)
 			{
@@ -64,13 +65,13 @@ namespace ft
 				{
 					this->vMaxCheck(n);
 					_data = _allocator.allocate(n);
-					for (size_type i = 0; i < n; i++)
+					for (int i = 0; i < n; i++)
 						_allocator.construct(_data + i, val);
 				}
 				_size = n;
 				_capacity = n;
 			}
-/* 
+
 			template< class InputIterator >
 			vector ( InputIterator first, InputIterator last,
 				allocator_type const & alloc = allocator_type() )
@@ -82,12 +83,11 @@ namespace ft
 				if (n > 0)
 				{
 					vResize(n);
-					for (size_t i = 0; i < n; i++)
+					for (int i = 0; i < n; i++)
 						this->_allocator.construct(this->_data + i, *first++);
 					this->_size += n;
 				}
 			}
-*/
 
 			vector( vector const & rhs )
 			: _data(0), _size(0), _capacity(0), _allocator(allocator_type())
@@ -197,7 +197,7 @@ namespace ft
 
 			// Modifiers
 /* 
-			void assign( size_type n, const_reference val )
+			void assign( int n, const_reference val )
 			{
 				if (this->_size)
 				{
@@ -245,7 +245,7 @@ namespace ft
 			{
 				size_type	pos;
 
-				assert(position >= this->begin() && position < this->end());
+				assert(position >= this->begin() && position <= this->end());
 				if (_size == _capacity)
 				{
 					pos = std::distance(this->begin(), position);
@@ -262,7 +262,7 @@ namespace ft
 			{
 				size_type	pos = 0;
 
-				assert(position >= this->begin() && position < this->end());
+				assert(position >= this->begin() && position <= this->end());
 				if (_size + n >= _capacity)
 				{
 					pos = std::distance(this->begin(), position);
@@ -282,7 +282,7 @@ namespace ft
 				size_type	pos;
 				size_type	len;
 
-				assert(position >= this->begin() && position < this->end());
+				assert(position >= this->begin() && position <= this->end());
 				len = std::distance(first, last);
 				if (len == 0)
 					return ;
@@ -313,8 +313,8 @@ namespace ft
 			{
 				size_type	len;
 
-				assert(first >= this->begin() && first < this->end()
-					&& last >= this->begin() && last < this->end());
+				assert(first >= this->begin() && first <= this->end()
+					&& last >= this->begin() && last <= this->end());
 				len = std::distance(first, last);
 				if (!len)
 					return (first);
@@ -365,7 +365,7 @@ namespace ft
 
 			// Allocator
 
-			allocator_type get_allocatorator( void ) const {
+			allocator_type get_allocator( void ) const {
 				return _allocator;
 			}
 
@@ -444,35 +444,15 @@ namespace ft
 	template <class T, class Alloc>
 	bool operator==(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs)
 	{
-		typename vector<T, Alloc>::iterator	l_it = lhs.begin();
-		typename vector<T, Alloc>::iterator	r_it = rhs.begin();
-
-		if (lhs.size != rhs.size)
+		if (lhs.size() != rhs.size())
 			return (false);
-		while (l_it != lhs.end())
-		{
-			if (*l_it++ != *r_it++)
-				return (false);
-		}
-		return (true);
+		return equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 
 	template <class T, class Alloc>
 	bool operator<(vector<T, Alloc> const & lhs, vector<T, Alloc> const & rhs)
 	{
-		typename vector<T, Alloc>::iterator	l_it = lhs.begin();
-		typename vector<T, Alloc>::iterator	r_it = rhs.begin();
-
-		while (l_it != lhs.end())
-		{
-			if (*l_it < *r_it)
-				return (true);
-			else if (*r_it < *l_it)
-				return (false);
-			l_it++;
-			r_it++;
-		}
-		return (false);
+		return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class T, class Alloc>
