@@ -57,7 +57,7 @@ namespace ft
 			: _data(0), _size(0), _capacity(0), _allocator(alloc)
 			{}
 
-			explicit vector ( int n, value_type const & val = value_type(),
+			explicit vector ( size_type n, value_type const & val = value_type(),
 				allocator_type const & alloc = allocator_type() )
 			: _data(0), _size(0), _capacity(0), _allocator(alloc)
 			{
@@ -65,29 +65,29 @@ namespace ft
 				{
 					this->vMaxCheck(n);
 					_data = _allocator.allocate(n);
-					for (int i = 0; i < n; i++)
+					for (size_type i = 0; i < n; i++)
 						_allocator.construct(_data + i, val);
 				}
 				_size = n;
 				_capacity = n;
 			}
 
-			template< class InputIterator >
+/* 			template< class InputIterator >
 			vector ( InputIterator first, InputIterator last,
 				allocator_type const & alloc = allocator_type() )
 			: _data(NULL), _size(0), _capacity(0), _allocator(alloc)
 			{
-				difference_type	n;
+				size_type	n;
 
 				n = std::distance(first ,last);
 				if (n > 0)
 				{
 					vResize(n);
-					for (int i = 0; i < n; i++)
+					for (size_type i = 0; i < n; i++)
 						this->_allocator.construct(this->_data + i, *first++);
 					this->_size += n;
 				}
-			}
+			} */
 
 			vector( vector const & rhs )
 			: _data(0), _size(0), _capacity(0), _allocator(allocator_type())
@@ -196,8 +196,8 @@ namespace ft
 			}
 
 			// Modifiers
-/* 
-			void assign( int n, const_reference val )
+
+			void assign( size_type n, const_reference val )
 			{
 				if (this->_size)
 				{
@@ -211,24 +211,23 @@ namespace ft
 				_size = n;
 			}
 
- */
-			template< class InputIterator >
-			void assign( InputIterator first, InputIterator last )
-			{
-				size_t	n;
+			// template< class InputIterator >
+			// void assign( InputIterator first, InputIterator last )
+			// {
+			// 	size_t	n;
 
-				if (this->_size)
-				{
-					this->vDestroy(this->begin(), this->end());
-					_size = 0;
-				}
-				n = std::distance(first, last);
-				if (n > _capacity)
-					this->vResize(n);
-				for (size_type i = 0; i < n; i ++)
-					_allocator.construct(_data + i, *first++);
-				_size = n;
-			}
+			// 	if (this->_size)
+			// 	{
+			// 		this->vDestroy(this->begin(), this->end());
+			// 		_size = 0;
+			// 	}
+			// 	n = std::distance(first, last);
+			// 	if (n > _capacity)
+			// 		this->vResize(n);
+			// 	for (size_type i = 0; i < n; i ++)
+			// 		_allocator.construct(_data + i, *first++);
+			// 	_size = n;
+			// }
 
 			void push_back( const_reference val )
 			{
@@ -282,7 +281,7 @@ namespace ft
 				size_type	pos;
 				size_type	len;
 
-				assert(position >= this->begin() && position <= this->end());
+				// assert(position >= this->begin() && position <= this->end());
 				len = std::distance(first, last);
 				if (len == 0)
 					return ;
@@ -301,7 +300,7 @@ namespace ft
 
 			iterator		erase( iterator position )
 			{
-				assert(position >= this->begin() && position < this->end());
+				// assert(position >= this->begin() && position < this->end());
 				vMove(position, position + 1, std::distance(position, this->end()));
 				_size--;
 				return (position == this->end() - 1 ? this->end() : position);
@@ -313,12 +312,13 @@ namespace ft
 			{
 				size_type	len;
 
-				assert(first >= this->begin() && first <= this->end()
-					&& last >= this->begin() && last <= this->end());
+				// assert(first >= this->begin() && first <= this->end()
+				// 	&& last >= this->begin() && last <= this->end());
 				len = std::distance(first, last);
 				if (!len)
 					return (first);
-				vMove(first, last, len);
+				vMove(first, last - len, len);
+				vMove(first, last, std::distance(last, this->end()));
 				_size -= len;
 				return (first == this->end() - 1 ? this->end() : first);
 			}

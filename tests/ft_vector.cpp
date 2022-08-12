@@ -1,6 +1,8 @@
 #include <iostream>
 #include "../includes/vector.hpp"
 #include <vector>
+// #include "../includes/type_traits.hpp"
+// #include <type_traits>
 
 // template<class T>
 // struct MyAllocator : public std::allocator<T>
@@ -67,15 +69,15 @@ int	main( void )
 		ft::vector<int>	v0;
 		ft::vector<int>	v1(5, 42);
 		ft::vector<int>	v2(v1);
-		ft::vector<int>	v3(v2.begin() + 1, v2.end() - 1);
+		// ft::vector<int>	v3(v2.begin() + 1, v2.end() - 1);
 		ft::vector<int>	v4;
 		v4 = v2;
 		v2.push_back(0);
 		vInfo<int>("v0", v0);
 		vInfo<int>("v1", v1);
 		vInfo<int>("v2", v2);
-		vInfo<int>("v3", v3);
-		vPrint<int>("v3", v3);
+		// vInfo<int>("v3", v3);
+		// vPrint<int>("v3", v3);
 		vPrint<int>("v4", v4);
 		vInfo<int>("v4", v4);
 	}
@@ -146,9 +148,9 @@ int	main( void )
 		vPrint<char>("v1", v1);
 		v1.swap(v0);
 		vPrint<char>("v1", v1);
-		// v1.assign(10, 100);
-		// vPrint<char>("v1", v1);
-		v1.assign(v1.begin(), v1.end());
+		v1.assign(10, 100);
+		vPrint<char>("v1", v1);
+		//v1.assign(v1.begin(), v1.end());
 		vPrint<char>("v1", v1);
 		while (v0.size())
 			v0.pop_back();
@@ -180,6 +182,61 @@ int	main( void )
 		std::cout << "<= is " << (v0 <= v1 ? "true" : "false") << std::endl;
 		std::cout << "> is " << (v0 > v1 ? "true" : "false") << std::endl;
 		std::cout << ">= is " << (v0 >= v1 ? "true" : "false") << std::endl;
+	}
+	std::cout << "%% TEST 5 :: ITERATORS %%" << std::endl;
+	{
+		ft::vector<int>	v0(42, 42);
+
+		ft::vector<int>::iterator it;
+		ft::vector<int>::reverse_iterator rit;
+		// ft::vector<int>::const_iterator cit;
+		ft::vector<int>::const_reverse_iterator crit;
+
+		std::cout << *(it = v0.begin()) << std::endl;
+		std::cout << *(it = v0.end() - 1) << std::endl;
+
+		// std::cout << *(cit = v0.begin()) << std::endl;
+		// std::cout << *(cit = v0.end()) << std::endl;
+
+		std::cout << *(rit = v0.rend()) << std::endl;
+		std::cout << *(rit = v0.rbegin()) << std::endl;
+
+		std::cout << *(rit = v0.rend()) << std::endl;
+		std::cout << *(rit = v0.rbegin()) << std::endl;
+
+		it = v0.begin();
+		std::cout << "( ";
+		while (it != v0.end())
+			std::cout << *it++ << " ";
+		std::cout << ")" << std::endl;
+		it -= 5;
+		std::cout << *it << std::endl;
+		it += 1;
+		std::cout << *it << std::endl;
+		it -= 2;
+		std::cout << *it << std::endl;
+		--it;
+		std::cout << *it << std::endl;
+		it[5] = 2;
+		std::cout << it[5] << std::endl;
+		std::cout << *it.base() << std::endl;
+	}
+	std::cout << "%% TEST 6 :: PERFORMANCE %%" << std::endl;
+	{
+		const size_t size = 1000000000;
+		ft::vector<int>	v0;
+
+		for (size_t i = 0; i < size; i++)
+			v0.push_back(i);
+		for (size_t i = 0; i < size; i++)
+			v0.pop_back();
+		vInfo<int>("v0", v0);
+		v0.insert(v0.begin(), size, 0);
+		vInfo<int>("v0", v0);
+		v0.assign(size * 2, 0);
+		vInfo<int>("v0", v0);
+		v0.erase(v0.begin() + 2, v0.end() - 2);
+		vInfo<int>("v0", v0);
 	}
 	return (0);
 }
