@@ -1,43 +1,13 @@
 #include <iostream>
 #include "../includes/vector.hpp"
 #include <vector>
-// #include "../includes/type_traits.hpp"
-// #include <type_traits>
-
-// template<class T>
-// struct MyAllocator : public std::allocator<T>
-// {
-// 	typedef typename std::allocator<T>::value_type		value_type;
-// 	typedef typename std::allocator<T>::reference 		reference;
-// 	typedef typename std::allocator<T>::const_reference	const_reference;
-// 	typedef typename std::allocator<T>::pointer			pointer;
-// 	typedef	typename std::allocator<T>::const_pointer	const_pointer;
-// 	typedef typename std::allocator<T>::size_type		size_type;
-// 	typedef typename std::allocator<T>::difference_type	difference_type;
-
-// 	pointer allocate( size_type n, const void * hint = 0 )
-// 	{
-// 		std::cout << "[MEM] allocating ( ";
-// 		std::cout << n << " * " << sizeof(T) << " bytes) ";
-// 		std::cout << "{" << n * sizeof(T) << "}" << std::endl;
-// 		return std::allocator<T>::allocate(n, hint);
-// 	}
-
-// 	void deallocate( pointer p, std::size_t n )
-// 	{
-// 		std::cout << "[MEM] deallocating ( ";
-// 		std::cout << n << " * " << sizeof(T) << " bytes) ";
-// 		std::cout << "{" << n * sizeof(T)<< "}" << std::endl;
-// 		std::allocator<T>::deallocate(p, n);
-// 	}
-// };
 
 template<class T, class Alloc >
 void	vInfo( std::string const & var, ft::vector<T, Alloc> const & v )
 {
 	if (v.empty())
 	{
-		std::cout << var << " = [ ]" << std::endl;
+		std::cout << var << " = [ ]";
 	}
 	else
 	{
@@ -69,15 +39,15 @@ int	main( void )
 		ft::vector<int>	v0;
 		ft::vector<int>	v1(5, 42);
 		ft::vector<int>	v2(v1);
-		// ft::vector<int>	v3(v2.begin() + 1, v2.end() - 1);
+		ft::vector<int>	v3(v2.begin() + 1, v2.end() - 1);
 		ft::vector<int>	v4;
 		v4 = v2;
 		v2.push_back(0);
 		vInfo<int>("v0", v0);
 		vInfo<int>("v1", v1);
 		vInfo<int>("v2", v2);
-		// vInfo<int>("v3", v3);
-		// vPrint<int>("v3", v3);
+		vInfo<int>("v3", v3);
+		vPrint<int>("v3", v3);
 		vPrint<int>("v4", v4);
 		vInfo<int>("v4", v4);
 	}
@@ -150,7 +120,7 @@ int	main( void )
 		vPrint<char>("v1", v1);
 		v1.assign(10, 100);
 		vPrint<char>("v1", v1);
-		//v1.assign(v1.begin(), v1.end());
+		v1.assign(v1.begin(), v1.end());
 		vPrint<char>("v1", v1);
 		while (v0.size())
 			v0.pop_back();
@@ -223,7 +193,7 @@ int	main( void )
 	}
 	std::cout << "%% TEST 6 :: PERFORMANCE %%" << std::endl;
 	{
-		const size_t size = 1000000000;
+		const size_t size = 1000000;
 		ft::vector<int>	v0;
 
 		for (size_t i = 0; i < size; i++)
@@ -235,7 +205,7 @@ int	main( void )
 		vInfo<int>("v0", v0);
 		v0.assign(size * 2, 0);
 		vInfo<int>("v0", v0);
-		v0.erase(v0.begin() + 2, v0.end() - 2);
+		v0.erase(v0.begin(), v0.end());
 		vInfo<int>("v0", v0);
 	}
 	return (0);

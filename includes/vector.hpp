@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "vector_iterators.hpp"
 #include "algorithm.hpp"
+#include "type_traits.hpp"
 
 namespace ft
 {
@@ -23,7 +24,7 @@ namespace ft
 			typedef size_t										size_type;
 			typedef ptrdiff_t									difference_type;
 			typedef vector_iterator<value_type>					iterator;
-			typedef vector_const_iterator<value_type>			const_iterator;
+			typedef vector_iterator<value_type const>			const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 
@@ -61,33 +62,17 @@ namespace ft
 				allocator_type const & alloc = allocator_type() )
 			: _data(0), _size(0), _capacity(0), _allocator(alloc)
 			{
-				if (n > 0)
-				{
-					this->vMaxCheck(n);
-					_data = _allocator.allocate(n);
-					for (size_type i = 0; i < n; i++)
-						_allocator.construct(_data + i, val);
-				}
-				_size = n;
-				_capacity = n;
+				this->vFill(n, val);
 			}
 
-/* 			template< class InputIterator >
+			template< class InputIterator >
 			vector ( InputIterator first, InputIterator last,
 				allocator_type const & alloc = allocator_type() )
 			: _data(NULL), _size(0), _capacity(0), _allocator(alloc)
 			{
-				size_type	n;
-
-				n = std::distance(first ,last);
-				if (n > 0)
-				{
-					vResize(n);
-					for (size_type i = 0; i < n; i++)
-						this->_allocator.construct(this->_data + i, *first++);
-					this->_size += n;
-				}
-			} */
+				typedef typename truth_type<is_integral<InputIterator>::value>::type X;
+				vRangeDispatch(first, last, X());
+			}
 
 			vector( vector const & rhs )
 			: _data(0), _size(0), _capacity(0), _allocator(allocator_type())
@@ -199,35 +184,15 @@ namespace ft
 
 			void assign( size_type n, const_reference val )
 			{
-				if (this->_size)
-				{
-					this->vDestroy(this->begin(), this->end());
-					_size = 0;
-				}
-				if (n > _capacity)
-					this->vResize(n);
-				for (size_type i = 0; i < n; i ++)
-					_allocator.construct(_data + i, val);
-				_size = n;
+				this->vAssignFill(n, val);
 			}
 
-			// template< class InputIterator >
-			// void assign( InputIterator first, InputIterator last )
-			// {
-			// 	size_t	n;
-
-			// 	if (this->_size)
-			// 	{
-			// 		this->vDestroy(this->begin(), this->end());
-			// 		_size = 0;
-			// 	}
-			// 	n = std::distance(first, last);
-			// 	if (n > _capacity)
-			// 		this->vResize(n);
-			// 	for (size_type i = 0; i < n; i ++)
-			// 		_allocator.construct(_data + i, *first++);
-			// 	_size = n;
-			// }
+			template< class InputIterator >
+			void assign( InputIterator first, InputIterator last )
+			{
+				typedef typename truth_type<is_integral<InputIterator>::value>::type X;
+				this->vAssignDispatch(first, last, X());
+			}
 
 			void push_back( const_reference val )
 			{
@@ -244,7 +209,7 @@ namespace ft
 			{
 				size_type	pos;
 
-				assert(position >= this->begin() && position <= this->end());
+				//assert(position >= this->begin() && position <= this->end());
 				if (_size == _capacity)
 				{
 					pos = std::distance(this->begin(), position);
@@ -261,7 +226,7 @@ namespace ft
 			{
 				size_type	pos = 0;
 
-				assert(position >= this->begin() && position <= this->end());
+				//assert(position >= this->begin() && position <= this->end());
 				if (_size + n >= _capacity)
 				{
 					pos = std::distance(this->begin(), position);
@@ -300,7 +265,6 @@ namespace ft
 
 			iterator		erase( iterator position )
 			{
-				// assert(position >= this->begin() && position < this->end());
 				vMove(position, position + 1, std::distance(position, this->end()));
 				_size--;
 				return (position == this->end() - 1 ? this->end() : position);
@@ -312,8 +276,6 @@ namespace ft
 			{
 				size_type	len;
 
-				// assert(first >= this->begin() && first <= this->end()
-				// 	&& last >= this->begin() && last <= this->end());
 				len = std::distance(first, last);
 				if (!len)
 					return (first);
@@ -337,6 +299,7 @@ namespace ft
 			iterator begin( void ) {
 				return iterator(&_data[0]);
 			}
+
 			const_iterator begin( void ) const {
 				return const_iterator(&_data[0]);
 			}
@@ -344,6 +307,7 @@ namespace ft
 			iterator end( void ) {
 				return iterator(&_data[_size]);
 			}
+
 			const_iterator end( void ) const {
 				return const_iterator(&_data[_size]);
 			}
@@ -351,6 +315,7 @@ namespace ft
 			reverse_iterator rbegin( void ) {
 				return reverse_iterator(&_data[_size]);
 			}
+
 			const_reverse_iterator rbegin( void ) const {
 				return const_reverse_iterator(&_data[_size]);
 			}
@@ -369,7 +334,7 @@ namespace ft
 				return _allocator;
 			}
 
-		protected:
+		private:
 
 			void vRangeCheck( size_type n ) {
 				if (n >= _size)
@@ -429,6 +394,90 @@ namespace ft
 						_allocator.destroy(&*src--);
 					}
 				}
+			}
+
+			void vFill( size_t n, value_type const & val)
+			{
+				if (n > 0)
+				{
+					this->vMaxCheck(n);
+					_data = _allocator.allocate(n);
+					for (size_type i = 0; i < n; i++)
+						_allocator.construct(_data + i, val);
+				}
+				_size = n;
+				_capacity = n;
+			}
+
+			template <typename X>
+			void	vRangeDispatch(X n, X val, true_type )
+			{
+				vFill(static_cast<size_type>(n), static_cast<value_type>(val));
+			}
+
+			template <typename X>
+			void	vRangeDispatch(X first, X last, false_type )
+			{
+				vRange(first , last);
+			}
+
+			template <typename InputIterator>
+			void vRange(InputIterator first, InputIterator last)
+			{
+				size_type	n;
+
+				n = std::distance(first ,last);
+				if (n > 0)
+				{
+					vResize(n);
+					for (size_type i = 0; i < n; i++)
+						this->_allocator.construct(this->_data + i, *first++);
+					this->_size += n;
+				}
+			}
+
+			template <typename X>
+			void	vAssignDispatch(X n, X val, true_type )
+			{
+				this->vAssignFill(static_cast<size_type>(n), static_cast<value_type>(val));
+			}
+
+			template <typename X>
+			void	vAssignDispatch(X first, X last, false_type )
+			{
+				this->vAssignRange(first , last);
+			}
+
+			void vAssignFill( size_type n, const_reference val )
+			{
+				if (this->_size)
+				{
+					this->vDestroy(this->begin(), this->end());
+					_size = 0;
+				}
+				if (n > _capacity)
+					this->vResize(n);
+				for (size_type i = 0; i < n; i ++)
+					_allocator.construct(_data + i, val);
+				_size = n;
+			}
+
+			template< class InputIterator >
+			void vAssignRange( InputIterator first, InputIterator last )
+			{
+				size_t	n;
+
+				if (this->_size)
+				{
+					this->vDestroy(this->begin(), this->end());
+					_size = 0;
+				}
+				n = std::distance(first, last);
+				if (n > _capacity)
+					this->vResize(n);
+				for (size_type i = 0; i < n; i ++)
+					_allocator.construct(_data + i, *first++);
+				_size = n;
 			}
 
 			void vDestroy( iterator start, iterator end )

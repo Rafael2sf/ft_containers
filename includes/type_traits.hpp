@@ -25,6 +25,16 @@ namespace ft
 	template <class T> struct remove_volatile				{typedef T type;};
 	template <class T> struct remove_volatile<T volatile>	{typedef T type;};
 
+
+	struct	true_type { };
+	struct	false_type { };
+
+	template <bool> struct truth_type
+	{ typedef false_type type; };
+
+	template <> struct truth_type<true>
+	{ typedef true_type type; };
+
 	/* ft::is_integral */
 
 	template< class T, bool v>
@@ -35,15 +45,6 @@ namespace ft
 		typedef integral_constant<T, v> type;
 		operator value_type( void ) const { return value; }
 	};
-
-	// template< class T, bool v>
-	// struct integral_constant<T*, v>
-	// {
-	// 	enum {value = v};
-	// 	typedef T	value_type;
-	// 	typedef integral_constant<T, v> type;
-	// 	operator value_type( void ) const { return value; }
-	// };
 
 	template<>
 	struct integral_constant<bool, true>
