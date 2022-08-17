@@ -3,22 +3,22 @@
 namespace ft
 {
 	template< class InputIt1, class InputIt2 >
-	bool equal( InputIt1 first1, InputIt1 last1, InputIt2 first2 )
+	bool equal( InputIt1 __first1, InputIt1 __last1, InputIt2 __first2 )
 	{
-		while (first1 != last1)
+		while (__first1 != __last1)
 		{
-			if (*first1++ != *first2++)
+			if (*__first1++ != *__first2++)
 				return false;
 		}
 		return true;
 	}
 
 	template< class InputIt1, class InputIt2, class BinaryPredicate >
-	bool equal( InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryPredicate p )
+	bool equal( InputIt1 __first1, InputIt1 __last1, InputIt2 __first2, BinaryPredicate __bp )
 	{
-		while (first1 != last1)
+		while (__first1 != __last1)
 		{
-			if (!p(*first1++ != *first2++))
+			if (!__bp(*__first1++ != *__first2++))
 				return false;
 		}
 		return true;
@@ -26,34 +26,34 @@ namespace ft
 
 	template< class InputIt1, class InputIt2 >
 	bool lexicographical_compare(
-		InputIt1 first1, InputIt1 last1,
-		InputIt2 first2, InputIt2 last2 )
+		InputIt1 __first1, InputIt1 __last1,
+		InputIt2 __first2, InputIt2 __last2 )
 	{
-		while ((first1 != last1) && (first2 != last2))
+		while ((__first1 != __last1) && (__first2 != __last2))
 		{
-			if (*first1 < *first2)
+			if (*__first1 < *__first2)
 				return true;
-			else if (*first2 < *first1)
+			else if (*__first2 < *__first1)
 				return false;
-			first1++;
-			first2++;
+			__first1++;
+			__first2++;
 		}
-		return (first1 == last1) && (first2 != last2);
+		return (__first1 == __last1) && (__first2 != __last2);
 	}
 
 	template< class InputIt1, class InputIt2, class Compare >
 	bool lexicographical_compare(
-		InputIt1 first1, InputIt1 last1,
-		InputIt2 first2, InputIt2 last2,
-		Compare comp )
+		InputIt1 __first1, InputIt1 __last1,
+		InputIt2 __first2, InputIt2 __last2,
+		Compare __comp )
 	{
-		while ((first1 != last1) && (first2 != last2))
+		while ((__first1 != __last1) && (__first2 != __last2))
 		{
-			if (comp(*first1, *first2))
+			if (__comp(*__first1, *__first2))
 				return true;
-			else if (comp(*first2, *first1))
+			else if (__comp(*__first2, *__first1))
 				return false;
 		}
-		return (first1 == last1) && (first2 != last2);
+		return (__first1 == __last1) && (__first2 != __last2);
 	}
 }

@@ -9,11 +9,11 @@ namespace ft
 		typedef	T2	second_type;
 
 		pair( void ) {};
-		pair( pair const & p ) {*this = p;}
-		pair( T1 const & x, const T2& y ): first(x), second(y) {}
-		pair & operator=( const pair & rhs ) {
-			this->first = rhs.first;
-			this->second = rhs.second;
+		pair( pair const & __p ) {*this = __p;}
+		pair( T1 const & __x, const T2& __y ): first(__x), second(__y) {}
+		pair & operator=( const pair & __rhs ) {
+			this->first = __rhs.first;
+			this->second = __rhs.second;
 			return (*this);
 		}
 		T1	first;
@@ -21,8 +21,8 @@ namespace ft
 	};
 
 	template <class T1, class T2>
-	pair<T1, T2> make_pair(T1 t, T2 u)
+	pair<T1, T2> make_pair(T1 __t, T2 __u)
 	{
-		return (pair<T1, T2>(t, u));
+		return (pair<T1, T2>(__t, __u));
 	}
 };
