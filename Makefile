@@ -65,7 +65,7 @@ $(_BIN)%: $(_OBJ)%.o
 # CLEAN #
 
 clean:
-	$(RMV) $(OBJS) $(STD_SRCS) ft_containers.*
+	$(RMV) $(OBJS) $(STD_SRCS) output.*
 
 fclean: clean
 	$(RMV) -r $(_OBJ) $(_BIN) $(NAME)

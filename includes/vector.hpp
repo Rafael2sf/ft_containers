@@ -12,7 +12,6 @@ namespace ft
 	class vector
 	{
 		public:
-
 		/* Member types */
 
 			typedef T											value_type;
@@ -31,14 +30,12 @@ namespace ft
 		/* Variables */
 
 		private:
-
 			pointer			_data;
 			size_type		_size;
 			size_type		_capacity;
 			allocator_type	_allocator;
 
 		public:
-
 		/* Constructors */
 
 			~vector()
@@ -76,14 +73,24 @@ namespace ft
 
  			vector & operator=( vector const & __rhs )
 			{
-				this->vDestroy();
-				if (__rhs._size > 0)
+				if (__rhs._capacity < _capacity)
 				{
-					_data = _allocator.allocate(__rhs._capacity);
+					this->vErase(this->begin(), this->end());
 					for (size_type i = 0; i < __rhs._size; i++)
 						_allocator.construct(_data + i, __rhs._data[i]);
 					_size = __rhs._size;
-					_capacity = __rhs._capacity;
+				}
+				else
+				{
+					this->vDestroy();
+					if (__rhs._size)
+					{
+						_data = _allocator.allocate(__rhs._capacity);
+						for (size_type i = 0; i < __rhs._size; i++)
+							_allocator.construct(_data + i, __rhs._data[i]);
+						_size = __rhs._size;
+						_capacity = __rhs._capacity;
+					}
 				}
 				return *this;
 			}
@@ -254,6 +261,11 @@ namespace ft
 
 			iterator		erase( iterator __positon )
 			{
+				if (__positon == this->end() - 1)
+				{
+					_allocator.destroy(&_data[--_size]);
+					return (this->end());
+				}
 				this->vMove(__positon, __positon + 1, std::distance(__positon, this->end()));
 				_size--;
 				return (__positon == this->end() - 1 ? this->end() : __positon);
@@ -272,7 +284,7 @@ namespace ft
 				this->vErase(__first, __last);
 				this->vMove(__first, __last, std::distance(__last, this->end()));
 				_size -= len;
-				return (__first == this->end() - 1 ? this->end() : __first);
+				return (__last == this->end() - 1 ? this->end() : __last);
 			}
 
 			void swap( vector & __other ) {
@@ -283,7 +295,8 @@ namespace ft
 			}
 
 			void clear( void ) {
-				this->vDestroy();
+				this->vErase(this->begin(), this->end());
+				_size = 0;
 			}
 
 			iterator begin( void ) {

@@ -88,9 +88,9 @@ is_executable $STD
 
 if [ ! -z "$__D" ]
 then
-	STD_OUT=$(mktemp ft_containers.XXXX)
+	STD_OUT=$(mktemp output.XXXX)
 	printf "$STD > $STD_OUT\n"
-	FT_OUT=$(mktemp ft_containers.XXXX)
+	FT_OUT=$(mktemp output.XXXX)
 	printf "$FT > $FT_OUT\n"
 fi
 

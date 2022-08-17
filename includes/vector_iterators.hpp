@@ -66,10 +66,10 @@ namespace ft
 				return (_pointer >= __rhs._pointer); 
 			}
 
-			vector_iterator &	operator=( vector_iterator const & __rhs ) {
-				_pointer = __rhs._pointer;
-				return (*this);
-			}
+			// vector_iterator &	operator=( vector_iterator const & __rhs ) {
+			// 	_pointer = __rhs._pointer;
+			// 	return (*this);
+			// }
 
 			vector_iterator &	operator++( void ) {
 				_pointer++;

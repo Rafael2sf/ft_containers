@@ -104,11 +104,11 @@ int	main( void )
 		vPrint<char>("v1", v1);
 		v1.insert(v1.begin(), v0.begin(), v0.end());
 		vPrint<char>("v1", v1);
-		v0.erase(v0.end() - 1);
-		v0.erase(v0.begin());
-		v0.erase(v0.begin() + v0.size() / 2);
+		std::cout << *v0.erase(v0.end() - 1) << std::endl;
+		std::cout << *v0.erase(v0.begin()) << std::endl;
+		std::cout << *v0.erase(v0.begin() + v0.size() / 2) << std::endl;
 		vPrint<char>("v0", v0);
-		v1.erase(v1.begin(), v1.begin() + 26);
+		std::cout << *v1.erase(v1.begin() + 1, v1.begin() + 26) << std::endl;
 		vPrint<char>("v1", v1);
 		v1.clear();
 		vPrint<char>("v1", v1);
