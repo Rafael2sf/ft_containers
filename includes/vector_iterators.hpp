@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iterators.hpp"
-#include <iostream>
+#include "type_traits.hpp"
 
 namespace ft
 {
@@ -20,13 +20,14 @@ namespace ft
 			vector_iterator( void )
 			: _pointer(NULL) {}
 
-			vector_iterator( vector_iterator const & __other )
-			: _pointer(__other._pointer) {}
+			vector_iterator( vector_iterator const& __other )
+			: _pointer(__other.base()) {}
 
 			vector_iterator( pointer __p )
 			: _pointer(__p) {}
 
-			pointer const & base( void ) const {
+		public:
+			pointer const& base( void ) const {
 				return _pointer;
 			}
 
@@ -42,31 +43,31 @@ namespace ft
 				return *(_pointer + n);
 			}
 
-			bool		operator==( vector_iterator const & __rhs ) const { 
+			bool		operator==( vector_iterator const& __rhs ) const { 
 				return (_pointer == __rhs._pointer); 
 			}
 
-			bool		operator!=( vector_iterator const & __rhs ) const { 
+			bool		operator!=( vector_iterator const& __rhs ) const { 
 				return (_pointer != __rhs._pointer); 
 			}
 
-			bool		operator<( vector_iterator const & __rhs ) const { 
+			bool		operator<( vector_iterator const& __rhs ) const { 
 				return (_pointer < __rhs._pointer); 
 			}
 
-			bool		operator>( vector_iterator const & __rhs ) const { 
+			bool		operator>( vector_iterator const& __rhs ) const { 
 				return (_pointer > __rhs._pointer); 
 			}
 
-			bool		operator<=( vector_iterator const & __rhs ) const { 
+			bool		operator<=( vector_iterator const& __rhs ) const { 
 				return (_pointer <= __rhs._pointer); 
 			}
 
-			bool		operator>=( vector_iterator const & __rhs ) const { 
+			bool		operator>=( vector_iterator const& __rhs ) const { 
 				return (_pointer >= __rhs._pointer); 
 			}
 
-			// vector_iterator &	operator=( vector_iterator const & __rhs ) {
+			// vector_iterator &	operator=( vector_iterator const& __rhs ) {
 			// 	_pointer = __rhs._pointer;
 			// 	return (*this);
 			// }
@@ -115,7 +116,7 @@ namespace ft
 				return (*this);
 			}
 
-			difference_type		operator-( vector_iterator const & __rhs ) {
+			difference_type		operator-( vector_iterator const& __rhs ) {
 				return (_pointer - __rhs._pointer);
 			}
 
@@ -124,7 +125,7 @@ namespace ft
 	};
 
 	template<typename T>
-	vector_iterator<T>	operator+(ptrdiff_t __lhs, vector_iterator<T> const & __rhs)
+	vector_iterator<T>	operator+(ptrdiff_t __lhs, vector_iterator<T> const& __rhs)
 	{
 		vector_iterator<T>	tmp(__rhs);
 		tmp += __lhs;

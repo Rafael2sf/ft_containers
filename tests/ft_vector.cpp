@@ -3,7 +3,7 @@
 #include <vector>
 
 template<class T, class Alloc >
-void	vInfo( std::string const & var, ft::vector<T, Alloc> const & v )
+void	vInfo( std::string const& var, ft::vector<T, Alloc> const& v )
 {
 	if (v.empty())
 	{
@@ -21,7 +21,7 @@ void	vInfo( std::string const & var, ft::vector<T, Alloc> const & v )
 }
 
 template<class T, class Alloc >
-void	vPrint( std::string const & var, ft::vector<T, Alloc> & v )
+void	vPrint( std::string const& var, ft::vector<T, Alloc> & v )
 {
 	typename ft::vector<T, Alloc>::iterator it = v.begin();
 

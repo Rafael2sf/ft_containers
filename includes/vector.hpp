@@ -43,12 +43,12 @@ namespace ft
 				this->vDestroy();
 			}
 
-			explicit vector ( allocator_type const & __alloc = allocator_type() )
+			explicit vector ( allocator_type const& __alloc = allocator_type() )
 			: _data(0), _size(0), _capacity(0), _allocator(__alloc)
 			{}
 
-			explicit vector ( size_type __n, value_type const & __val = value_type(),
-				allocator_type const & __alloc = allocator_type() )
+			explicit vector ( size_type __n, value_type const& __val = value_type(),
+				allocator_type const& __alloc = allocator_type() )
 			: _data(0), _size(0), _capacity(0), _allocator(__alloc)
 			{
 				this->vFill(__n, __val);
@@ -56,14 +56,14 @@ namespace ft
 
 			template <class InputIterator>
 			vector ( InputIterator __first, InputIterator __last,
-				allocator_type const & __alloc = allocator_type() )
-			: _data(NULL), _size(0), _capacity(0), _allocator(__alloc)
+				allocator_type const& __alloc = allocator_type() )
+			: _data(0), _size(0), _capacity(0), _allocator(__alloc)
 			{
 				typedef typename truth_type<is_integral<InputIterator>::value>::type X;
 				this->vDispatch(__first, __last, X());
 			}
 
-			vector( vector const & __rhs )
+			vector( vector const& __rhs )
 			: _data(0), _size(0), _capacity(0), _allocator(allocator_type())
 			{
 				*this = __rhs;
@@ -71,7 +71,7 @@ namespace ft
 
 		/* Operators */
 
- 			vector & operator=( vector const & __rhs )
+ 			vector & operator=( vector const& __rhs )
 			{
 				if (__rhs._capacity < _capacity)
 				{
@@ -464,7 +464,7 @@ namespace ft
 	};
 
 	template <class T, class Alloc>
-	bool operator==(vector<T, Alloc> const & __lhs, vector<T, Alloc> const & __rhs)
+	bool operator==(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs)
 	{
 		if (__lhs.size() != __rhs.size())
 			return (false);
@@ -472,28 +472,28 @@ namespace ft
 	}
 
 	template <class T, class Alloc>
-	bool operator<(vector<T, Alloc> const & __lhs, vector<T, Alloc> const & __rhs)
+	bool operator<(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs)
 	{
 		return lexicographical_compare(__lhs.begin(), __lhs.end(), __rhs.begin(), __rhs.end());
 	}
 
 	template <class T, class Alloc>
-	bool operator!=(vector<T, Alloc> const & __lhs, vector<T, Alloc> const & __rhs) {
+	bool operator!=(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
 		return !(__lhs == __rhs);
 	}
 
 	template <class T, class Alloc>
-	bool operator>(vector<T, Alloc> const & __lhs, vector<T, Alloc> const & __rhs) {
+	bool operator>(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
 		return __rhs < __lhs;
 	}
 
 	template <class T, class Alloc>
-	bool operator<=(vector<T, Alloc> const & __lhs, vector<T, Alloc> const & __rhs) {
+	bool operator<=(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
 		return !(__rhs < __lhs);
 	}
 
 	template <class T, class Alloc>
-	bool operator>=(vector<T, Alloc> const & __lhs, vector<T, Alloc> const & __rhs) {
+	bool operator>=(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
 		return !(__lhs < __rhs);
 	}
 

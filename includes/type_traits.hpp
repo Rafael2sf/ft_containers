@@ -25,7 +25,6 @@ namespace ft
 	template <class T> struct remove_volatile				{typedef T type;};
 	template <class T> struct remove_volatile<T volatile>	{typedef T type;};
 
-
 	struct	true_type { };
 	struct	false_type { };
 
