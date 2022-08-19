@@ -55,6 +55,10 @@ namespace ft
 			explicit reverse_iterator( iterator_type __iter )
 			: _current(__iter) {}
 
+			reverse_iterator( reverse_iterator const& __other ) {
+				*this = __other;
+			}
+
 			template <class U>
 			reverse_iterator( reverse_iterator<U> const& __other ) {
 				*this = __other;

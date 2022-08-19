@@ -159,14 +159,14 @@ int	main( void )
 
 		ft::vector<int>::iterator it;
 		ft::vector<int>::reverse_iterator rit;
-		// ft::vector<int>::const_iterator cit;
+		ft::vector<int>::const_iterator cit;
 		ft::vector<int>::const_reverse_iterator crit;
 
 		std::cout << *(it = v0.begin()) << std::endl;
 		std::cout << *(it = v0.end() - 1) << std::endl;
 
-		// std::cout << *(cit = v0.begin()) << std::endl;
-		// std::cout << *(cit = v0.end()) << std::endl;
+		std::cout << *(cit = v0.begin()) << std::endl;
+		std::cout << *(cit = v0.end()) << std::endl;
 
 		std::cout << *(rit = v0.rend()) << std::endl;
 		std::cout << *(rit = v0.rbegin()) << std::endl;
@@ -190,6 +190,24 @@ int	main( void )
 		it[5] = 2;
 		std::cout << it[5] << std::endl;
 		std::cout << *it.base() << std::endl;
+
+		rit = v0.rbegin();
+		std::cout << "( ";
+		while (rit != v0.rend())
+			std::cout << *rit++ << " ";
+		std::cout << ")" << std::endl;
+		rit -= 5;
+		std::cout << *rit << std::endl;
+		rit += 1;
+		std::cout << *rit << std::endl;
+		rit -= 2;
+		std::cout << *rit << std::endl;
+		--rit;
+		std::cout << *rit << std::endl;
+		rit[5] = 42;
+		std::cout << rit[5] << std::endl;
+		std::cout << *rit.base() << std::endl;
+		std::cout << (*v0.end().base() == *v0.rbegin().base()) << std::endl;
 	}
 	std::cout << "%% TEST 6 :: PERFORMANCE %%" << std::endl;
 	{

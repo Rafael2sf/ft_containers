@@ -34,6 +34,12 @@ namespace ft
 	template <> struct truth_type<true>
 	{ typedef true_type type; };
 
+	template<class T, class U>
+	struct is_same : false_type { enum {value = false}; };
+
+	template<class T>
+	struct is_same<T, T> : true_type { enum {value = true}; };
+
 	/* ft::is_integral */
 
 	template< class T, bool v>

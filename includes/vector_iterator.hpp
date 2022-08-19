@@ -15,6 +15,10 @@ namespace ft
 			typedef typename iterator_traits<T>::pointer			pointer;
 			typedef typename iterator_traits<T>::difference_type	difference_type;
 
+		private:
+			pointer	_pointer;
+
+		public:
 			~vector_iterator() {}
 
 			vector_iterator( void )
@@ -23,12 +27,21 @@ namespace ft
 			vector_iterator( vector_iterator const& __other )
 			: _pointer(__other.base()) {}
 
+			template <typename U>
+			vector_iterator( vector_iterator<U> const& __other )
+			: _pointer(__other.base()) {}
+
 			vector_iterator( pointer __p )
 			: _pointer(__p) {}
 
-		public:
-			pointer const& base( void ) const {
+
+			pointer const & base( void ) const {
 				return _pointer;
+			}
+
+			vector_iterator &	operator=( vector_iterator const& __rhs ) {
+				_pointer = __rhs._pointer;
+				return (*this);
 			}
 
 			reference	operator*( void ) {
@@ -67,10 +80,6 @@ namespace ft
 				return (_pointer >= __rhs._pointer); 
 			}
 
-			// vector_iterator &	operator=( vector_iterator const& __rhs ) {
-			// 	_pointer = __rhs._pointer;
-			// 	return (*this);
-			// }
 
 			vector_iterator &	operator++( void ) {
 				_pointer++;
@@ -119,9 +128,6 @@ namespace ft
 			difference_type		operator-( vector_iterator const& __rhs ) {
 				return (_pointer - __rhs._pointer);
 			}
-
-		private:
-			pointer	_pointer;
 	};
 
 	template<typename T>
