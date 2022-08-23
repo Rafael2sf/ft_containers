@@ -99,12 +99,14 @@ namespace ft
 				{
 					tmp->left = _allocate_node(__pair);
 					tmp->left->parent = tmp;
+					std::cout << "inserted " << __pair.first << std::endl;
 					_insert_fix(tmp->left);
 				}
 				else
 				{
 					tmp->right = _allocate_node(__pair);
 					tmp->right->parent = tmp;
+					std::cout << "inserted " << __pair.first << std::endl;
 					_insert_fix(tmp->right);
 				}
 				_count++;
@@ -118,30 +120,178 @@ namespace ft
 			}
 
 		private:
+
 			void\
 			_insert_fix( node_pointer __pos )
 			{
-				while (__pos->parent && __pos->parent->color == red)
+				node_pointer	tmp;
+
+				while (__pos != _root && __pos->parent->color == red)
 				{
-					// case 1, x-p is gp-lc and gp-rc is red
-					if (__pos->parent->parent
-						&& __pos->parent == __pos->parent->parent->left)
+					// parent is left of gp
+					if (__pos->parent->parent && __pos->parent == __pos->parent->parent->left)
 					{
-						__pos->parent->color = black;
-						__pos->parent->parent->color = red;
-						__pos->parent->parent->right->color = black;
-						__pos = __pos->parent;
-						continue ;
+						// if uncle is red do color swap
+						if (__pos->parent->parent->right && __pos->parent->parent->right->color == red)
+						{
+							std::cout << "left color-swap" << '\n';
+							__pos->parent->color = black;
+							__pos->parent->parent->color = red;
+							__pos->parent->parent->right->color = black;
+							__pos = __pos->parent->parent;
+							continue ;
+						}
+						else
+						{
+							// node is right of parent
+							if (__pos == __pos->parent->right)
+							{
+								std::cout << "(left)-right rotation" << '\n';
+								// left  rotation (to do right)
+								tmp = __pos;
+								__pos = __pos->parent;
+								__pos->parent->left = tmp;
+								tmp->parent = __pos->parent;
+								__pos->right = tmp->left;
+								if (tmp->left)
+									tmp->left->parent = __pos;
+								tmp->left = __pos;
+								__pos->parent = tmp;
+							} 
+							// left-right rotation (left is alredy done)
+							std::cout << "left-(right) rotation" << '\n';
+							__pos = __pos->parent;
+							tmp = __pos->parent;
+							tmp->left = __pos->right;
+							if (tmp->left)
+								tmp->left->parent = tmp;
+							if (tmp->parent)
+							{
+								// gp is left of parent
+								if (tmp == tmp->parent->left)
+									tmp->parent->left = __pos;
+								else
+									tmp->parent->right = __pos;
+								__pos->parent = tmp->parent;
+							}
+							else
+								_root = __pos;
+							__pos->right = tmp;
+							tmp->parent = __pos;
+							// recolor
+							std::cout << "recolor" << '\n';
+							tmp->color = red;
+							__pos->color = black;
+							//__pos = tmp;
+						}
 					}
-					// x is rc of p
-					else if (__pos == __pos->parent->right)
+					else if (__pos->parent->parent) // parent is right of gp and exits
 					{
-						__pos = __pos->parent;
-						_left_rotate(__pos);
+						// if uncle is red color swap
+						if (__pos->parent->parent->left && __pos->parent->parent->left->color == red)
+						{
+							std::cout << "right color-swap" << '\n';
+							__pos->parent->color = black;
+							__pos->parent->parent->color = red;
+							__pos->parent->parent->left->color = black;
+							__pos = __pos->parent->parent;
+							continue ;
+						}
+						else
+						{
+							// node is left of parent
+							if (__pos == __pos->parent->left)
+							{
+								std::cout << "(right)-left rotation" << '\n';
+								// // right  rotation (to do left)
+								tmp = __pos;
+								__pos = __pos->parent;
+								__pos->parent->right = tmp;
+								tmp->parent = __pos->parent;
+								__pos->left = tmp->right;
+								if (tmp->right)
+									tmp->right->parent = __pos;
+								tmp->right = __pos;
+								__pos->parent = tmp;
+							} 
+							// left-right rotation (left is alredy done)
+							std::cout << "right-(left) rotation" << '\n';
+							__pos = __pos->parent;
+							tmp = __pos->parent;
+							tmp->right = __pos->left;
+							if (tmp->right)
+								tmp->right->parent = tmp;
+							if (tmp->parent)
+							{
+								// gp is left of parent
+								if (tmp == tmp->parent->right)
+									tmp->parent->right = __pos;
+								else
+									tmp->parent->left = __pos;
+								__pos->parent = tmp->parent;
+							}
+							else
+							{
+								_root = __pos;
+								__pos->parent = NULL;
+							}
+							__pos->left = tmp;
+							tmp->parent = __pos;
+							// recolor
+							std::cout << "recolor" << '\n';
+							tmp->color = red;
+							__pos->color = black;
+							//__pos = tmp;
+						}
 					}
+					std::cout << "loop" << '\n';
 					__pos = __pos->parent;
 				}
+				_root->color = black;
 			}
+
+			// void
+			// _insert_fix( node_pointer __pos )
+			// {
+			// 	while (__pos->parent && __pos->parent->color == red)
+			// 	{
+			// 		// case 1, x-p is gp-lc and gp-rc is red
+			// 		if (__pos->parent->parent
+			// 			&& __pos->parent == __pos->parent->parent->left)
+			// 		{
+			// 			if	(__pos->parent->parent->right
+			// 				&& __pos->parent->parent->right->color == red)
+			// 			{
+			// 				__pos->parent->color = black;
+			// 				__pos->parent->parent->color = red;
+			// 				__pos->parent->parent->right->color = black;
+			// 				__pos = __pos->parent;
+			// 				std::cout << "left recolor" << std::endl;
+			// 			}
+			// 		}
+			// 		// x is rc of p
+			// 		else if (__pos == __pos->parent->right)
+			// 		{
+			// 			__pos = __pos->parent;
+			// 			_left_rotate(__pos);
+			// 			std::cout << "left rotate" << std::endl;
+			// 			continue ;
+			// 		}
+			// 		else
+			// 		{
+			// 			if	(__pos->parent->parent->left
+			// 				&& __pos->parent->parent->left->color == red)
+			// 			{
+			// 				__pos->parent->color = black;
+			// 				__pos->parent->parent->color = red;
+			// 				__pos->parent->parent->left->color = black;
+			// 				__pos = __pos->parent;
+			// 				std::cout << "right recolor" << std::endl;
+			// 			}
+			// 		}
+			// 		__pos = __pos->parent;
+			// 	}
+			// }
 
 			void\
 			_left_rotate( node_pointer __pos )
@@ -150,21 +300,26 @@ namespace ft
 
 				if (!__pos->parent)
 					return ;
-				tmp = __pos->parent;
-				if (tmp->parent)
+				tmp = __pos->right;
+				// set parent of current node
+				if (__pos->parent)
 				{
-					__pos->parent = tmp->parent;
-					if (tmp == tmp->parent->left)
-						tmp->parent->left = __pos;
+					tmp->parent = __pos->parent;
+					if (__pos == __pos->parent->left)
+						__pos->parent->left = __pos;
 					else
-						tmp->parent->right = __pos;
+						__pos->parent->right = __pos;
 				}
 				else
 					__pos->parent = 0;
-				tmp->right = __pos->left;
-				__pos->left->parent = tmp;
-				__pos->left = tmp;
-				tmp->parent = __pos;
+
+				// set right node of current
+				__pos->right = tmp->left;
+				if (tmp->left)
+					tmp->left->parent = __pos;
+
+				tmp->left = __pos;
+				__pos->parent = tmp;
 			}
 
 			void\
@@ -200,12 +355,33 @@ namespace ft
 				return (_find_insert_position_of(__curr->left, __key));
 			}
 
-			void	_in_order( node_pointer __curr )
+			void\
+			_in_order( node_pointer __curr )
 			{
 				if (!__curr)
 					return ;
 				_in_order(__curr->left);
-				std::cout << (__curr->data.first) << std::endl;
+				std::cout << __curr->data.first;
+				if (__curr->color == red)
+					std::cout << "\tred";
+				else
+					std::cout << "\tblack";
+				std::cout << "\tl:: ";
+				if (__curr->left) 
+					std::cout << __curr->left->data.first; 
+				else
+					std::cout << "-";
+				std::cout << "\tr:: ";
+				if (__curr->right)
+					std::cout << __curr->right->data.first;
+				else
+					std::cout << "-";
+				std::cout << "\tp:: ";
+				if (__curr->parent) 
+					std::cout << __curr->parent->data.first;
+				else
+					std::cout << "-";
+				std::cout << std::endl;
 				_in_order(__curr->right);
 			}
 	};
