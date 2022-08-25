@@ -57,7 +57,7 @@ namespace ft
 			typedef size_t										size_type;
 			// iterators + ptrdiff
 
-		private:
+		protected:
 			typedef RbtNode<value_type>							node;
 			typedef RbtNode<value_type> const					const_node;
 			typedef RbtNode<value_type> *						node_pointer;
@@ -66,11 +66,14 @@ namespace ft
 
 			node_pointer	_root;
 			size_type		_count;
+
+		private:
 			allocator_type	_allocator;
 			node_allocator	_node_allocator;
 			Compare			_compare;
 
 		public:
+
 			~RedBlackTree()
 			{
 				this->_destroy(node_pointer(_root));
@@ -89,24 +92,26 @@ namespace ft
 			// range constructor
 			// operator=
 
-			void\
+			void
 			insert( value_type const& __pair )
 			{
 				node_pointer	tmp;
 
 				if (!_count)
 				{
-					_empty_insert(__pair);
+					_root = _allocate_node(__pair);
+					_root->color = black;
+					_count++;
 					return ;
 				}
-				tmp = _find_insert_position_of(_root, __pair.first);
+				tmp = _insert_find(_root, __pair.first);
 				if (!tmp->right && __pair.first > tmp->data->first)
 				{
 					tmp->right = _allocate_node(__pair);
 					tmp->right->parent = tmp;
 					_insert_fix(tmp->right);
 				}
-				else
+				else if (!tmp->left)
 				{
 					tmp->left = _allocate_node(__pair);
 					tmp->left->parent = tmp;
@@ -115,17 +120,106 @@ namespace ft
 				_count++;
 			}
 
-			node_pointer
-			getRoot( void ) const { return (_root); }
-
 			void
-			printTree( void )
+			print( void )
 			{
 				std::cout << " -- tree -- " << '\n';
 				_in_order(_root);
 			}
 
+			void
+			find( key_type const& __val )
+			{
+				node_pointer	f;
+				f = this->_find(node_pointer(_root), __val);
+				if (!f)
+					std::cout << "not found" << '\n';
+				else
+					std::cout << f->data->second << '\n';
+			}
+
+			void
+			erase( key_type const& __key )
+			{
+				node_pointer	tmp;
+				node_pointer	nmin;
+				RbtColor		color;
+
+				tmp = this->_find(node_pointer(_root), __key);
+				if (!tmp)
+					return ;
+				color = tmp->color;
+				if (!tmp->left)
+					this->_erase_edge(tmp, true);
+				else if (!tmp->right)
+					this->_erase_edge(tmp, false);
+				else
+				{
+					nmin = this->_min(tmp->right);
+					color = nmin->color;
+					_allocator.destroy(tmp->data);
+					_allocator.construct(tmp->data, *nmin->data);
+					if (nmin->parent == tmp)
+					{
+						nmin->right->parent = tmp;
+						tmp->right = nmin->right;
+					}
+					else
+					{
+						nmin->parent->left = nmin->right;
+						if (nmin->right)
+						{
+							nmin->right->parent = nmin->parent;
+							nmin->right = 0;
+						}
+						tmp->color = color;
+					}
+					_destroy(nmin);
+					_count--;
+				}
+				std::cout << color << std::endl;
+			}
+
 		private:
+
+			void
+			_erase_edge( node_pointer __pos, bool _null_left )
+			{
+				if (_null_left)
+				{
+					if (__pos->parent)
+					{
+						if (__pos == __pos->parent->left)
+							__pos->parent->left = __pos->right;
+						else
+							__pos->parent->right = __pos->right;
+						if (__pos->right)
+							__pos->right->parent = __pos->parent;
+					}
+					else
+						_root = __pos->right;
+					__pos->right = 0;
+				}
+				else
+				{
+					if (__pos->parent)
+					{
+						if (__pos == __pos->parent->left)
+							__pos->parent->left = __pos->left;
+						else
+							__pos->parent->right = __pos->left;
+						if (__pos->left)
+							__pos->left->parent = __pos->parent;
+					}
+					else
+						_root = __pos->left;
+					__pos->left = 0;
+				}
+				if (_root)
+					_root->parent = 0;
+				this->_destroy(__pos);
+				_count--;
+			}
 
 			void
 			_insert_fix( node_pointer __pos )
@@ -175,14 +269,6 @@ namespace ft
 					}
 				}
 				_root->color = black;
-			}
-
-			void
-			_empty_insert( value_type const& __pair )
-			{
-				_root = _allocate_node(__pair);
-				_root->color = black;
-				_count++;
 			}
 
 			void
@@ -300,7 +386,7 @@ namespace ft
 			}
 
 			node_pointer
-			_find_insert_position_of( node_pointer __curr, key_type const& __key )
+			_insert_find( node_pointer __curr, key_type const& __key )
 			{
 				if (!__curr)
 					return (NULL);
@@ -308,11 +394,11 @@ namespace ft
 				{
 					if (!__curr->right)
 						return (__curr);
-					return (_find_insert_position_of(__curr->right, __key));
+					return (_insert_find(__curr->right, __key));
 				}
 				if (!__curr->left)
 					return (__curr);
-				return (_find_insert_position_of(__curr->left, __key));
+				return (_insert_find(__curr->left, __key));
 			}
 
 			void
@@ -356,6 +442,38 @@ namespace ft
 				_allocator.deallocate(__pos->data, 1);
 				_node_allocator.destroy(__pos);
 				_node_allocator.deallocate(__pos, 1);
+			}
+
+			node_pointer
+			_find( node_pointer __pos, key_type const& val )
+			{
+				if (!__pos)
+					return (NULL);
+				if (_compare(val, __pos->data->first) && !_compare(__pos->data->first, val))
+					return (_find(__pos->left, val));
+				else if (_compare(__pos->data->first, val) && !_compare(val, __pos->data->first))
+					return (_find(__pos->right, val));
+				return (__pos);
+			}
+
+			node_pointer
+			_min( node_pointer __pos )
+			{
+				if (!__pos)
+					return NULL;
+				while (__pos->left)
+					__pos = __pos->left;
+				return (__pos);
+			}
+
+			node_pointer
+			_max( node_pointer __pos )
+			{
+				if (!__pos)
+					return NULL;
+				while (__pos->right)
+					__pos = __pos->right;
+				return (__pos);
 			}
 	};
 }
