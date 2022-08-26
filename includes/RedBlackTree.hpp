@@ -10,8 +10,9 @@
 namespace ft
 {
 	enum RbtColor {
-		red = false,
-		black = true
+		red = 0,
+		black = 1,
+		double_black = 2
 	};
 
 	template <class T>
@@ -142,49 +143,122 @@ namespace ft
 			erase( key_type const& __key )
 			{
 				node_pointer	tmp;
-				node_pointer	nmin;
+				node_pointer	del;
 				RbtColor		color;
 
-				tmp = this->_find(node_pointer(_root), __key);
+				if (!_count)
+					return ;
+				tmp = _find(node_pointer(_root), __key);
 				if (!tmp)
 					return ;
 				color = tmp->color;
 				if (!tmp->left)
-					this->_erase_edge(tmp, true);
+					del = _erase_edge(tmp, true);
 				else if (!tmp->right)
-					this->_erase_edge(tmp, false);
+					del = _erase_edge(tmp, false);
 				else
-				{
-					nmin = this->_min(tmp->right);
-					color = nmin->color;
-					_allocator.destroy(tmp->data);
-					_allocator.construct(tmp->data, *nmin->data);
-					if (nmin->parent == tmp)
-					{
-						nmin->right->parent = tmp;
-						tmp->right = nmin->right;
-					}
-					else
-					{
-						nmin->parent->left = nmin->right;
-						if (nmin->right)
-						{
-							nmin->right->parent = nmin->parent;
-							nmin->right = 0;
-						}
-						tmp->color = color;
-					}
-					_destroy(nmin);
-					_count--;
-				}
-				std::cout << color << std::endl;
+					del = _erase_middle(tmp, color);
+				--_count;
+				if (tmp)
+					std::cout << "tmp: " << tmp->data->first <<std::endl;
+				else
+					std::cout << "tmp: " << "-" <<std::endl;
+				if (del)
+					std::cout << "del " << del->data->first <<std::endl;
+				else
+					std::cout << "del " << "-" <<std::endl;
+				if (del->parent)
+					std::cout << "del->p " << del->parent->data->first <<std::endl;
+				else
+					std::cout << "del->P " << "-" <<std::endl;
+				_destroy(del);
+				//_erase_fix(tmp, color);
 			}
 
 		private:
 
 			void
-			_erase_edge( node_pointer __pos, bool _null_left )
+			_erase_fix( node_pointer __pos, RbtColor & color )
 			{
+				node_pointer	sibling;
+
+				// 	std::cout << "fix: " << __pos->data->first << '\n';
+				// Either deleted node or replacer is red
+				if (__pos->color == red || color == red)
+				{
+					std::cout << "case 1" << std::endl;
+					if (__pos)
+					__pos->color = black;
+				}
+				else if (__pos->color == black && color == black)
+				{
+					std::cout << "case 2" << std::endl;
+					__pos->color = double_black;
+					while (__pos != _root && __pos->color == double_black)
+					{
+						if (__pos == __pos->parent->left)
+							sibling = __pos->right;
+						else
+							sibling = __pos->left;
+						std::cout << "no sibling" << std::endl;
+						(void)sibling;
+						// // Cases (rotations)
+						// // 1) ...
+						if (sibling->color == black 
+							&& ((sibling->left && sibling->left->color == red)
+							|| (sibling->right && sibling->right->color == red)))
+						{
+							_insert_ll_rotate(__pos);
+						}
+						// else if (sibling->color == black)
+						// {
+						// 	;
+						// }
+						// else
+						// {
+						// 	;
+						// }
+					}
+				// }
+				// else
+				// {
+				// 	std::cout << "case 3" << std::endl;
+				// 	(void)__pos;
+				}
+			}
+
+			/* if node is red return it after deleting, else replace it with a double-black node */
+			node_pointer
+			_erase_middle( node_pointer & __pos, RbtColor & __color )
+			{
+				node_pointer	tmp;
+
+				tmp = _max(__pos->left);
+				__color = tmp->color;
+				_allocator.destroy(__pos->data);
+				_allocator.construct(__pos->data, *tmp->data);
+				if (tmp->parent == __pos)
+				{
+					if (tmp->left)
+						tmp->left->parent = __pos;
+					__pos->left = tmp->left;
+				}
+				else
+				{
+					tmp->parent->left = tmp->left;
+					if (tmp->left)
+						tmp->left->parent = tmp->parent;
+				}
+				tmp->left = 0;
+				return tmp;
+			}
+
+			/* if node is red, remove it, else replace it with a empty node */
+			node_pointer
+			_erase_edge( node_pointer & __pos, bool _null_left )
+			{
+				node_pointer	tmp;
+
 				if (_null_left)
 				{
 					if (__pos->parent)
@@ -198,7 +272,9 @@ namespace ft
 					}
 					else
 						_root = __pos->right;
-					__pos->right = 0;
+					tmp = __pos;
+					__pos = __pos->right;
+					tmp->right = 0;
 				}
 				else
 				{
@@ -213,18 +289,19 @@ namespace ft
 					}
 					else
 						_root = __pos->left;
-					__pos->left = 0;
+					tmp = __pos;
+					__pos = __pos->left;
+					tmp->left = 0;
 				}
 				if (_root)
 					_root->parent = 0;
-				this->_destroy(__pos);
-				_count--;
+				return tmp;
 			}
 
 			void
 			_insert_fix( node_pointer __pos )
 			{
-				/* check for violations as long as parent color is red */
+				/* check for violations as lon50g as parent color is red */
 				while (__pos != _root 
 					&& __pos->parent->color == red)
 				{
@@ -376,16 +453,6 @@ namespace ft
 			}
 
 			node_pointer
-			_allocate_node( value_type const& __pair )
-			{
-				node_pointer tmp = _node_allocator.allocate(1);
-				_node_allocator.construct(tmp, node());
-				tmp->data = _allocator.allocate(1);
-				_allocator.construct(tmp->data, __pair);
-				return tmp;
-			}
-
-			node_pointer
 			_insert_find( node_pointer __curr, key_type const& __key )
 			{
 				if (!__curr)
@@ -399,6 +466,16 @@ namespace ft
 				if (!__curr->left)
 					return (__curr);
 				return (_insert_find(__curr->left, __key));
+			}
+
+			node_pointer
+			_allocate_node( value_type const& __pair )
+			{
+				node_pointer tmp = _node_allocator.allocate(1);
+				_node_allocator.construct(tmp, node());
+				tmp->data = _allocator.allocate(1);
+				_allocator.construct(tmp->data, __pair);
+				return tmp;
 			}
 
 			void
@@ -449,9 +526,11 @@ namespace ft
 			{
 				if (!__pos)
 					return (NULL);
-				if (_compare(val, __pos->data->first) && !_compare(__pos->data->first, val))
+				if (_compare(val, __pos->data->first) 
+					&& !_compare(__pos->data->first, val))
 					return (_find(__pos->left, val));
-				else if (_compare(__pos->data->first, val) && !_compare(val, __pos->data->first))
+				else if (_compare(__pos->data->first, val) 
+					&& !_compare(val, __pos->data->first))
 					return (_find(__pos->right, val));
 				return (__pos);
 			}

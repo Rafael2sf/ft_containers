@@ -36,11 +36,11 @@ int	main( void )
 	/* Constructors */
 	std::cout << "%% TEST 0 :: CONSTRUCTORS %%" << std::endl;
 	{
-		ft::vector<int>	v0;
-		ft::vector<int>	v1(5, 42);
-		ft::vector<int>	v2(v1);
-		ft::vector<int>	v3(v2.begin() + 1, v2.end() - 1);
-		ft::vector<int>	v4;
+		ft::vector<int> v0;
+		ft::vector<int> v1(5, 42);
+		ft::vector<int> v2(v1);
+		ft::vector<int> v3(v2.begin() + 1, v2.end() - 1);
+		ft::vector<int> v4;
 		v4 = v2;
 		v2.push_back(0);
 		vInfo<int>("v0", v0);
