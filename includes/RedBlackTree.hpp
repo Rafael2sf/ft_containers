@@ -142,124 +142,96 @@ namespace ft
 			void
 			erase( key_type const& __key )
 			{
-				node_pointer	tmp;
 				node_pointer	del;
-				RbtColor		color;
+				node_pointer	tmp;
 
 				if (!_count)
 					return ;
 				tmp = _find(node_pointer(_root), __key);
 				if (!tmp)
 					return ;
-				color = tmp->color;
-				if (!tmp->left)
-					del = _erase_edge(tmp, true);
-				else if (!tmp->right)
-					del = _erase_edge(tmp, false);
+				del = _node_detach(tmp);
+				if (del->color == red)
+				{
+					std::cout << "case 1" << '\n';
+					_print_node("tmp", tmp);
+					_print_node("del", del);
+					_destroy(del);
+				}
+				else if (tmp && tmp->color == red)
+				{
+					std::cout << "case 2" << '\n';
+					_print_node("tmp", tmp);
+					_print_node("del", del);
+					tmp->color = black;
+				}
 				else
-					del = _erase_middle(tmp, color);
-				--_count;
-				if (tmp)
-					std::cout << "tmp: " << tmp->data->first <<std::endl;
-				else
-					std::cout << "tmp: " << "-" <<std::endl;
-				if (del)
-					std::cout << "del " << del->data->first <<std::endl;
-				else
-					std::cout << "del " << "-" <<std::endl;
-				if (del->parent)
-					std::cout << "del->p " << del->parent->data->first <<std::endl;
-				else
-					std::cout << "del->P " << "-" <<std::endl;
-				_destroy(del);
-				//_erase_fix(tmp, color);
+				{
+					std::cout << "case 3" << '\n';
+					del->color = double_black;
+					_print_node("tmp", tmp);
+					_print_node("del", del);
+					_erase_fix(del);
+					_destroy(del);
+				}
+				_count--;
+				// std::cout << "del: " << del->data->first << '\t';
+				// if (del->parent)
+				// 	std::cout << "p: " << del->parent->data->first;
+				// std::cout << '\n';
+				// if (tmp)
+				// {
+				// 	std::cout << "replaced: " << tmp->data->first << '\t';
+				// 	if (tmp->parent)
+				// 		std::cout << "p: " << tmp->parent->data->first;
+				// 	std::cout << '\n';
+				// }
 			}
 
 		private:
 
 			void
-			_erase_fix( node_pointer __pos, RbtColor & color )
+			_erase_fix( node_pointer  __pos )
 			{
+				_print_node("fix", __pos->parent);
 				node_pointer	sibling;
 
-				// 	std::cout << "fix: " << __pos->data->first << '\n';
-				// Either deleted node or replacer is red
-				if (__pos->color == red || color == red)
+				while (__pos != _root && __pos->color == double_black)
 				{
-					std::cout << "case 1" << std::endl;
-					if (__pos)
-					__pos->color = black;
-				}
-				else if (__pos->color == black && color == black)
-				{
-					std::cout << "case 2" << std::endl;
-					__pos->color = double_black;
-					while (__pos != _root && __pos->color == double_black)
+					if (! __pos->parent->left)
+						sibling = __pos->parent->right;
+					else
+						sibling = __pos->parent->left;
+					
+					if (!sibling)
 					{
-						if (__pos == __pos->parent->left)
-							sibling = __pos->right;
-						else
-							sibling = __pos->left;
-						std::cout << "no sibling" << std::endl;
-						(void)sibling;
-						// // Cases (rotations)
-						// // 1) ...
-						if (sibling->color == black 
-							&& ((sibling->left && sibling->left->color == red)
-							|| (sibling->right && sibling->right->color == red)))
-						{
-							_insert_ll_rotate(__pos);
-						}
-						// else if (sibling->color == black)
-						// {
-						// 	;
-						// }
-						// else
-						// {
-						// 	;
-						// }
+						std::cout << "no sibling ... quiting \n";
+						return ;
 					}
-				// }
-				// else
-				// {
-				// 	std::cout << "case 3" << std::endl;
-				// 	(void)__pos;
+
+					// case 3:
+					if ((!sibling->left || sibling->left->color == black)
+						&& (!sibling->left || sibling->right->color == black))
+					{
+						std::cout << "\tcase 3.0" << '\n';
+						sibling->color = red;
+						if (__pos->parent->color == red)
+							__pos->parent->color = black;
+						else
+							__pos->parent->color = double_black;
+					}
+					__pos = __pos->parent;
+					std::cout << "fix loop +\n";
 				}
 			}
 
-			/* if node is red return it after deleting, else replace it with a double-black node */
+			/* return the node to be deleted */
 			node_pointer
-			_erase_middle( node_pointer & __pos, RbtColor & __color )
+			_node_detach( node_pointer & __pos )
 			{
 				node_pointer	tmp;
 
-				tmp = _max(__pos->left);
-				__color = tmp->color;
-				_allocator.destroy(__pos->data);
-				_allocator.construct(__pos->data, *tmp->data);
-				if (tmp->parent == __pos)
-				{
-					if (tmp->left)
-						tmp->left->parent = __pos;
-					__pos->left = tmp->left;
-				}
-				else
-				{
-					tmp->parent->left = tmp->left;
-					if (tmp->left)
-						tmp->left->parent = tmp->parent;
-				}
-				tmp->left = 0;
-				return tmp;
-			}
-
-			/* if node is red, remove it, else replace it with a empty node */
-			node_pointer
-			_erase_edge( node_pointer & __pos, bool _null_left )
-			{
-				node_pointer	tmp;
-
-				if (_null_left)
+				if (!__pos->left)
 				{
 					if (__pos->parent)
 					{
@@ -276,7 +248,7 @@ namespace ft
 					__pos = __pos->right;
 					tmp->right = 0;
 				}
-				else
+				else if (!__pos->right)
 				{
 					if (__pos->parent)
 					{
@@ -293,9 +265,15 @@ namespace ft
 					__pos = __pos->left;
 					tmp->left = 0;
 				}
-				if (_root)
-					_root->parent = 0;
-				return tmp;
+				else
+				{
+					tmp = _max(__pos->left);
+					_allocator.destroy(__pos->data);
+					_allocator.construct(__pos->data, *tmp->data);
+					__pos = tmp;
+					tmp = _node_detach(__pos);
+				}
+				return (tmp);
 			}
 
 			void
@@ -315,8 +293,8 @@ namespace ft
 						{
 							_insert_color_swap(__pos, true);
 						}
-						/* otherwise we must call the respective rotation */
-						else
+
+						else /* otherwise we must call the respective rotation */
 						{
 							/* in case pos is right of parent we must do a left-right rotation
 								to put it in place for a left-left rotation */
@@ -334,8 +312,7 @@ namespace ft
 						{
 							_insert_color_swap(__pos, false);
 						}
-						/* otherwise we must call the respective rotation */
-						else
+						else /* otherwise we must call the respective rotation */
 						{
 							/* in case pos is right of parent we must do a right-left rotation
 								to put it in place for a right-right rotation */
@@ -553,6 +530,37 @@ namespace ft
 				while (__pos->right)
 					__pos = __pos->right;
 				return (__pos);
+			}
+
+			void
+			_print_node( std::string const& __s, node_pointer const& __node )
+			{
+				std::cout << __s << "\t";
+				if (__node)
+				{
+					if (__node->color)
+						std::cout << "black\t";
+					else
+						std::cout << "red\t";
+					std::cout << __node->data->first << "\t\t";
+					if (__node->parent)
+						std::cout << __node->parent->data->first;
+					else
+						std::cout << "(nil)";
+					std::cout << " ";
+					if (__node->left)
+						std::cout << __node->left->data->first;
+					else
+						std::cout << "(nil)";
+					std::cout << " ";
+					if (__node->right)
+						std::cout << "\t" << __node->right->data->first;
+					else
+						std::cout << "(nil)";
+				}
+				else
+					std::cout << "(nil)";
+				std::cout << '\n';
 			}
 	};
 }
