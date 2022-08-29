@@ -77,7 +77,7 @@ namespace ft
 
 			~RedBlackTree()
 			{
-				this->_destroy(node_pointer(_root));
+				this->_n_destroy(node_pointer(_root));
 				_root = 0;
 				_count = 0;
 			}
@@ -96,229 +96,260 @@ namespace ft
 			void
 			insert( value_type const& __pair )
 			{
-				node_pointer	tmp;
-
 				if (!_count)
 				{
-					_root = _allocate_node(__pair);
+					_root = _n_allocate(__pair);
 					_root->color = black;
-					_count++;
-					return ;
 				}
-				tmp = _insert_find(_root, __pair.first);
-				if (!tmp->right && __pair.first > tmp->data->first)
-				{
-					tmp->right = _allocate_node(__pair);
-					tmp->right->parent = tmp;
-					_insert_fix(tmp->right);
-				}
-				else if (!tmp->left)
-				{
-					tmp->left = _allocate_node(__pair);
-					tmp->left->parent = tmp;
-					_insert_fix(tmp->left);
-				}
+				else
+					_n_insert(_root, __pair);
 				_count++;
 			}
 
 			void
 			print( void )
 			{
-				std::cout << " -- tree -- " << '\n';
+				std::cout << "TREE\nname |\tcolor |\tkey |\t~\tparent|\tleft|\tright|" << '\n';
 				_in_order(_root);
 			}
 
-			void
-			find( key_type const& __val )
+			node_pointer
+			nodeFind( key_type const& __val )
 			{
-				node_pointer	f;
-				f = this->_find(node_pointer(_root), __val);
-				if (!f)
-					std::cout << "not found" << '\n';
-				else
-					std::cout << f->data->second << '\n';
+				return _n_find(node_pointer(_root), __val);
 			}
 
 			void
 			erase( key_type const& __key )
 			{
 				node_pointer	del;
-				node_pointer	tmp;
+				node_pointer	rep;
 
+				if (_count == 1)
+				{
+					_n_destroy(_root);
+					_count--;
+				}
 				if (!_count)
 					return ;
-				tmp = _find(node_pointer(_root), __key);
-				if (!tmp)
+				del = _n_find(node_pointer(_root), __key);
+				if (!del)
 					return ;
-				del = _node_detach(tmp);
-				if (del->color == red)
-				{
-					std::cout << "case 1" << '\n';
-					_print_node("tmp", tmp);
-					_print_node("del", del);
-					_destroy(del);
-				}
-				else if (tmp && tmp->color == red)
-				{
-					std::cout << "case 2" << '\n';
-					_print_node("tmp", tmp);
-					_print_node("del", del);
-					tmp->color = black;
-				}
-				else
-				{
-					std::cout << "case 3" << '\n';
-					del->color = double_black;
-					_print_node("tmp", tmp);
-					_print_node("del", del);
-					_erase_fix(del);
-					_destroy(del);
-				}
+				rep = _n_erase_sucessor(del);
+				/* double black must be fixed */
+				if (del->color == black && (!rep || rep->color == black))
+					_n_erase_fix(del, rep);
+				_n_remove(del);
+				/* Bring blackness to root or replacer node  */
+				if (rep && (rep == _root || (rep->color == red && del->color == black)))
+					rep->color = black;
+				_n_destroy(del);
 				_count--;
-				// std::cout << "del: " << del->data->first << '\t';
-				// if (del->parent)
-				// 	std::cout << "p: " << del->parent->data->first;
-				// std::cout << '\n';
-				// if (tmp)
-				// {
-				// 	std::cout << "replaced: " << tmp->data->first << '\t';
-				// 	if (tmp->parent)
-				// 		std::cout << "p: " << tmp->parent->data->first;
-				// 	std::cout << '\n';
-				// }
+			}
+
+			void
+			all_black( void )
+			{
+				_in_order_black(node_pointer(_root));
 			}
 
 		private:
 
-			void
-			_erase_fix( node_pointer  __pos )
-			{
-				_print_node("fix", __pos->parent);
-				node_pointer	sibling;
-
-				while (__pos != _root && __pos->color == double_black)
-				{
-					if (! __pos->parent->left)
-						sibling = __pos->parent->right;
-					else
-						sibling = __pos->parent->left;
-					
-					if (!sibling)
-					{
-						std::cout << "no sibling ... quiting \n";
-						return ;
-					}
-
-					// case 3:
-					if ((!sibling->left || sibling->left->color == black)
-						&& (!sibling->left || sibling->right->color == black))
-					{
-						std::cout << "\tcase 3.0" << '\n';
-						sibling->color = red;
-						if (__pos->parent->color == red)
-							__pos->parent->color = black;
-						else
-							__pos->parent->color = double_black;
-					}
-					__pos = __pos->parent;
-					std::cout << "fix loop +\n";
-				}
-			}
-
-			/* return the node to be deleted */
 			node_pointer
-			_node_detach( node_pointer & __pos )
+			_n_erase_sucessor( node_pointer & __n )
 			{
 				node_pointer	tmp;
 
-				if (!__pos->left)
+				if (!__n)
+					return NULL;
+				if (__n->left && __n->right)
 				{
-					if (__pos->parent)
-					{
-						if (__pos == __pos->parent->left)
-							__pos->parent->left = __pos->right;
-						else
-							__pos->parent->right = __pos->right;
-						if (__pos->right)
-							__pos->right->parent = __pos->parent;
-					}
-					else
-						_root = __pos->right;
-					tmp = __pos;
-					__pos = __pos->right;
-					tmp->right = 0;
+					tmp = _n_max(__n->left);
+					_allocator.destroy(__n->data);
+					_allocator.construct(__n->data, *tmp->data);
+					__n = tmp;
+					tmp = _n_erase_sucessor(__n);
 				}
-				else if (!__pos->right)
-				{
-					if (__pos->parent)
-					{
-						if (__pos == __pos->parent->left)
-							__pos->parent->left = __pos->left;
-						else
-							__pos->parent->right = __pos->left;
-						if (__pos->left)
-							__pos->left->parent = __pos->parent;
-					}
-					else
-						_root = __pos->left;
-					tmp = __pos;
-					__pos = __pos->left;
-					tmp->left = 0;
-				}
-				else
-				{
-					tmp = _max(__pos->left);
-					_allocator.destroy(__pos->data);
-					_allocator.construct(__pos->data, *tmp->data);
-					__pos = tmp;
-					tmp = _node_detach(__pos);
-				}
-				return (tmp);
+				if (!__n->left)
+					return __n->right;
+				if (!__n->right)
+					return __n->left;
+				return NULL;
 			}
 
 			void
-			_insert_fix( node_pointer __pos )
+			_n_erase_fix( node_pointer __d, node_pointer __r )
 			{
-				/* check for violations as lon50g as parent color is red */
-				while (__pos != _root 
-					&& __pos->parent->color == red)
+				node_pointer	s;
+				node_pointer	i;
+
+				(void)__r;
+				i = __d;
+				i->color = double_black;
+				while (i != _root && i->color == double_black)
+				{
+					if (i == i->parent->left)
+						s = i->parent->right;
+					else
+						s = i->parent->left;
+
+					if (!s)
+					{
+						std::cout << "WARN: NO SIBLING" << '\n';
+						return ;
+					}
+
+					if (s->color == black 
+						&& ((!s->left || s->left->color == black)
+						&& (!s->right || s->right->color == black)))
+					{
+						std::cout << "case 0" << std::endl;
+						if (i != __d)
+							i->color = black;
+						s->color = red;
+						if (s->parent->color == black)
+							s->parent->color = double_black;
+						else
+							s->parent->color = black;
+					}
+					else if (s->color == red)
+					{
+						std::cout << "case 1" << std::endl;
+						std::swap(s->color, s->parent->color);
+						if (s == s->parent->right)
+							_n_rotate_rr(s, false);
+						else
+							_n_rotate_ll(s, false);
+						continue ;
+					}
+					// TODO: _n_erase_near_red (i, s, side)
+					else if (i == i->parent->left && s->left && s->left->color == red
+							&& (!s->right || s->right->color == black))
+					{
+						std::cout << "case 2a" << std::endl;
+						std::swap(s->color, s->left->color);
+						_n_rotate_ll(s->left, false);
+						continue ;
+					}
+					// Maybe not be working as exptected
+					else if (i == i->parent->right && s->right && s->right->color == red
+							&& (!s->left || s->left->color == black))
+					{
+						std::cout << "case 2b" << std::endl;
+						std::swap(s->color, s->right->color);
+						_n_rotate_rr(s->right, false);
+						continue ;
+					}
+					// TODO: _n_erase_far_red (i, s, side)
+					else if (i == i->parent->left && s->right && s->right->color == red)
+					{
+						std::cout << "case 3a" << std::endl;
+						_n_rotate_rr(s, false);
+						i->color = black;
+						s->right->color = black;
+						return ;
+					}
+					// Maybe not be working as expected
+					else if (i == i->parent->right && s->left && s->left->color == red)
+					{
+						std::cout << "case 3b" << std::endl;
+						_n_rotate_ll(s, false);
+						i->color = black;
+						s->left->color = black;
+						return ;
+					}
+					i = i->parent;
+				}
+			}
+
+			void
+			_n_remove( node_pointer __n )
+			{
+				if (!__n)
+					return ;
+				if (!__n->left)
+				{
+					if (__n->parent)
+					{
+						if (__n == __n->parent->left)
+							__n->parent->left = __n->right;
+						else
+							__n->parent->right = __n->right;
+						if (__n->right)
+							__n->right->parent = __n->parent;
+					}
+					else
+					{
+						_root = __n->right;
+						_root->parent = 0;
+					}
+					__n->right = 0;
+				}
+				else if (!__n->right)
+				{
+					if (__n->parent)
+					{
+						if (__n == __n->parent->left)
+							__n->parent->left = __n->left;
+						else
+							__n->parent->right = __n->left;
+						if (__n->left)
+							__n->left->parent = __n->parent;
+					}
+					else
+					{
+						_root = __n->left;
+						_root->parent = 0;
+					}
+					__n->left = 0;
+				}
+			}
+
+			void
+			_n_insert_fix( node_pointer __n )
+			{
+				/* check for violations as long as parent color is red */
+				while (__n != _root 
+					&& __n->parent->color == red)
 				{
 					/* if parent is left of grandparent */
-					if (__pos->parent->parent
-						&& __pos->parent == __pos->parent->parent->left)
+					if (__n->parent->parent
+						&& __n->parent == __n->parent->parent->left)
 					{
 						/* if uncle of node is red, a color swap is enough to fix */
-						if (__pos->parent->parent->right
-							&& __pos->parent->parent->right->color == red)
+						if (__n->parent->parent->right
+							&& __n->parent->parent->right->color == red)
 						{
-							_insert_color_swap(__pos, true);
+							_n_insert_cswap(__n, true);
 						}
 
 						else /* otherwise we must call the respective rotation */
 						{
 							/* in case pos is right of parent we must do a left-right rotation
 								to put it in place for a left-left rotation */
-							if (__pos == __pos->parent->right)
-								_insert_lr_rotate(__pos);
-							_insert_ll_rotate(__pos);
+							if (__n == __n->parent->right)
+								_n_rotate_lr(__n);
+							__n = __n->parent;
+							_n_rotate_ll(__n, true);
 						}
 					}
 					/* parent is right of grandparent */
-					else if (__pos->parent->parent)
+					else if (__n->parent->parent)
 					{
 						/* if uncle of node is red, a color swap is enough to fix */
-						if (__pos->parent->parent->left 
-							&& __pos->parent->parent->left->color == red)
+						if (__n->parent->parent->left 
+							&& __n->parent->parent->left->color == red)
 						{
-							_insert_color_swap(__pos, false);
+							_n_insert_cswap(__n, false);
 						}
 						else /* otherwise we must call the respective rotation */
 						{
 							/* in case pos is right of parent we must do a right-left rotation
 								to put it in place for a right-right rotation */
-							if (__pos == __pos->parent->left)
-								_insert_rl_rotate(__pos);
-							_insert_rr_rotate(__pos);
+							if (__n == __n->parent->left)
+								_n_rotate_rl(__n);
+							__n = __n->parent;
+							_n_rotate_rr(__n, true);
 						}
 					}
 				}
@@ -326,127 +357,141 @@ namespace ft
 			}
 
 			void
-			_insert_ll_rotate( node_pointer & __pos )
+			_n_rotate_ll( node_pointer __n, bool __recolor )
 			{
 				node_pointer	tmp;
 
-				__pos = __pos->parent;
-				tmp = __pos->parent;
-				tmp->left = __pos->right;
+				tmp = __n->parent;
+				tmp->left = __n->right;
 				if (tmp->left)
 					tmp->left->parent = tmp;
 				if (tmp->parent)
 				{
 					if (tmp == tmp->parent->left)
-						tmp->parent->left = __pos;
+						tmp->parent->left = __n;
 					else
-						tmp->parent->right = __pos;
-					__pos->parent = tmp->parent;
+						tmp->parent->right = __n;
+					__n->parent = tmp->parent;
 				}
 				else
 				{
-					_root = __pos;
+					_root = __n;
 					_root->parent = 0;
 				}
-				__pos->right = tmp;
-				tmp->parent = __pos;
-				tmp->color = red;
-				__pos->color = black;
-				__pos = tmp;
+				__n->right = tmp;
+				tmp->parent = __n;
+				if (__recolor)
+				{
+					tmp->color = red;
+					__n->color = black;
+				}
+				__n = tmp;
 			}
 
 			void
-			_insert_lr_rotate( node_pointer & __pos )
+			_n_rotate_lr( node_pointer & __n )
 			{
 				node_pointer	tmp;
 
-				tmp = __pos;
-				__pos = __pos->parent;
-				__pos->parent->left = tmp;
-				tmp->parent = __pos->parent;
-				__pos->right = tmp->left;
+				tmp = __n;
+				__n = __n->parent;
+				__n->parent->left = tmp;
+				tmp->parent = __n->parent;
+				__n->right = tmp->left;
 				if (tmp->left)
-					tmp->left->parent = __pos;
-				tmp->left = __pos;
-				__pos->parent = tmp;
+					tmp->left->parent = __n;
+				tmp->left = __n;
+				__n->parent = tmp;
 			}
 
 			void
-			_insert_rr_rotate( node_pointer & __pos )
+			_n_rotate_rr( node_pointer __n, bool __recolor )
 			{
 				node_pointer	tmp;
 
-				__pos = __pos->parent;
-				tmp = __pos->parent;
-				tmp->right = __pos->left;
+				tmp = __n->parent;
+				tmp->right = __n->left;
 				if (tmp->right)
 					tmp->right->parent = tmp;
 				if (tmp->parent)
 				{
 					if (tmp == tmp->parent->right)
-						tmp->parent->right = __pos;
+						tmp->parent->right = __n;
 					else
-						tmp->parent->left = __pos;
-					__pos->parent = tmp->parent;
+						tmp->parent->left = __n;
+					__n->parent = tmp->parent;
 				}
 				else
 				{
-					_root = __pos;
+					_root = __n;
 					_root->parent = 0;
 				}
-				__pos->left = tmp;
-				tmp->parent = __pos;
-				tmp->color = red;
-				__pos->color = black;
-				__pos = tmp;
+				__n->left = tmp;
+				tmp->parent = __n;
+				if (__recolor)
+				{
+					tmp->color = red;
+					__n->color = black;
+				}
+				__n = tmp;
 			}
 
 			void
-			_insert_rl_rotate( node_pointer & __pos )
+			_n_rotate_rl( node_pointer & __n )
 			{
 				node_pointer	tmp;
 
-				tmp = __pos;
-				__pos = __pos->parent;
-				__pos->parent->right = tmp;
-				tmp->parent = __pos->parent;
-				__pos->left = tmp->right;
+				tmp = __n;
+				__n = __n->parent;
+				__n->parent->right = tmp;
+				tmp->parent = __n->parent;
+				__n->left = tmp->right;
 				if (tmp->right)
-					tmp->right->parent = __pos;
-				tmp->right = __pos;
-				__pos->parent = tmp;
+					tmp->right->parent = __n;
+				tmp->right = __n;
+				__n->parent = tmp;
 			}
 
 			void
-			_insert_color_swap( node_pointer & __pos, bool __left_swap )
+			_n_insert_cswap( node_pointer __n, bool __left_swap )
 			{
-				__pos->parent->color = black;
-				__pos->parent->parent->color = red;
+				__n->parent->color = black;
+				__n->parent->parent->color = red;
 				if (__left_swap)
-					__pos->parent->parent->right->color = black;
+					__n->parent->parent->right->color = black;
 				else
-					__pos->parent->parent->left->color = black;
-				__pos = __pos->parent->parent;
+					__n->parent->parent->left->color = black;
+				__n = __n->parent->parent;
 			}
 
 			node_pointer
-			_insert_find( node_pointer __curr, key_type const& __key )
+			_n_insert( node_pointer __n, value_type const& __pair )
 			{
-				if (!__curr)
+				if (!__n)
 					return (NULL);
-				if (_compare( __curr->data->first, __key))
+				if (_compare( __n->data->first, __pair.first))
 				{
-					if (!__curr->right)
-						return (__curr);
-					return (_insert_find(__curr->right, __key));
+					if (!__n->right)
+					{
+						__n->right = _n_allocate(__pair);
+						__n->right->parent = __n;
+						_n_insert_fix(__n->right);
+						return (__n);
+					}
+					return (_n_insert(__n->right, __pair));
 				}
-				if (!__curr->left)
-					return (__curr);
-				return (_insert_find(__curr->left, __key));
+				if (!__n->left)
+				{
+					__n->left = _n_allocate(__pair);
+					__n->left->parent = __n;
+					_n_insert_fix(__n->left);
+					return (__n);
+				}
+				return (_n_insert(__n->left, __pair));
 			}
 
 			node_pointer
-			_allocate_node( value_type const& __pair )
+			_n_allocate( value_type const& __pair )
 			{
 				node_pointer tmp = _node_allocator.allocate(1);
 				_node_allocator.construct(tmp, node());
@@ -461,106 +506,133 @@ namespace ft
 				if (!__curr)
 					return ;
 				_in_order(__curr->left);
-				std::cout << __curr->data->first;
-				if (__curr->color == red)
-					std::cout << "\tred";
-				else
-					std::cout << "\tblack";
-				std::cout << "\tl:: ";
-				if (__curr->left) 
-					std::cout << __curr->left->data->first; 
-				else
-					std::cout << "-";
-				std::cout << "\tr:: ";
-				if (__curr->right)
-					std::cout << __curr->right->data->first;
-				else
-					std::cout << "-";
-				std::cout << "\tp:: ";
-				if (__curr->parent) 
-					std::cout << __curr->parent->data->first;
-				else
-					std::cout << "-";
-				std::cout << std::endl;
+				_n_print("", __curr);
 				_in_order(__curr->right);
 			}
 
 			void
-			_destroy( node_pointer __pos )
+			_in_order_black( node_pointer __curr )
 			{
-				if (!__pos)
+				if (!__curr)
 					return ;
-				_destroy(__pos->left);
-				_destroy(__pos->right);
-				_allocator.destroy(__pos->data);
-				_allocator.deallocate(__pos->data, 1);
-				_node_allocator.destroy(__pos);
-				_node_allocator.deallocate(__pos, 1);
-			}
-
-			node_pointer
-			_find( node_pointer __pos, key_type const& val )
-			{
-				if (!__pos)
-					return (NULL);
-				if (_compare(val, __pos->data->first) 
-					&& !_compare(__pos->data->first, val))
-					return (_find(__pos->left, val));
-				else if (_compare(__pos->data->first, val) 
-					&& !_compare(val, __pos->data->first))
-					return (_find(__pos->right, val));
-				return (__pos);
-			}
-
-			node_pointer
-			_min( node_pointer __pos )
-			{
-				if (!__pos)
-					return NULL;
-				while (__pos->left)
-					__pos = __pos->left;
-				return (__pos);
-			}
-
-			node_pointer
-			_max( node_pointer __pos )
-			{
-				if (!__pos)
-					return NULL;
-				while (__pos->right)
-					__pos = __pos->right;
-				return (__pos);
+				_in_order_black(__curr->left);
+				__curr->color = black;
+				_in_order_black(__curr->right);
 			}
 
 			void
-			_print_node( std::string const& __s, node_pointer const& __node )
+			_n_destroy( node_pointer __n )
+			{
+				if (!__n)
+					return ;
+				_n_destroy(__n->left);
+				_n_destroy(__n->right);
+				_allocator.destroy(__n->data);
+				_allocator.deallocate(__n->data, 1);
+				_node_allocator.destroy(__n);
+				_node_allocator.deallocate(__n, 1);
+			}
+
+			node_pointer
+			_n_find( node_pointer __n, key_type const& val )
+			{
+				if (!__n)
+					return (NULL);
+				if (_compare(val, __n->data->first) 
+					&& !_compare(__n->data->first, val))
+					return (_n_find(__n->left, val));
+				else if (_compare(__n->data->first, val) 
+					&& !_compare(val, __n->data->first))
+					return (_n_find(__n->right, val));
+				return (__n);
+			}
+
+			node_pointer
+			_n_min( node_pointer __n )
+			{
+				if (!__n)
+					return NULL;
+				while (__n->left)
+					__n = __n->left;
+				return (__n);
+			}
+
+			node_pointer
+			_n_max( node_pointer __n )
+			{
+				if (!__n)
+					return NULL;
+				while (__n->right)
+					__n = __n->right;
+				return (__n);
+			}
+
+			void
+			_n_print( std::string const& __s, node_pointer const& __n )
 			{
 				std::cout << __s << "\t";
-				if (__node)
+				if (__n)
 				{
-					if (__node->color)
+					if (__n->color == black)
 						std::cout << "black\t";
+					else if (__n->color == double_black)
+						std::cout << "d_black\t";
 					else
 						std::cout << "red\t";
-					std::cout << __node->data->first << "\t\t";
-					if (__node->parent)
-						std::cout << __node->parent->data->first;
+					std::cout << __n->data->first << "\t\t";
+					if (__n->parent)
+						std::cout << __n->parent->data->first;
 					else
-						std::cout << "(nil)";
-					std::cout << " ";
-					if (__node->left)
-						std::cout << __node->left->data->first;
+					{
+						if (__n == _root)
+							std::cout << "root";
+						else
+							std::cout << "nil";
+					}
+					std::cout << "\t";
+					if (__n->left)
+						std::cout << __n->left->data->first;
 					else
-						std::cout << "(nil)";
-					std::cout << " ";
-					if (__node->right)
-						std::cout << "\t" << __node->right->data->first;
+						std::cout << "nil";
+					std::cout << "\t";
+					if (__n->right)
+						std::cout << __n->right->data->first;
 					else
-						std::cout << "(nil)";
+						std::cout << "nil";
 				}
 				else
-					std::cout << "(nil)";
+					std::cout << "nil";
 				std::cout << '\n';
 			}
+
+			// bool
+			// _n_verify( node_pointer __n, size_type & __max_h, size_type & __min_h )
+			// {
+			// 	size_type	lmax_h, lmin_h			// bool
+			// _n_verify( node_pointer __n, size_type & __max_h, size_type & __min_h )
+			// {
+			// 	size_type	lmax_h, lmin_h, rmax_h, rmin_h;
+
+			// 	if (!__n)
+			// 	{
+			// 		__max_h = __min_h = 0;
+			// 		return true;
+			// 	}
+			// 	if (_n_verify(__n, __max_h))
+			// 	__max_h = std::max(lmax_h, rmax_h);
+			// 	__min_h = std::max(lmin_h, rmin_h);
+			// 	if (__max_h <= 2 * __min_h)
+			// 		return true;
+			// 	return false;
+			// } __min_h = 0;
+			// 		return true;
+			// 	}
+			// 	if (_n_verify(__n, __max_h))
+			// 	__max_h = std::max(lmax_h, rmax_h);
+			// 	__min_h = std::max(lmin_h, rmin_h);
+			// 	if (__max_h <= 2 * __min_h)
+			// 		return true;
+			// 	return false;
+			// }
 	};
 }
