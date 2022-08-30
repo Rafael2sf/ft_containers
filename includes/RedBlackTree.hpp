@@ -128,6 +128,7 @@ namespace ft
 				if (_count == 1)
 				{
 					_n_destroy(_root);
+					_root = 0;
 					_count--;
 				}
 				if (!_count)
@@ -136,9 +137,13 @@ namespace ft
 				if (!del)
 					return ;
 				rep = _n_erase_sucessor(del);
+				// _n_print("del", del);
+				// if (rep)
+				// 	_n_print("rep", rep);
 				/* double black must be fixed */
 				if (del->color == black && (!rep || rep->color == black))
-					_n_erase_fix(del, rep);
+					_n_erase_fix(del);
+
 				_n_remove(del);
 				/* Bring blackness to root or replacer node  */
 				if (rep && (rep == _root || (rep->color == red && del->color == black)))
@@ -153,6 +158,21 @@ namespace ft
 				_in_order_black(node_pointer(_root));
 			}
 
+			bool
+			isValid( void )
+			{
+				size_type	max_h, min_h;
+				if (_root->color != black)
+					return false;
+				return _n_verify_balance(_root, max_h, min_h);
+			}
+
+			bool
+			inOrder( void )
+			{
+				return _n_order(_root);
+			}
+
 		private:
 
 			node_pointer
@@ -164,7 +184,7 @@ namespace ft
 					return NULL;
 				if (__n->left && __n->right)
 				{
-					tmp = _n_max(__n->left);
+					tmp = _n_min(__n->right);
 					_allocator.destroy(__n->data);
 					_allocator.construct(__n->data, *tmp->data);
 					__n = tmp;
@@ -178,32 +198,31 @@ namespace ft
 			}
 
 			void
-			_n_erase_fix( node_pointer __d, node_pointer __r )
+			_n_erase_fix( node_pointer __d )
 			{
 				node_pointer	s;
 				node_pointer	i;
 
-				(void)__r;
 				i = __d;
 				i->color = double_black;
+				//std::cout  << "fix\n";
 				while (i != _root && i->color == double_black)
 				{
 					if (i == i->parent->left)
 						s = i->parent->right;
 					else
 						s = i->parent->left;
-
 					if (!s)
 					{
 						std::cout << "WARN: NO SIBLING" << '\n';
+						i->color = black;
 						return ;
 					}
-
 					if (s->color == black 
 						&& ((!s->left || s->left->color == black)
 						&& (!s->right || s->right->color == black)))
 					{
-						std::cout << "case 0" << std::endl;
+						//std::cout << "case 0" << std::endl;
 						if (i != __d)
 							i->color = black;
 						s->color = red;
@@ -211,39 +230,37 @@ namespace ft
 							s->parent->color = double_black;
 						else
 							s->parent->color = black;
+						i = i->parent;
 					}
 					else if (s->color == red)
 					{
-						std::cout << "case 1" << std::endl;
+						//std::cout << "case 1" << std::endl;
 						std::swap(s->color, s->parent->color);
 						if (s == s->parent->right)
 							_n_rotate_rr(s, false);
 						else
 							_n_rotate_ll(s, false);
-						continue ;
 					}
 					// TODO: _n_erase_near_red (i, s, side)
 					else if (i == i->parent->left && s->left && s->left->color == red
 							&& (!s->right || s->right->color == black))
 					{
-						std::cout << "case 2a" << std::endl;
+						//std::cout << "case 2a" << std::endl;
 						std::swap(s->color, s->left->color);
 						_n_rotate_ll(s->left, false);
-						continue ;
 					}
 					// Maybe not be working as exptected
 					else if (i == i->parent->right && s->right && s->right->color == red
 							&& (!s->left || s->left->color == black))
 					{
-						std::cout << "case 2b" << std::endl;
+						//std::cout << "case 2b" << std::endl;
 						std::swap(s->color, s->right->color);
 						_n_rotate_rr(s->right, false);
-						continue ;
 					}
 					// TODO: _n_erase_far_red (i, s, side)
 					else if (i == i->parent->left && s->right && s->right->color == red)
 					{
-						std::cout << "case 3a" << std::endl;
+						//std::cout << "case 3a" << std::endl;
 						_n_rotate_rr(s, false);
 						i->color = black;
 						s->right->color = black;
@@ -252,14 +269,14 @@ namespace ft
 					// Maybe not be working as expected
 					else if (i == i->parent->right && s->left && s->left->color == red)
 					{
-						std::cout << "case 3b" << std::endl;
+						//std::cout << "case 3b" << std::endl;
 						_n_rotate_ll(s, false);
 						i->color = black;
 						s->left->color = black;
 						return ;
 					}
-					i = i->parent;
 				}
+				_root->color = black;
 			}
 
 			void
@@ -322,7 +339,6 @@ namespace ft
 						{
 							_n_insert_cswap(__n, true);
 						}
-
 						else /* otherwise we must call the respective rotation */
 						{
 							/* in case pos is right of parent we must do a left-right rotation
@@ -330,7 +346,7 @@ namespace ft
 							if (__n == __n->parent->right)
 								_n_rotate_lr(__n);
 							__n = __n->parent;
-							_n_rotate_ll(__n, true);
+							__n = _n_rotate_ll(__n, true);
 						}
 					}
 					/* parent is right of grandparent */
@@ -349,14 +365,14 @@ namespace ft
 							if (__n == __n->parent->left)
 								_n_rotate_rl(__n);
 							__n = __n->parent;
-							_n_rotate_rr(__n, true);
+							__n = _n_rotate_rr(__n, true);
 						}
 					}
 				}
 				_root->color = black;
 			}
 
-			void
+			node_pointer
 			_n_rotate_ll( node_pointer __n, bool __recolor )
 			{
 				node_pointer	tmp;
@@ -386,6 +402,7 @@ namespace ft
 					__n->color = black;
 				}
 				__n = tmp;
+				return __n;
 			}
 
 			void
@@ -404,7 +421,7 @@ namespace ft
 				__n->parent = tmp;
 			}
 
-			void
+			node_pointer
 			_n_rotate_rr( node_pointer __n, bool __recolor )
 			{
 				node_pointer	tmp;
@@ -434,6 +451,7 @@ namespace ft
 					__n->color = black;
 				}
 				__n = tmp;
+				return __n;
 			}
 
 			void
@@ -453,7 +471,7 @@ namespace ft
 			}
 
 			void
-			_n_insert_cswap( node_pointer __n, bool __left_swap )
+			_n_insert_cswap( node_pointer & __n, bool __left_swap )
 			{
 				__n->parent->color = black;
 				__n->parent->parent->color = red;
@@ -605,34 +623,61 @@ namespace ft
 				std::cout << '\n';
 			}
 
-			// bool
-			// _n_verify( node_pointer __n, size_type & __max_h, size_type & __min_h )
-			// {
-			// 	size_type	lmax_h, lmin_h			// bool
-			// _n_verify( node_pointer __n, size_type & __max_h, size_type & __min_h )
-			// {
-			// 	size_type	lmax_h, lmin_h, rmax_h, rmin_h;
+			bool
+			_n_verify_balance( node_pointer __n, size_type & __max_h, size_type & __min_h )
+			{
+				size_type	lmax_h = 0, lmin_h = 0, rmax_h = 0, rmin_h = 0;
 
-			// 	if (!__n)
-			// 	{
-			// 		__max_h = __min_h = 0;
-			// 		return true;
-			// 	}
-			// 	if (_n_verify(__n, __max_h))
-			// 	__max_h = std::max(lmax_h, rmax_h);
-			// 	__min_h = std::max(lmin_h, rmin_h);
-			// 	if (__max_h <= 2 * __min_h)
-			// 		return true;
-			// 	return false;
-			// } __min_h = 0;
-			// 		return true;
-			// 	}
-			// 	if (_n_verify(__n, __max_h))
-			// 	__max_h = std::max(lmax_h, rmax_h);
-			// 	__min_h = std::max(lmin_h, rmin_h);
-			// 	if (__max_h <= 2 * __min_h)
-			// 		return true;
-			// 	return false;
-			// }
+				if (__n->color == red
+					&& ((__n->left && __n->left->color == red) 
+						|| (__n->right && __n->right->color == red)
+						|| (__n->parent && __n->parent->color == red)))
+				{
+					std::cout << "bad red node" << std::endl;
+					return false;
+				}
+				if (__n->left && _n_verify_balance(__n->left, lmax_h, lmin_h) == false)
+					return false;
+				if (__n->right && _n_verify_balance(__n->right, rmax_h, rmin_h) == false)
+					return false;
+				__max_h = std::max(lmax_h, rmax_h) + 1;
+				__min_h = std::min(lmin_h, rmin_h) + 1;
+				if (__max_h <= 2 * __min_h)
+					return true;
+				return false;
+			}
+
+			size_type
+			_n_verify_colors( node_pointer __n )
+			{
+				if (!__n)
+					return 1;
+				if (__n->color == red
+					&& ((__n->left && __n->left->color == red) 
+						|| (__n->right && __n->right->color == red)
+						|| (__n->parent && __n->parent->color == red)))
+				{
+					std::cout << "bad red node" << std::endl;
+					return false;
+				}
+				return (_n_verify_colors(__n->left) + _n_verify_colors(__n->right) + (__n->color == black));
+			}
+
+			bool _n_order(node_pointer node)
+			{
+				if (node == NULL)
+					return 1;
+
+				if (node->left != NULL && node->left->data > node->data)
+					return 0;
+
+				if (node->right != NULL && node->right->data < node->data)
+					return 0;
+
+				if (!_n_order(node->left) || !_n_order(node->right))
+					return 0;
+
+				return 1;
+			}
 	};
 }
