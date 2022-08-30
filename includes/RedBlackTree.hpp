@@ -113,11 +113,11 @@ namespace ft
 				_in_order(_root);
 			}
 
-			node_pointer
-			nodeFind( key_type const& __val )
-			{
-				return _n_find(node_pointer(_root), __val);
-			}
+			// node_pointer
+			// nodeFind( key_type const& __val )
+			// {
+			// 	return _n_find(node_pointer(_root), __val);
+			// }
 
 			void
 			erase( key_type const& __key )
@@ -125,25 +125,15 @@ namespace ft
 				node_pointer	del;
 				node_pointer	rep;
 
-				if (_count == 1)
-				{
-					_n_destroy(_root);
-					_root = 0;
-					_count--;
-				}
 				if (!_count)
 					return ;
 				del = _n_find(node_pointer(_root), __key);
 				if (!del)
 					return ;
 				rep = _n_erase_sucessor(del);
-				// _n_print("del", del);
-				// if (rep)
-				// 	_n_print("rep", rep);
-				/* double black must be fixed */
+				/* double black requires tree rebalance */
 				if (del->color == black && (!rep || rep->color == black))
-					_n_erase_fix(del);
-
+					_n_erase_balance(del);
 				_n_remove(del);
 				/* Bring blackness to root or replacer node  */
 				if (rep && (rep == _root || (rep->color == red && del->color == black)))
@@ -152,16 +142,19 @@ namespace ft
 				_count--;
 			}
 
-			void
-			all_black( void )
-			{
-				_in_order_black(node_pointer(_root));
-			}
+			// void
+			// all_black( void )
+			// {
+			// 	_in_order_black(node_pointer(_root));
+			// }
 
 			bool
 			isValid( void )
 			{
 				size_type	max_h, min_h;
+
+				if (!_root)
+					return true;
 				if (_root->color != black)
 					return false;
 				return _n_verify_balance(_root, max_h, min_h);
@@ -170,6 +163,9 @@ namespace ft
 			bool
 			inOrder( void )
 			{
+
+				if (!_root)
+					return true;
 				return _n_order(_root);
 			}
 
@@ -184,7 +180,7 @@ namespace ft
 					return NULL;
 				if (__n->left && __n->right)
 				{
-					tmp = _n_min(__n->right);
+					tmp = _n_max(__n->left);
 					_allocator.destroy(__n->data);
 					_allocator.construct(__n->data, *tmp->data);
 					__n = tmp;
@@ -198,33 +194,29 @@ namespace ft
 			}
 
 			void
-			_n_erase_fix( node_pointer __d )
+			_n_erase_balance( node_pointer __d )
 			{
 				node_pointer	s;
 				node_pointer	i;
 
 				i = __d;
 				i->color = double_black;
-				//std::cout  << "fix\n";
+				/* loop as long as i is not root and i is a double black node, in order to
+					balance the tree the db node must be removed */
 				while (i != _root && i->color == double_black)
 				{
+					/* the sibling node will be used to decide which "case"
+						to call, a sibling is guaranted to exist */
 					if (i == i->parent->left)
 						s = i->parent->right;
 					else
 						s = i->parent->left;
-					if (!s)
-					{
-						std::cout << "WARN: NO SIBLING" << '\n';
-						i->color = black;
-						return ;
-					}
-					if (s->color == black 
-						&& ((!s->left || s->left->color == black)
+					/* if sibling and his children are black, then do a
+						"color swap" and repeat as long as parent is also black */
+					if (s->color == black && ((!s->left || s->left->color == black)
 						&& (!s->right || s->right->color == black)))
 					{
-						//std::cout << "case 0" << std::endl;
-						if (i != __d)
-							i->color = black;
+						i->color = black;
 						s->color = red;
 						if (s->parent->color == black)
 							s->parent->color = double_black;
@@ -232,48 +224,54 @@ namespace ft
 							s->parent->color = black;
 						i = i->parent;
 					}
+					/* if sibling is red, swap color with parent and
+						rotate db in oposite direction */
 					else if (s->color == red)
 					{
-						//std::cout << "case 1" << std::endl;
 						std::swap(s->color, s->parent->color);
 						if (s == s->parent->right)
 							_n_rotate_rr(s, false);
 						else
 							_n_rotate_ll(s, false);
 					}
-					// TODO: _n_erase_near_red (i, s, side)
-					else if (i == i->parent->left && s->left && s->left->color == red
+					else if (i == i->parent->left)
+					{
+						/* if the near child of s from i is red, swap s color with s near child
+							and call the respective rotation */
+					 	if (s->left && s->left->color == red
 							&& (!s->right || s->right->color == black))
-					{
-						//std::cout << "case 2a" << std::endl;
-						std::swap(s->color, s->left->color);
-						_n_rotate_ll(s->left, false);
+						{
+							std::swap(s->color, s->left->color);
+							_n_rotate_ll(s->left, false);
+						}
+						/* if the far child of s from i is red, swap s color with s parent
+							and call the respective rotation */
+						if (s->right && s->right->color == red)
+						{
+							std::swap(s->parent->color, s->color);
+							_n_rotate_rr(s, false);
+							i->color = black;
+							s->right->color = black;
+							return ;
+						}
 					}
-					// Maybe not be working as exptected
-					else if (i == i->parent->right && s->right && s->right->color == red
-							&& (!s->left || s->left->color == black))
+					/* same as above but for opossite side */
+					else 
 					{
-						//std::cout << "case 2b" << std::endl;
-						std::swap(s->color, s->right->color);
-						_n_rotate_rr(s->right, false);
-					}
-					// TODO: _n_erase_far_red (i, s, side)
-					else if (i == i->parent->left && s->right && s->right->color == red)
-					{
-						//std::cout << "case 3a" << std::endl;
-						_n_rotate_rr(s, false);
-						i->color = black;
-						s->right->color = black;
-						return ;
-					}
-					// Maybe not be working as expected
-					else if (i == i->parent->right && s->left && s->left->color == red)
-					{
-						//std::cout << "case 3b" << std::endl;
-						_n_rotate_ll(s, false);
-						i->color = black;
-						s->left->color = black;
-						return ;
+						if (i == i->parent->right && s->right && s->right->color == red
+								&& (!s->left || s->left->color == black))
+						{
+							std::swap(s->color, s->right->color);
+							_n_rotate_rr(s->right, false);
+						}
+						if (s->left && s->left->color == red)
+						{
+							std::swap(s->parent->color, s->color);
+							_n_rotate_ll(s, false);
+							i->color = black;
+							s->left->color = black;
+							return ;
+						}
 					}
 				}
 				_root->color = black;
@@ -297,8 +295,10 @@ namespace ft
 					}
 					else
 					{
+						//_n_print("root_replace", __n);
 						_root = __n->right;
-						_root->parent = 0;
+						if (_root)
+							_root->parent = 0;
 					}
 					__n->right = 0;
 				}
@@ -323,7 +323,7 @@ namespace ft
 			}
 
 			void
-			_n_insert_fix( node_pointer __n )
+			_n_insert_balance( node_pointer __n )
 			{
 				/* check for violations as long as parent color is red */
 				while (__n != _root 
@@ -339,10 +339,9 @@ namespace ft
 						{
 							_n_insert_cswap(__n, true);
 						}
-						else /* otherwise we must call the respective rotation */
+						/* otherwise rotations are require */
+						else
 						{
-							/* in case pos is right of parent we must do a left-right rotation
-								to put it in place for a left-left rotation */
 							if (__n == __n->parent->right)
 								_n_rotate_lr(__n);
 							__n = __n->parent;
@@ -358,10 +357,9 @@ namespace ft
 						{
 							_n_insert_cswap(__n, false);
 						}
-						else /* otherwise we must call the respective rotation */
+						/* otherwise rotations are require */
+						else
 						{
-							/* in case pos is right of parent we must do a right-left rotation
-								to put it in place for a right-right rotation */
 							if (__n == __n->parent->left)
 								_n_rotate_rl(__n);
 							__n = __n->parent;
@@ -493,7 +491,7 @@ namespace ft
 					{
 						__n->right = _n_allocate(__pair);
 						__n->right->parent = __n;
-						_n_insert_fix(__n->right);
+						_n_insert_balance(__n->right);
 						return (__n);
 					}
 					return (_n_insert(__n->right, __pair));
@@ -502,7 +500,7 @@ namespace ft
 				{
 					__n->left = _n_allocate(__pair);
 					__n->left->parent = __n;
-					_n_insert_fix(__n->left);
+					_n_insert_balance(__n->left);
 					return (__n);
 				}
 				return (_n_insert(__n->left, __pair));
@@ -518,25 +516,25 @@ namespace ft
 				return tmp;
 			}
 
-			void
-			_in_order( node_pointer __curr )
-			{
-				if (!__curr)
-					return ;
-				_in_order(__curr->left);
-				_n_print("", __curr);
-				_in_order(__curr->right);
-			}
+			// void
+			// _in_order( node_pointer __curr )
+			// {
+			// 	if (!__curr)
+			// 		return ;
+			// 	_in_order(__curr->left);
+			// 	_n_print("", __curr);
+			// 	_in_order(__curr->right);
+			// }
 
-			void
-			_in_order_black( node_pointer __curr )
-			{
-				if (!__curr)
-					return ;
-				_in_order_black(__curr->left);
-				__curr->color = black;
-				_in_order_black(__curr->right);
-			}
+			// void
+			// _in_order_black( node_pointer __curr )
+			// {
+			// 	if (!__curr)
+			// 		return ;
+			// 	_in_order_black(__curr->left);
+			// 	__curr->color = black;
+			// 	_in_order_black(__curr->right);
+			// }
 
 			void
 			_n_destroy( node_pointer __n )
@@ -628,6 +626,12 @@ namespace ft
 			{
 				size_type	lmax_h = 0, lmin_h = 0, rmax_h = 0, rmin_h = 0;
 
+				if (!__n)
+				{
+					__max_h = __min_h = 0;
+					return true;
+				}
+
 				if (__n->color == red
 					&& ((__n->left && __n->left->color == red) 
 						|| (__n->right && __n->right->color == red)
@@ -636,10 +640,14 @@ namespace ft
 					std::cout << "bad red node" << std::endl;
 					return false;
 				}
-				if (__n->left && _n_verify_balance(__n->left, lmax_h, lmin_h) == false)
+				if (_n_verify_balance(__n->left, lmax_h, lmin_h) == false)
+				{
 					return false;
-				if (__n->right && _n_verify_balance(__n->right, rmax_h, rmin_h) == false)
+				}
+				if (_n_verify_balance(__n->right, rmax_h, rmin_h) == false)
+				{
 					return false;
+				}
 				__max_h = std::max(lmax_h, rmax_h) + 1;
 				__min_h = std::min(lmin_h, rmin_h) + 1;
 				if (__max_h <= 2 * __min_h)
@@ -668,10 +676,10 @@ namespace ft
 				if (node == NULL)
 					return 1;
 
-				if (node->left != NULL && node->left->data > node->data)
+				if (node->left != NULL && node->left->data->first > node->data->first)
 					return 0;
 
-				if (node->right != NULL && node->right->data < node->data)
+				if (node->right != NULL && node->right->data->first < node->data->first)
 					return 0;
 
 				if (!_n_order(node->left) || !_n_order(node->right))
