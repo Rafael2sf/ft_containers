@@ -1,6 +1,8 @@
 #pragma once
 
 #include "iterators.hpp"
+#include "vector.hpp"
+#include <iostream>
 
 namespace ft
 {
@@ -14,8 +16,10 @@ namespace ft
 			typedef typename iterator_traits<T>::pointer			pointer;
 			typedef typename iterator_traits<T>::difference_type	difference_type;
 
-		private:
-			pointer _pointer;
+		protected:
+			pointer 			_pointer;
+			vector<pointer>		_rstack;
+			vector<pointer>		_lstack;
 
 		public:
 			~RbtIterator()
@@ -40,6 +44,7 @@ namespace ft
 
 			RbtIterator & operator=( RbtIterator const& __rhs ) {
 				_pointer = __rhs._pointer;
+				_rstack = __rhs._rstack;
 				return *this;
 			}
 
@@ -54,5 +59,13 @@ namespace ft
 			pointer		operator->( void ) {
 				return _pointer;
 			}
+
+			// RbtIterator	& operator++( void )
+			// {
+			// }
+
+			// RbtIterator	& operator--( void )
+			// {
+			// }
 	};
 }

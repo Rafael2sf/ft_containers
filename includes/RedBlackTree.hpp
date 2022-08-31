@@ -56,6 +56,7 @@ namespace ft
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
 			typedef size_t										size_type;
+			typedef RbtIterator<RbtNode<value_type> *>			iterator;
 			// iterators + ptrdiff
 
 		protected:
@@ -90,34 +91,98 @@ namespace ft
 			: _root(0), _count(0)
 			{ (void)__other; }
 
-			// range constructor
-			// operator=
+			/* element acess */
+
+			iterator
+			begin( void )
+			{
+				node_pointer	n;
+
+				n = _root;
+				while (n->left)
+					n = n->left;
+				return iterator(n);
+			}
+
+			allocator_type 
+			get_allocator() const
+			{
+				return _allocator;
+			}
+
+			mapped_type & 
+			operator[]( Key const& __key )
+			{
+				node_pointer	n;
+
+				n = _n_find(_root, __key);
+				if (!n)
+				{
+					n = _n_insert(_root, 
+						make_pair<key_type, mapped_type>(__key, mapped_type()));
+					_count++;
+				}
+				return n->data->second;
+			}
+
+			mapped_type & 
+			at( key_type const& __key )
+			{
+				node_pointer	n;
+
+				n = _n_find(_root, __key);
+				if (!n)
+					throw std::out_of_range("map: at()");
+				return n->data->second;
+			}
+
+			mapped_type const& 
+			at( key_type const& __key ) const
+			{
+				node_pointer	n;
+
+				n = _n_find(_root, __key);
+				if (!n)
+					throw std::out_of_range("map: at()");
+				return n->data->second;
+			}
+
+			/* Capacity */
+
+			bool
+			empty( void ) const
+			{
+				return _count == 0;
+			}
+
+			size_type
+			size( void ) const
+			{
+				return _count;
+			}
+
+			size_type
+			max_size( void ) const
+			{
+				return _node_allocator.max_size();
+			}
+
+			/* modifiers */
+
+			void
+			clear( void )
+			{
+				if (_count)
+					_n_destroy(_root);
+				_count = 0;
+			}
 
 			void
 			insert( value_type const& __pair )
 			{
-				if (!_count)
-				{
-					_root = _n_allocate(__pair);
-					_root->color = black;
-				}
-				else
-					_n_insert(_root, __pair);
+				_n_insert(_root, __pair);
 				_count++;
 			}
-
-			void
-			print( void )
-			{
-				std::cout << "TREE\nname |\tcolor |\tkey |\t~\tparent|\tleft|\tright|" << '\n';
-				_in_order(_root);
-			}
-
-			// node_pointer
-			// nodeFind( key_type const& __val )
-			// {
-			// 	return _n_find(node_pointer(_root), __val);
-			// }
 
 			void
 			erase( key_type const& __key )
@@ -140,33 +205,6 @@ namespace ft
 					rep->color = black;
 				_n_destroy(del);
 				_count--;
-			}
-
-			// void
-			// all_black( void )
-			// {
-			// 	_in_order_black(node_pointer(_root));
-			// }
-
-			bool
-			isValid( void )
-			{
-				size_type	max_h, min_h;
-
-				if (!_root)
-					return true;
-				if (_root->color != black)
-					return false;
-				return _n_verify_balance(_root, max_h, min_h);
-			}
-
-			bool
-			inOrder( void )
-			{
-
-				if (!_root)
-					return true;
-				return _n_order(_root);
 			}
 
 		private:
@@ -258,7 +296,7 @@ namespace ft
 					/* same as above but for opossite side */
 					else 
 					{
-						if (i == i->parent->right && s->right && s->right->color == red
+						if (s->right && s->right->color == red
 								&& (!s->left || s->left->color == black))
 						{
 							std::swap(s->color, s->right->color);
@@ -483,6 +521,12 @@ namespace ft
 			node_pointer
 			_n_insert( node_pointer __n, value_type const& __pair )
 			{
+				if (!_count)
+				{
+					_root = _n_allocate(__pair);
+					_root->color = black;
+					return _root;
+				}
 				if (!__n)
 					return (NULL);
 				if (_compare( __n->data->first, __pair.first))
@@ -492,7 +536,7 @@ namespace ft
 						__n->right = _n_allocate(__pair);
 						__n->right->parent = __n;
 						_n_insert_balance(__n->right);
-						return (__n);
+						return (__n->right);
 					}
 					return (_n_insert(__n->right, __pair));
 				}
@@ -501,7 +545,7 @@ namespace ft
 					__n->left = _n_allocate(__pair);
 					__n->left->parent = __n;
 					_n_insert_balance(__n->left);
-					return (__n);
+					return (__n->left);
 				}
 				return (_n_insert(__n->left, __pair));
 			}
@@ -515,26 +559,6 @@ namespace ft
 				_allocator.construct(tmp->data, __pair);
 				return tmp;
 			}
-
-			// void
-			// _in_order( node_pointer __curr )
-			// {
-			// 	if (!__curr)
-			// 		return ;
-			// 	_in_order(__curr->left);
-			// 	_n_print("", __curr);
-			// 	_in_order(__curr->right);
-			// }
-
-			// void
-			// _in_order_black( node_pointer __curr )
-			// {
-			// 	if (!__curr)
-			// 		return ;
-			// 	_in_order_black(__curr->left);
-			// 	__curr->color = black;
-			// 	_in_order_black(__curr->right);
-			// }
 
 			void
 			_n_destroy( node_pointer __n )
@@ -581,111 +605,6 @@ namespace ft
 				while (__n->right)
 					__n = __n->right;
 				return (__n);
-			}
-
-			void
-			_n_print( std::string const& __s, node_pointer const& __n )
-			{
-				std::cout << __s << "\t";
-				if (__n)
-				{
-					if (__n->color == black)
-						std::cout << "black\t";
-					else if (__n->color == double_black)
-						std::cout << "d_black\t";
-					else
-						std::cout << "red\t";
-					std::cout << __n->data->first << "\t\t";
-					if (__n->parent)
-						std::cout << __n->parent->data->first;
-					else
-					{
-						if (__n == _root)
-							std::cout << "root";
-						else
-							std::cout << "nil";
-					}
-					std::cout << "\t";
-					if (__n->left)
-						std::cout << __n->left->data->first;
-					else
-						std::cout << "nil";
-					std::cout << "\t";
-					if (__n->right)
-						std::cout << __n->right->data->first;
-					else
-						std::cout << "nil";
-				}
-				else
-					std::cout << "nil";
-				std::cout << '\n';
-			}
-
-			bool
-			_n_verify_balance( node_pointer __n, size_type & __max_h, size_type & __min_h )
-			{
-				size_type	lmax_h = 0, lmin_h = 0, rmax_h = 0, rmin_h = 0;
-
-				if (!__n)
-				{
-					__max_h = __min_h = 0;
-					return true;
-				}
-
-				if (__n->color == red
-					&& ((__n->left && __n->left->color == red) 
-						|| (__n->right && __n->right->color == red)
-						|| (__n->parent && __n->parent->color == red)))
-				{
-					std::cout << "bad red node" << std::endl;
-					return false;
-				}
-				if (_n_verify_balance(__n->left, lmax_h, lmin_h) == false)
-				{
-					return false;
-				}
-				if (_n_verify_balance(__n->right, rmax_h, rmin_h) == false)
-				{
-					return false;
-				}
-				__max_h = std::max(lmax_h, rmax_h) + 1;
-				__min_h = std::min(lmin_h, rmin_h) + 1;
-				if (__max_h <= 2 * __min_h)
-					return true;
-				return false;
-			}
-
-			size_type
-			_n_verify_colors( node_pointer __n )
-			{
-				if (!__n)
-					return 1;
-				if (__n->color == red
-					&& ((__n->left && __n->left->color == red) 
-						|| (__n->right && __n->right->color == red)
-						|| (__n->parent && __n->parent->color == red)))
-				{
-					std::cout << "bad red node" << std::endl;
-					return false;
-				}
-				return (_n_verify_colors(__n->left) + _n_verify_colors(__n->right) + (__n->color == black));
-			}
-
-			bool _n_order(node_pointer node)
-			{
-				if (node == NULL)
-					return 1;
-
-				if (node->left != NULL && node->left->data->first > node->data->first)
-					return 0;
-
-				if (node->right != NULL && node->right->data->first < node->data->first)
-					return 0;
-
-				if (!_n_order(node->left) || !_n_order(node->right))
-					return 0;
-
-				return 1;
 			}
 	};
 }

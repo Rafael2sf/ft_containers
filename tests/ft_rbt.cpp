@@ -1,6 +1,7 @@
-#include <stdlib.h>
 #include <map>
+#include <vector>
 #include "../includes/RedBlackTree.hpp"
+#include "../includes/vector.hpp"
 
 class Foo
 {
@@ -19,13 +20,32 @@ class Foo
 
 int main( void )
 {
-	ft::RedBlackTree<int, int> tree;
-	srand(time(NULL));
-	for (int i = 0; i < 10000000; i++)
-		tree.insert(ft::pair<int, int>(i, i));
-	for (int i = 0; i < 10000000; i++)
-		tree.erase(rand() % (10000000 - 1));
-	std::cout << (tree.isValid() ? "true" : "false") << std::endl;
-	std::cout << (tree.inOrder() ? "true" : "false") << std::endl;
+	// std::map<int, int>				m;
+	// std::map<int, int>::iterator	it = m.begin();
+	ft::RedBlackTree<int, int>				m;
+	ft::RedBlackTree<int, int>::iterator	it;
+
+	m[10] = 5;
+	m[6] = 3;
+	m[15] = 6;
+	m[4] = 1;
+	m[7] = 4;
+	m[5] = 2;
+
+	// it = m.begin();
+	// std::cout << (*it).data->second << std::endl;
+	// std::cout << (*(++it)).data->second << std::endl;
+	// std::cout << (*(++it)).data->second << std::endl;
+	// std::cout << (*(++it)).data->second << std::endl;
+	// std::cout << (*(++it)).data->second << std::endl;
+	// //std::cout << (*(++it)).data->second << std::endl;
+
+	// std::cout << (*(--it)).data->second << std::endl;
+	// std::cout << (*(--it)).data->second << std::endl;
+	// std::cout << (*(--it)).data->second << std::endl;
+	// std::cout << (*(--it)).data->second << std::endl;
+	// std::cout << (*(--it)).data->second << std::endl;
+	// std::cout << (*(--it)).data->second << std::endl;
+
 	return (0);
 }

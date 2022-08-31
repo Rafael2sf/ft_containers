@@ -34,7 +34,6 @@ namespace ft
 			vector_iterator( pointer __p )
 			: _pointer(__p) {}
 
-
 			pointer const & base( void ) const {
 				return _pointer;
 			}
