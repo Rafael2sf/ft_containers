@@ -21,31 +21,32 @@ class Foo
 
 int main( void )
 {
-	srand(time(NULL));
+	// srand(time(NULL));
 
-	ft::vector< ft::pair<int, int> >v;
-	for (int i = 0; i < 1000000; i++)
-		v.push_back(ft::make_pair<int, int>(rand() % 1000000, i));
+	// ft::vector< ft::pair<int, int> >v;
+	// for (int i = 0; i < 1000000; i++)
+	// 	v.push_back(ft::make_pair<int, int>(rand() % 1000000, i));
 
-	ft::RedBlackTree<int, int>		m(v.begin(), v.end());
-	std::cout << m.size() << std::endl;
+	ft::RedBlackTree<int, int>				t;
 
-	// for (int i = 0; i < 10000000; i++)
-	// 	m.insert(ft::make_pair<int, int>(42, 42));
+	for (int i = 0; i < 42; i++)
+		t.insert(ft::make_pair<int, int>(i, 100 + i));
 	// std::cout << m.size() << '\n';
 	// for (int i = 0; i < 10000000; i++)
 	// 	m.erase(42);
 
-	//m.print();
+	t.print();
+	ft::RedBlackTree<int, int>::iterator it2;
+	ft::RedBlackTree<int, int>::iterator it = t.begin();
+	for (; it != t.end(); ++it)
+		std::cout << (*it).data->first << " " << (*it).data->second << std::endl;
+	std::cout << (*it).data->first << " " << (*it).data->second << std::endl;
 
-	// it = m.begin();
-	// std::cout << (*it).data->second << std::endl;
 	// std::cout << (*(++it)).data->second << std::endl;
 	// std::cout << (*(++it)).data->second << std::endl;
 	// std::cout << (*(++it)).data->second << std::endl;
 	// std::cout << (*(++it)).data->second << std::endl;
 	//std::cout << (*(++it)).data->second << std::endl;
-
 	// std::cout << (*(--it)).data->second << std::endl;
 	// std::cout << (*(--it)).data->second << std::endl;
 	// std::cout << (*(--it)).data->second << std::endl;

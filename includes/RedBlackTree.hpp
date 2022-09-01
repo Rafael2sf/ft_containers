@@ -128,12 +128,16 @@ namespace ft
 			iterator
 			begin( void )
 			{
-				node_pointer	n;
+				return iterator(_n_min(_root));
+			}
 
-				n = _root;
-				while (n->left)
-					n = n->left;
-				return iterator(n);
+			iterator
+			end( void )
+			{
+				iterator it(NULL);
+
+				it._n_base = _root;
+				return it;
 			}
 
 			/* element acess */

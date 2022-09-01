@@ -17,55 +17,98 @@ namespace ft
 			typedef typename iterator_traits<T>::difference_type	difference_type;
 
 		protected:
-			pointer 			_pointer;
-			// vector<pointer>		_rstack;
-			// vector<pointer>		_lstack;
+
+			pointer 			_pos;
 
 		public:
+
+			pointer 			_n_base;
+
 			~RbtIterator()
 			{}
 
 			RbtIterator( void )
-			: _pointer(NULL)
+			: _pos(NULL), _n_base(NULL)
 			{}
 
 			RbtIterator( pointer __p )
-			: _pointer(__p)
+			: _pos(__p), _n_base(_n_find_root(__p))
 			{}
 
 			RbtIterator( RbtIterator const& __other )
-			: _pointer(__other.base())
+			: _pos(__other.base()), _n_base(_n_find_root(__other.base()))
 			{}
 
 			template <class U>
 			RbtIterator( RbtIterator<U> const& __other )
-			: _pointer(__other.base())
+			: _pos(__other.base()), _n_base(_n_find_root(__other.base()))
 			{}
 
 			RbtIterator & operator=( RbtIterator const& __rhs ) {
-				_pointer = __rhs._pointer;
-				// _rstack = __rhs._rstack;
+				_pos = __rhs._pos;
+				_n_base = __rhs._n_base;
 				return *this;
 			}
 
 			pointer const & base( void ) const {
-				return _pointer;
+				return _pos;
 			}
 
 			reference	operator*( void ) {
-				return *_pointer;
+				return *_pos;
 			}
 
 			pointer		operator->( void ) {
-				return _pointer;
+				return _pos;
 			}
 
-			// RbtIterator	& operator++( void )
-			// {
-			// }
+			bool
+			operator==( RbtIterator const& __rhs )
+			{
+				return _pos == __rhs._pos;
+			}
 
-			// RbtIterator	& operator--( void )
-			// {
-			// }
+			bool
+			operator!=( RbtIterator const& __rhs )
+			{
+				return !(*this == __rhs);
+			}
+
+			RbtIterator	& operator++( void )
+			{
+				if (!_pos)
+					std::cout << "abc" << '\n';
+				if (_pos->right)
+				{
+					_pos = _pos->right;
+					while (_pos->left)
+						_pos = _pos->left;
+				}
+				else if (_pos->parent && _pos == _pos->parent->left)
+				{
+					_pos = _pos->parent;
+
+				}
+				else
+				{
+					while (_pos->parent && _pos == _pos->parent->right)
+						_pos = _pos->parent;
+					if (_pos)
+						_pos = _pos->parent;
+				}
+				if (!_pos)
+					std::cout << "last elem";
+				return *this;
+			}
+
+		private:
+
+			pointer
+			_n_find_root( pointer __n )
+			{
+				while (__n->parent)
+					__n = __n->parent;
+				return __n;
+			}
 	};
 }
