@@ -1,5 +1,6 @@
 #include <map>
 #include <vector>
+#include <stdlib.h>
 #include "../includes/RedBlackTree.hpp"
 #include "../includes/vector.hpp"
 
@@ -20,17 +21,22 @@ class Foo
 
 int main( void )
 {
-	// std::map<int, int>				m;
-	// std::map<int, int>::iterator	it = m.begin();
-	ft::RedBlackTree<int, int>				m;
-	ft::RedBlackTree<int, int>::iterator	it;
+	srand(time(NULL));
 
-	m[10] = 5;
-	m[6] = 3;
-	m[15] = 6;
-	m[4] = 1;
-	m[7] = 4;
-	m[5] = 2;
+	ft::vector< ft::pair<int, int> >v;
+	for (int i = 0; i < 1000000; i++)
+		v.push_back(ft::make_pair<int, int>(rand() % 1000000, i));
+
+	ft::RedBlackTree<int, int>		m(v.begin(), v.end());
+	std::cout << m.size() << std::endl;
+
+	// for (int i = 0; i < 10000000; i++)
+	// 	m.insert(ft::make_pair<int, int>(42, 42));
+	// std::cout << m.size() << '\n';
+	// for (int i = 0; i < 10000000; i++)
+	// 	m.erase(42);
+
+	//m.print();
 
 	// it = m.begin();
 	// std::cout << (*it).data->second << std::endl;
@@ -38,7 +44,7 @@ int main( void )
 	// std::cout << (*(++it)).data->second << std::endl;
 	// std::cout << (*(++it)).data->second << std::endl;
 	// std::cout << (*(++it)).data->second << std::endl;
-	// //std::cout << (*(++it)).data->second << std::endl;
+	//std::cout << (*(++it)).data->second << std::endl;
 
 	// std::cout << (*(--it)).data->second << std::endl;
 	// std::cout << (*(--it)).data->second << std::endl;
@@ -46,6 +52,6 @@ int main( void )
 	// std::cout << (*(--it)).data->second << std::endl;
 	// std::cout << (*(--it)).data->second << std::endl;
 	// std::cout << (*(--it)).data->second << std::endl;
-
+	//bar.print();
 	return (0);
 }

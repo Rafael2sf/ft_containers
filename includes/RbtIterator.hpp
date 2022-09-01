@@ -18,8 +18,8 @@ namespace ft
 
 		protected:
 			pointer 			_pointer;
-			vector<pointer>		_rstack;
-			vector<pointer>		_lstack;
+			// vector<pointer>		_rstack;
+			// vector<pointer>		_lstack;
 
 		public:
 			~RbtIterator()
@@ -44,7 +44,7 @@ namespace ft
 
 			RbtIterator & operator=( RbtIterator const& __rhs ) {
 				_pointer = __rhs._pointer;
-				_rstack = __rhs._rstack;
+				// _rstack = __rhs._rstack;
 				return *this;
 			}
 
