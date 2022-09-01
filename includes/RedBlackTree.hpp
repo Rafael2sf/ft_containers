@@ -37,13 +37,9 @@ namespace ft
 		RbtNode( void )
 		: color(red), left(0), right(0), parent(0)
 		{}
-	};
 
- 	// struct	RbtNode : RbtBaseNode
-	// {
-	// 	typedef RbtNode<T>*			link_type;
-	// 	T	data;
-	// };
+		// max min root value_type
+	};
 
 	template	<class Key,
 				class T,
@@ -136,7 +132,7 @@ namespace ft
 			{
 				iterator it(NULL);
 
-				it._n_base = _root;
+				it.n_base = _root;
 				return it;
 			}
 
