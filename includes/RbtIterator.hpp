@@ -3,14 +3,22 @@
 #include "iterators.hpp"
 #include "vector.hpp"
 #include <iostream>
+#include <typeinfo>
 
 namespace ft
 {
 	template <class T>
-	class RbtIterator : iterator_traits<T>
+	struct RbtNode;
+
+	template <class T>
+	class RbtIterator
 	{
 		public:
-			typedef std::bidirectional_iterator_tag 				iterator_category;
+			typedef std::bidirectional_iterator_tag iterator_category;
+			// typedef T								value_type;
+			// typedef T*								reference;
+			// typedef T&								pointer;
+			// typedef ptrdiff_t						difference_type;
 			typedef typename iterator_traits<T>::value_type			value_type;
 			typedef typename iterator_traits<T>::reference			reference;
 			typedef typename iterator_traits<T>::pointer			pointer;
@@ -18,57 +26,62 @@ namespace ft
 
 		protected:
 
-			pointer 			_pos;
+			typedef RbtNode<value_type>				node;
+			typedef RbtNode<value_type> const		const_node;
+			typedef RbtNode<value_type> *			node_pointer;
+			typedef RbtNode<value_type> const *		const_node_pointer;
+
+			node_pointer _pos;
 
 		public:
 
-			pointer 			n_base;
+			node_pointer _Node_Root;
 
 			~RbtIterator()
 			{}
 
 			RbtIterator( void )
-			: _pos(NULL), n_base(NULL)
+			: _pos(NULL)
 			{}
 
-			RbtIterator( pointer __p )
-			: _pos(__p), n_base(_n_find_root(__p))
+			RbtIterator( node_pointer __root, node_pointer __p = 0)
+			: _pos(__p), _Node_Root(__root)
 			{}
 
 			RbtIterator( RbtIterator const& __other )
-			: _pos(__other.base()), n_base(_n_find_root(__other.base()))
+			: _pos(__other._pos), _Node_Root(__other._Node_Root)
 			{}
 
-			template <class U>
+			template <typename U>
 			RbtIterator( RbtIterator<U> const& __other )
-			: _pos(__other.base()), n_base(_n_find_root(__other.base()))
+			: _pos(__other.base()), _Node_Root(__other._Node_Root)
 			{}
 
-			RbtIterator & operator=( RbtIterator const& __rhs ) {
+			RbtIterator & 
+			operator=( RbtIterator const& __rhs )
+			{
 				_pos = __rhs._pos;
-				n_base = __rhs.n_base;
+				_Node_Root = __rhs._Node_Root;
 				return *this;
 			}
 
-			pointer const & base( void ) const {
-				return n_base;
+			value_type
+			operator*( void )
+			{
+				return (*_pos).data;
 			}
 
-			// return ft::pair
-
-			reference	operator*( void ) {
-				return *_pos;
-			}
-
-			pointer		operator->( void ) {
-				return _pos;
+			pointer
+			operator->( void )
+			{
+				return _pos->data;
 			}
 
 			bool
 			operator==( RbtIterator const& __rhs )
 			{
-				if (!_pos)
-					return n_base == __rhs.n_base;
+				if (!_pos && !__rhs._pos)
+					return (_Node_Root == __rhs._Node_Root) && _Node_Root != NULL;
 				return _pos == __rhs._pos;
 			}
 
@@ -78,11 +91,12 @@ namespace ft
 				return !(*this == __rhs);
 			}
 
-			RbtIterator	& operator++( void )
+			RbtIterator	&
+			operator++( void )
 			{
 				if (!_pos)
 				{
-					_pos = n_base;
+					_pos = _Node_Root;
 					while (_pos && _pos->right)
 						_pos = _pos->right;
 					return *this;
@@ -105,19 +119,21 @@ namespace ft
 				return *this;
 			}
 
-			RbtIterator operator++( int )
+			RbtIterator 
+			operator++( int )
 			{
-				RbtIterator<pointer>	it;
+				RbtIterator	it(*this);
 
-				it = ++(*this);
+				++(*this);
 				return (it);
 			}
 
-			RbtIterator	& operator--( void )
+			RbtIterator	&
+			operator--( void )
 			{
 				if (!_pos)
 				{
-					_pos = n_base;
+					_pos = _Node_Root;
 					while (_pos && _pos->right)
 						_pos = _pos->right;
 					return *this;
@@ -140,25 +156,32 @@ namespace ft
 				}
 				if (!_pos)
 				{
-					_pos = n_base;
+					_pos = _Node_Root;
 					while (_pos && _pos->right)
 						_pos = _pos->right;
 				}
 				return *this;
 			}
 
-			RbtIterator operator--( int )
+			RbtIterator
+			operator--( int )
 			{
-				RbtIterator<pointer>	it;
+				RbtIterator	it(*this);
 
-				it = --(*this);
+				--(*this);
 				return (it);
+			}
+
+			node_pointer
+			base( void ) const
+			{
+				return _pos;
 			}
 
 		private:
 
-			pointer
-			_n_find_root( pointer __n )
+			node_pointer
+			_n_find_root( node_pointer __n )
 			{
 				if (!__n)
 					return NULL;
@@ -167,8 +190,8 @@ namespace ft
 				return __n;
 			}
 
-			pointer
-			_n_max( pointer __n )
+			node_pointer
+			_n_max( node_pointer __n )
 			{
 				if (!__n)
 					return NULL;
@@ -178,4 +201,3 @@ namespace ft
 			}
 	};
 }
-

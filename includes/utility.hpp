@@ -12,10 +12,10 @@ namespace ft
 		: first(first_type()), second(second_type())
 		{};
 
-		template < class U1, class U2>
-		pair( pair<U1, U2> const& __other )
-		: first(__other.first), second(__other.second)
-		{}
+		// template < class U1, class U2>
+		// pair( pair<U1, U2> const& __other )
+		// : first(__other.first), second(__other.second)
+		// {}
 
 		pair( T1 const& __first, T2 const& __second )
 		: first(__first), second(__second)

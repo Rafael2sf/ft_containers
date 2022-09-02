@@ -25,20 +25,19 @@ namespace ft
 	template <class T>
 	struct RbtNode
 	{
+		typedef T					value_type;
 		typedef RbtNode<T> *		node_pointer;
 		typedef RbtNode<T> const*	const_node_pointer;
 
-		T				*data;
+		T				data;
 		RbtColor		color;
 		node_pointer	left;
 		node_pointer	right;
 		node_pointer	parent;
 
-		RbtNode( void )
-		: color(red), left(0), right(0), parent(0)
+		RbtNode( value_type const& __val )
+		: data(__val), color(red), left(0), right(0), parent(0)
 		{}
-
-		// max min root value_type
 	};
 
 	template	<class Key,
@@ -59,17 +58,18 @@ namespace ft
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
 			typedef size_t										size_type;
-			typedef RbtIterator<RbtNode<value_type> *>			iterator;
+			typedef RbtIterator<pointer>						iterator;
+			typedef RbtIterator<const_pointer>					const_iterator;
 			typedef typename iterator_traits<iterator>::difference_type
 																difference_type;
-			// iterators + ptrdiff
 
 		protected:
 			typedef RbtNode<value_type>							node;
 			typedef RbtNode<value_type> const					const_node;
 			typedef RbtNode<value_type> *						node_pointer;
 			typedef RbtNode<value_type> const*					const_node_pointer;
-			typedef std::allocator<node>						node_allocator;
+			typedef typename Alloc::template rebind<RbtNode<value_type> >::other
+																node_allocator;
 
 			node_pointer	_root;
 			size_type		_count;
@@ -81,11 +81,12 @@ namespace ft
 
 			~RedBlackTree()
 			{
-				_n_destroy(node_pointer(_root));
-				_root = 0;
+				if (_count)
+					_n_destroy(node_pointer(_root));
 				_count = 0;
 			}
 
+			explicit
 			RedBlackTree( key_compare const& __comp = key_compare(),
 				allocator_type const& __alloc = allocator_type() )
 			: _root(0), _count(0), _compare(__comp),
@@ -102,10 +103,20 @@ namespace ft
 				_n_range(__first, __last);
 			}
 
-			RedBlackTree( RedBlackTree const& __other ) // Copy using iterators
-			: _root(0), _count(0), _compare(),
-				_allocator(),  _node_allocator()
-			{ (void)__other; }
+			// RedBlackTree( RedBlackTree const& __other )
+			// : _root(0), _count(0), _compare(),
+			// 	_allocator(),  _node_allocator()
+			// {
+			// 	_n_range(__other.begin(), __other.end());
+			// }
+
+			// RedBlackTree &
+			// operator=( RedBlackTree const& __rhs )
+			// {
+			// 	this->clear();
+			// 	_n_range(__rhs.begin(), __rhs.end());
+			// 	return *this;
+			// }
 
 			key_compare
 			key_comp( void ) const
@@ -124,17 +135,26 @@ namespace ft
 			iterator
 			begin( void )
 			{
-				return iterator(_n_min(_root));
+				return iterator(_root, _n_min(_root));
+			}
+
+			const_iterator
+			begin( void ) const
+			{
+				return const_iterator(_root, _n_min(_root));
 			}
 
 			iterator
 			end( void )
 			{
-				iterator it(NULL);
-
-				it.n_base = _root;
-				return it;
+				return iterator(_root);
 			}
+
+			// const_iterator
+			// end( void ) const
+			// {
+			// 	return const_iterator(_root, NULL);
+			// }
 
 			/* element acess */
 
@@ -280,9 +300,9 @@ namespace ft
 						std::cout << "d_black\t";
 					else
 						std::cout << "red\t";
-					std::cout << __n->data->first << "\t\t";
+					std::cout << __n->data.first << "\t\t";
 					if (__n->parent)
-						std::cout << __n->parent->data->first;
+						std::cout << __n->parent->data.first;
 					else
 					{
 						if (__n == _root)
@@ -292,12 +312,12 @@ namespace ft
 					}
 					std::cout << "\t";
 					if (__n->left)
-						std::cout << __n->left->data->first;
+						std::cout << __n->left->data.first;
 					else
 						std::cout << "nil";
 					std::cout << "\t";
 					if (__n->right)
-						std::cout << __n->right->data->first;
+						std::cout << __n->right->data.first;
 					else
 						std::cout << "nil";
 				}
@@ -436,7 +456,6 @@ namespace ft
 				_root->color = black;
 			}
 
-
 			/* insert */
 
 			node_pointer
@@ -450,7 +469,7 @@ namespace ft
 				}
 				if (!__n)
 					return (NULL);
-				if (_compare( __n->data->first, __pair.first))
+				if (_compare(__n->data.first, __pair.first))
 				{
 					if (!__n->right)
 					{
@@ -683,9 +702,9 @@ namespace ft
 			_n_allocate( value_type const& __pair )
 			{
 				node_pointer tmp = _node_allocator.allocate(1);
-				_node_allocator.construct(tmp, node());
-				tmp->data = _allocator.allocate(1);
-				_allocator.construct(tmp->data, __pair);
+				_node_allocator.construct(tmp, node(__pair));
+				// tmp->data = _allocator.allocate(1);
+				// _allocator.construct(tmp->data, __pair);
 				return tmp;
 			}
 
@@ -696,8 +715,8 @@ namespace ft
 					return ;
 				_n_destroy(__n->left);
 				_n_destroy(__n->right);
-				_allocator.destroy(__n->data);
-				_allocator.deallocate(__n->data, 1);
+				// _allocator.destroy(__n->data);
+				// _allocator.deallocate(__n->data, 1);
 				_node_allocator.destroy(__n);
 				_node_allocator.deallocate(__n, 1);
 			}
@@ -707,11 +726,11 @@ namespace ft
 			{
 				if (!__n)
 					return (NULL);
-				if (_compare(val, __n->data->first) 
-					&& !_compare(__n->data->first, val))
+				if (_compare(val, __n->data.first) 
+					&& !_compare(__n->data.first, val))
 					return (_n_find(__n->left, val));
-				else if (_compare(__n->data->first, val) 
-					&& !_compare(val, __n->data->first))
+				else if (_compare(__n->data.first, val) 
+					&& !_compare(val, __n->data.first))
 					return (_n_find(__n->right, val));
 				return (__n);
 			}
@@ -743,7 +762,10 @@ namespace ft
 			_n_range(InputIterator __first, InputIterator __last)
 			{
 				while (__first != __last)
+				{
+					std::cout << "oof\n";
 					this->insert(*__first++);
+				}
 			}
 	};
 }
