@@ -45,6 +45,9 @@ BINS	=		$(patsubst $(_OBJ)%.o, $(_BIN)% ,$(OBJS))
 
 all: $(_BIN) $(BINS)
 
+test:
+	$(CXX) $(CXXFLAGS) tests/ft_rbt.cpp -o test.exe
+
 $(_OBJ)%.o: $(_SRC)%.cpp
 	@$(MKD) $(_OBJ)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@

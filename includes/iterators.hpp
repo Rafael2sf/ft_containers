@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <cstddef>
+#include <iostream>
 
 namespace ft
 {
@@ -60,9 +61,9 @@ namespace ft
 			}
 
 			template <class U>
-			reverse_iterator( reverse_iterator<U> const& __other ) {
-				*this = __other;
-			}
+			reverse_iterator( reverse_iterator<U> const& __other )
+			: _current(__other.base())
+			{}
 
 			iterator_type base() const {
 				return (_current.base());
@@ -152,28 +153,28 @@ namespace ft
 	bool		operator>(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
-		return (__lhs.base() > __rhs.base()); 
+		return (__lhs.base() < __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
 	bool		operator>=(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
-		return (__lhs.base() >= __rhs.base()); 
+		return (__lhs.base() <= __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
 	bool		operator<(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
-		return (__lhs.base() < __rhs.base()); 
+		return (__lhs.base() > __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
 	bool		operator<=(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
-		return (__lhs.base() <= __rhs.base()); 
+		return (__lhs.base() >= __rhs.base()); 
 	}
 
 	template <class Iter>

@@ -36,8 +36,10 @@ namespace ft
 		node_pointer	parent;
 
 		RbtNode( value_type const& __val )
-		: data(__val), color(red), left(0), right(0), parent(0)
-		{}
+		: color(red), left(0), right(0), parent(0)
+		{
+			data = __val;
+		}
 	};
 
 	template	<class Key,
@@ -58,8 +60,10 @@ namespace ft
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
 			typedef size_t										size_type;
-			typedef RbtIterator<pointer>						iterator;
-			typedef RbtIterator<const_pointer>					const_iterator;
+			typedef RbtIterator<value_type>						iterator;
+			typedef RbtIterator<const value_type>				const_iterator;
+			// typedef ft::reverse_iterator<iterator>				reverse_iterator;
+			// typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 			typedef typename iterator_traits<iterator>::difference_type
 																difference_type;
 
@@ -103,20 +107,20 @@ namespace ft
 				_n_range(__first, __last);
 			}
 
-			// RedBlackTree( RedBlackTree const& __other )
-			// : _root(0), _count(0), _compare(),
-			// 	_allocator(),  _node_allocator()
-			// {
-			// 	_n_range(__other.begin(), __other.end());
-			// }
+			RedBlackTree( RedBlackTree const& __other )
+			: _root(0), _count(0), _compare(),
+				_allocator(),  _node_allocator()
+			{
+				_n_range(__other.begin(), __other.end());
+			}
 
-			// RedBlackTree &
-			// operator=( RedBlackTree const& __rhs )
-			// {
-			// 	this->clear();
-			// 	_n_range(__rhs.begin(), __rhs.end());
-			// 	return *this;
-			// }
+			RedBlackTree &
+			operator=( RedBlackTree const& __rhs )
+			{
+				this->clear();
+				_n_range(__rhs.begin(), __rhs.end());
+				return *this;
+			}
 
 			key_compare
 			key_comp( void ) const
@@ -135,25 +139,50 @@ namespace ft
 			iterator
 			begin( void )
 			{
-				return iterator(_root, _n_min(_root));
+				return iterator(&_root, _n_min(_root));
 			}
 
 			const_iterator
 			begin( void ) const
 			{
-				return const_iterator(_root, _n_min(_root));
+				return const_iterator(&_root, _n_min(_root));
 			}
 
 			iterator
 			end( void )
 			{
-				return iterator(_root);
+				return iterator(&_root);
 			}
 
-			// const_iterator
-			// end( void ) const
+			const_iterator
+			end( void ) const
+			{
+				return const_iterator(node_pointer(&_root)); // sadly not working
+			}
+
+			// reverse_iterator
+			// rbegin( void )
 			// {
-			// 	return const_iterator(_root, NULL);
+			// 	return reverse_iterator(iterator(&_root, _n_max(_root)));
+			// }
+
+			// const_reverse_iterator
+			// rbegin( void ) const
+			// {
+			// 	return const_reverse_iterator(
+			// 		const_iterator(&_root, _n_max(_root)));
+			// }
+
+			// reverse_iterator
+			// rend( void )
+			// {
+			// 	return reverse_iterator(iterator(&_root));
+			// }
+
+			// const_reverse_iterator
+			// rend( void ) const
+			// {
+			// 	return const_reverse_iterator(const_iterator(&_root));
 			// }
 
 			/* element acess */
@@ -167,38 +196,30 @@ namespace ft
 			mapped_type & 
 			operator[]( Key const& __key )
 			{
-				node_pointer	n;
-
-				n = _n_find(_root, __key);
-				if (!n)
-				{
-					n = _n_insert(_root, 
-						make_pair<key_type, mapped_type>(__key, mapped_type()));
-					_count++;
-				}
-				return n->data->second;
+				return (_n_insert(_root,
+					make_pair(__key, mapped_type())).first->second);
 			}
 
 			mapped_type & 
 			at( key_type const& __key )
 			{
-				node_pointer	n;
+				iterator	n;
 
 				n = _n_find(_root, __key);
-				if (!n)
-					throw std::out_of_range("map: at()");
-				return n->data->second;
+				if (n == this->end())
+					throw std::out_of_range("RedBlackTree: at()");
+				return n->second;
 			}
 
 			mapped_type const& 
 			at( key_type const& __key ) const
 			{
-				node_pointer	n;
+				iterator	n;
 
-				n = _n_find(_root, __key);
-				if (!n)
-					throw std::out_of_range("map: at()");
-				return n->data->second;
+				n = this->find(__key);
+				if (n == this->end())
+					throw std::out_of_range("RedBlackTree: at()");
+				return n->second;
 			}
 
 			/* Capacity */
@@ -231,18 +252,46 @@ namespace ft
 				_count = 0;
 			}
 
-			void
-			insert( value_type const& __pair )
+			pair<iterator, bool>
+			insert( value_type const& __val )
 			{
-				_n_insert(_root, __pair);
-				_count++;
+				return _n_insert(_root, __val);
+			}
+
+			iterator
+			insert( iterator __position, value_type const& __val )
+			{
+				return (_n_insert(__position._M_node, __val)).first;
+			}
+
+			template <class InputIterator>
+			void
+			insert(InputIterator __first, InputIterator __last )
+			{
+				_n_range(__first, __last);
 			}
 
 			void
+			erase( iterator __pos )
+			{
+				if (__pos != this->end())
+					_n_erase(__pos._M_node, __pos->first);
+			}
+
+			size_type
 			erase( key_type const& __key )
 			{
-				_n_erase(_root, __key);
-				_count--;
+				return _n_erase(_root, __key);
+			}
+
+			void
+			erase(iterator __first, iterator __last)
+			{
+				while (__first != __last)
+				{
+					_n_erase(__first._M_node, __first->key);
+					__first++;
+				}
 			}
 
 			void
@@ -257,6 +306,18 @@ namespace ft
 			}
 
 			/* operations */
+
+			iterator
+			find( const key_type& k )
+			{
+				return this->find(k);
+			}
+
+			const_iterator
+			find( const key_type& k ) const
+			{
+				return this->find(k);
+			}
 
 			size_type
 			count( key_type const& __key ) const
@@ -328,26 +389,31 @@ namespace ft
 
 			/* erase */
 
-			void
+			bool
 			_n_erase( node_pointer __hint, key_type const& __key )
 			{
+				iterator		pos;
 				node_pointer	del;
 				node_pointer	rep;
 
 				if (!_count)
-					return ;
-				del = _n_find(node_pointer(__hint), __key);
-				if (!del)
-					return ;
+					return false;
+				pos = _n_find(node_pointer(__hint), __key);
+				if (pos == this->end())
+					return false;
+				del = pos._M_node;
 				rep = _n_erase_sucessor(del);
 				/* double black requires tree rebalance */
 				if (del->color == black && (!rep || rep->color == black))
 					_n_erase_balance(del);
 				_n_remove(del);
 				/* Bring blackness to root or replacer node  */
-				if (rep && (rep == _root || (rep->color == red && del->color == black)))
+				if (rep && (rep == _root
+					|| (rep->color == red && del->color == black)))
 					rep->color = black;
 				_n_destroy(del);
+				_count--;
+				return true;
 			}
 
 			node_pointer
@@ -456,19 +522,36 @@ namespace ft
 				_root->color = black;
 			}
 
-			/* insert */
-
-			node_pointer
-			_n_insert( node_pointer __n, value_type const& __pair )
+			/* insert a element incrementing size and balancing the red-black tree
+				return a iterator to the inserted element on sucess otherwise end() */
+			pair<iterator, bool>
+			_n_insert( node_pointer __hint, value_type const& __pair )
 			{
+				pair<iterator, bool> tmp;
+
 				if (!_count)
 				{
 					_root = _n_allocate(__pair);
 					_root->color = black;
-					return _root;
+					tmp = make_pair(iterator(&_root, _root), true);
 				}
-				if (!__n)
-					return (NULL);
+				else
+				{
+					if (!__hint)
+						__hint = _root;
+					while (__hint->parent && _compare(__hint->data.first, __pair.first))
+						__hint = __hint->parent;
+					tmp = _n_insert_find(__hint, __pair);
+				}
+				if (tmp.second)
+					_count++;
+				return tmp;
+			}
+
+			/* recursevly find the insert position or duplicated */
+			pair<iterator, bool>
+			_n_insert_find( node_pointer __n, value_type const& __pair )
+			{
 				if (_compare(__n->data.first, __pair.first))
 				{
 					if (!__n->right)
@@ -477,33 +560,26 @@ namespace ft
 						__n->right->parent = __n;
 						__n = __n->right;
 						_n_insert_balance(__n);
-						return (__n);
+						return make_pair(iterator(&_root, __n), true);
 					}
-					return (_n_insert(__n->right, __pair));
+					return (_n_insert_find(__n->right, __pair));
 				}
-				if (!__n->left)
+				else if (_compare(__pair.first, __n->data.first))
 				{
-					__n->left = _n_allocate(__pair);
-					__n->left->parent = __n;
-					__n = __n->left;
-					_n_insert_balance(__n);
-					return (__n);
+					if (!__n->left)
+					{
+						__n->left = _n_allocate(__pair);
+						__n->left->parent = __n;
+						__n = __n->left;
+						_n_insert_balance(__n);
+						return make_pair(iterator(&_root, __n), true);
+					}
+					return (_n_insert_find(__n->left, __pair));
 				}
-				return (_n_insert(__n->left, __pair));
+				return make_pair(iterator(&_root, __n), false);
 			}
 
-			void
-			_n_insert_cswap( node_pointer & __n, bool __left_swap )
-			{
-				__n->parent->color = black;
-				__n->parent->parent->color = red;
-				if (__left_swap)
-					__n->parent->parent->right->color = black;
-				else
-					__n->parent->parent->left->color = black;
-				__n = __n->parent->parent;
-			}
-
+			/* insert_balance performs the required operations to balance the tree */
 			void
 			_n_insert_balance( node_pointer __n )
 			{
@@ -530,16 +606,14 @@ namespace ft
 							__n = _n_rotate_ll(__n, true);
 						}
 					}
-					/* parent is right of grandparent */
+					/* same as above but for oposite side  */
 					else if (__n->parent->parent)
 					{
-						/* if uncle of node is red, a color swap is enough to fix */
 						if (__n->parent->parent->left 
 							&& __n->parent->parent->left->color == red)
 						{
 							_n_insert_cswap(__n, false);
 						}
-						/* otherwise rotations are require */
 						else
 						{
 							if (__n == __n->parent->left)
@@ -552,7 +626,22 @@ namespace ft
 				_root->color = black;
 			}
 
-			/* rotations */
+			/* insert_balance helper swaps color with uncle node */
+			void
+			_n_insert_cswap( node_pointer & __n, bool __left_swap )
+			{
+				__n->parent->color = black;
+				__n->parent->parent->color = red;
+				if (__left_swap)
+					__n->parent->parent->right->color = black;
+				else
+					__n->parent->parent->left->color = black;
+				__n = __n->parent->parent;
+			}
+
+			/* red-black tree rotations ( similar to a BST )
+				ll = left-left / rr = right-right 
+				lr = left-right / rl = right-left */
 
 			node_pointer
 			_n_rotate_ll( node_pointer __n, bool __recolor )
@@ -652,8 +741,7 @@ namespace ft
 				__n->parent = tmp;
 			}
 
-			/* tree utils */
-
+			/* detach a node and remove it */
 			void
 			_n_remove( node_pointer __n )
 			{
@@ -698,6 +786,8 @@ namespace ft
 				}
 			}
 
+			/* allocate a node using the given allocator
+				but rebinded to a new type (node_pointer) */
 			node_pointer
 			_n_allocate( value_type const& __pair )
 			{
@@ -708,6 +798,7 @@ namespace ft
 				return tmp;
 			}
 
+			/* destroy a node and all its children */
 			void
 			_n_destroy( node_pointer __n )
 			{
@@ -721,18 +812,20 @@ namespace ft
 				_node_allocator.deallocate(__n, 1);
 			}
 
-			node_pointer
-			_n_find( node_pointer __n, key_type const& val ) const
+			/* recursevly search for a key and
+				return it on sucess otherwise end() */
+			iterator
+			_n_find( node_pointer __n, key_type const& val )
 			{
 				if (!__n)
-					return (NULL);
+					return (this->end());
 				if (_compare(val, __n->data.first) 
 					&& !_compare(__n->data.first, val))
 					return (_n_find(__n->left, val));
 				else if (_compare(__n->data.first, val) 
 					&& !_compare(val, __n->data.first))
 					return (_n_find(__n->right, val));
-				return (__n);
+				return (iterator(&_root, __n));
 			}
 
 			node_pointer
@@ -762,10 +855,7 @@ namespace ft
 			_n_range(InputIterator __first, InputIterator __last)
 			{
 				while (__first != __last)
-				{
-					std::cout << "oof\n";
-					this->insert(*__first++);
-				}
+					_n_insert(_root, *__first++);
 			}
 	};
 }

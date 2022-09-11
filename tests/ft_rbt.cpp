@@ -2,8 +2,10 @@
 #include <vector>
 #include <utility>
 #include <stdlib.h>
+#include <iterator>
 #include "../includes/RedBlackTree.hpp"
 #include "../includes/vector.hpp"
+#include "../includes/type_traits.hpp"
 
 class Foo
 {
@@ -29,53 +31,43 @@ struct MyAlloc
 	pointer
 	allocate( size_type _n, void const* hint = 0 )
 	{
-		std::cout << "hi\n";
+		std::cout << "custom allocate" << "\n";
 		return std::allocator<T>::allocate(_n);
 	}
 
 	pointer
 	deallocate( size_type _n, void const* hint = 0 )
 	{
-		std::cout << "hi\n";
+		std::cout << "custom deallocate" << "\n";
 		return std::allocator<T>::allocate(_n);
 	}
 };
 
+template <class InputIterator>
+void
+iter_print( InputIterator __first, InputIterator __last )
+{
+	int i = 0;
+
+	while (__first != __last)
+	{
+		std::cout << i << '\t' << __first->first << '\t' << __first->second << '\n';
+		__first++;
+		i++;
+	}
+}
+
+/** TODO: Test erase functions */
+
 int main( void )
 {
-	//typedef typename x::template rebind<std::string>::other _alloc_type;
-	// srand(time(NULL));
-
-	// ft::RedBlackTree<int, int>	t1;
-	// for (int i = 0; i < 16; i++)
-	// 	t1.insert(ft::make_pair<int, int>(i, 100 + i));
-
-	// t1.print();
-	// std::cout << (t1.begin() == t1.end()) << '\n';
-
-	// ft::RedBlackTree<int, int>	t2(t1.begin(), t1.end()); //(t1.begin(), t1.end());
-
-	// std::cout << t2.size() << '\n';
-	// std::cout << t1.size() << '\n';
-
-	ft::RbtNode<ft::pair<int, int> > * n = new ft::RbtNode<ft::pair<int, int> >(1);
-
-	ft::RbtIterator< ft::pair<int, int>*> x(n);
-	ft::RbtIterator< const ft::pair<int, int> *> y(n);
-
-	x->first = 10;
-	y->first = 10;
-
-	//ft::RbtIterator< int* > y()
-	//ft::RbtIterator< const int* > y = ft::RbtIterator(&i)
-
-	// ft::RedBlackTree<int, int>::iterator it = t2.begin();
-	// //(*it) = ft::pair<int, int>(0, 0);
-	// while (it != t2.end())
-	// {
-	// 	std::cout << (*it).first << " " << (*it).second << std::endl;
-	// 	it++;
-	// }
-	// it++;
-	// std::cout << (*it).first << " " << (*it).second << std::endl;
+	{
+		ft::RedBlackTree<int, int> t;
+		t[1] = 42;
+		t[2] = 42;
+		t[3] = 42;
+		std::cout << t[1] << '\n';
+		iter_print(t.begin(), t.end());
+	}
+	return (0);
 }

@@ -11,18 +11,14 @@ namespace ft
 	struct RbtNode;
 
 	template <class T>
-	class RbtIterator
+	class RbtIterator: public iterator_traits<T*>
 	{
 		public:
-			typedef std::bidirectional_iterator_tag iterator_category;
-			// typedef T								value_type;
-			// typedef T*								reference;
-			// typedef T&								pointer;
-			// typedef ptrdiff_t						difference_type;
-			typedef typename iterator_traits<T>::value_type			value_type;
-			typedef typename iterator_traits<T>::reference			reference;
-			typedef typename iterator_traits<T>::pointer			pointer;
-			typedef typename iterator_traits<T>::difference_type	difference_type;
+			typedef std::bidirectional_iterator_tag					iterator_category;
+			typedef typename iterator_traits<T*>::value_type		value_type;
+			typedef typename iterator_traits<T*>::reference			reference;
+			typedef typename iterator_traits<T*>::pointer			pointer;
+			typedef typename iterator_traits<T*>::difference_type	difference_type;
 
 		protected:
 
@@ -31,58 +27,72 @@ namespace ft
 			typedef RbtNode<value_type> *			node_pointer;
 			typedef RbtNode<value_type> const *		const_node_pointer;
 
-			node_pointer _pos;
+			node_pointer *_base;
 
 		public:
 
-			node_pointer _Node_Root;
+			node_pointer _M_node;
 
 			~RbtIterator()
 			{}
 
 			RbtIterator( void )
-			: _pos(NULL)
+			: _base(NULL), _M_node(NULL)
 			{}
 
-			RbtIterator( node_pointer __root, node_pointer __p = 0)
-			: _pos(__p), _Node_Root(__root)
+			RbtIterator( node_pointer *__root, node_pointer __p = 0)
+			: _base(__root), _M_node(__p)
 			{}
 
 			RbtIterator( RbtIterator const& __other )
-			: _pos(__other._pos), _Node_Root(__other._Node_Root)
+			: _base(__other._base), _M_node(__other._M_node)
 			{}
 
 			template <typename U>
-			RbtIterator( RbtIterator<U> const& __other )
-			: _pos(__other.base()), _Node_Root(__other._Node_Root)
+			RbtIterator( RbtIterator<U> __other,
+				typename enable_if<is_same<value_type,
+				typename remove_const<U>::type>::value>::type* = 0 )
+			: _base(__other.base()), _M_node(__other._M_node)
 			{}
+
+			node_pointer *
+			base( void ) const
+			{
+				return _base;
+			}
 
 			RbtIterator & 
 			operator=( RbtIterator const& __rhs )
 			{
-				_pos = __rhs._pos;
-				_Node_Root = __rhs._Node_Root;
+				_M_node = __rhs._M_node;
+				_base = __rhs.base();
 				return *this;
 			}
 
-			value_type
+			typename remove_pointer<pointer>::type &
 			operator*( void )
 			{
-				return (*_pos).data;
+				return _M_node->data;
+			}
+
+			void
+			typeTest( void )
+			{
+				std::cout << (is_same<ft::pair<int,int>, value_type>::value ? "true" : "false") << std::endl;
 			}
 
 			pointer
 			operator->( void )
 			{
-				return _pos->data;
+				return &_M_node->data;
 			}
 
 			bool
 			operator==( RbtIterator const& __rhs )
 			{
-				if (!_pos && !__rhs._pos)
-					return (_Node_Root == __rhs._Node_Root) && _Node_Root != NULL;
-				return _pos == __rhs._pos;
+				if (!_M_node && !__rhs._M_node)
+					return (_base == __rhs._base) && _base != NULL;
+				return _M_node == __rhs._M_node;
 			}
 
 			bool
@@ -94,27 +104,27 @@ namespace ft
 			RbtIterator	&
 			operator++( void )
 			{
-				if (!_pos)
+				if (!_M_node)
 				{
-					_pos = _Node_Root;
-					while (_pos && _pos->right)
-						_pos = _pos->right;
+					_M_node = *_base;
+					while (_M_node && _M_node->right)
+						_M_node = _M_node->right;
 					return *this;
 				}
-				if (_pos->right)
+				if (_M_node->right)
 				{
-					_pos = _pos->right;
-					while (_pos->left)
-						_pos = _pos->left;
+					_M_node = _M_node->right;
+					while (_M_node->left)
+						_M_node = _M_node->left;
 				}
-				else if (_pos->parent && _pos == _pos->parent->left)
-					_pos = _pos->parent;
+				else if (_M_node->parent && _M_node == _M_node->parent->left)
+					_M_node = _M_node->parent;
 				else
 				{
-					while (_pos->parent && _pos == _pos->parent->right)
-						_pos = _pos->parent;
-					if (_pos)
-						_pos = _pos->parent;
+					while (_M_node->parent && _M_node == _M_node->parent->right)
+						_M_node = _M_node->parent;
+					if (_M_node)
+						_M_node = _M_node->parent;
 				}
 				return *this;
 			}
@@ -131,34 +141,34 @@ namespace ft
 			RbtIterator	&
 			operator--( void )
 			{
-				if (!_pos)
+				if (!_M_node)
 				{
-					_pos = _Node_Root;
-					while (_pos && _pos->right)
-						_pos = _pos->right;
+					_M_node = *_base;
+					while (_M_node && _M_node->right)
+						_M_node = _M_node->right;
 					return *this;
 				}
-				if (_pos->left)
+				if (_M_node->left)
 				{
-					_pos = _pos->left;
-					while (_pos->right)
-						_pos = _pos->right;
+					_M_node = _M_node->left;
+					while (_M_node->right)
+						_M_node = _M_node->right;
 				}
-				else if (_pos->parent 
-					&& _pos == _pos->parent->right)
-					_pos = _pos->parent;
+				else if (_M_node->parent 
+					&& _M_node == _M_node->parent->right)
+					_M_node = _M_node->parent;
 				else
 				{
-					while (_pos->parent && _pos == _pos->parent->left)
-						_pos = _pos->parent;
-					if (_pos)
-						_pos = _pos->parent;
+					while (_M_node->parent && _M_node == _M_node->parent->left)
+						_M_node = _M_node->parent;
+					if (_M_node)
+						_M_node = _M_node->parent;
 				}
-				if (!_pos)
+				if (!_M_node)
 				{
-					_pos = _Node_Root;
-					while (_pos && _pos->right)
-						_pos = _pos->right;
+					_M_node = *_base;
+					while (_M_node && _M_node->right)
+						_M_node = _M_node->right;
 				}
 				return *this;
 			}
@@ -170,34 +180,6 @@ namespace ft
 
 				--(*this);
 				return (it);
-			}
-
-			node_pointer
-			base( void ) const
-			{
-				return _pos;
-			}
-
-		private:
-
-			node_pointer
-			_n_find_root( node_pointer __n )
-			{
-				if (!__n)
-					return NULL;
-				while (__n->parent)
-					__n = __n->parent;
-				return __n;
-			}
-
-			node_pointer
-			_n_max( node_pointer __n )
-			{
-				if (!__n)
-					return NULL;
-				while (__n->parent)
-					__n = __n->parent;
-				return __n;
 			}
 	};
 }

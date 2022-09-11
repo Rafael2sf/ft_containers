@@ -6,14 +6,14 @@
 namespace ft
 {
 	template<class T>
-	class vector_iterator: public iterator_traits<T>
+	class vector_iterator: public iterator_traits<T*>
 	{
 		public:
 
-			typedef typename iterator_traits<T>::value_type			value_type;
-			typedef typename iterator_traits<T>::reference			reference;
-			typedef typename iterator_traits<T>::pointer			pointer;
-			typedef typename iterator_traits<T>::difference_type	difference_type;
+			typedef typename iterator_traits<T*>::value_type		value_type;
+			typedef typename iterator_traits<T*>::reference			reference;
+			typedef typename iterator_traits<T*>::pointer			pointer;
+			typedef typename iterator_traits<T*>::difference_type	difference_type;
 
 		private:
 			pointer	_pointer;
@@ -28,13 +28,17 @@ namespace ft
 			: _pointer(__other.base()) {}
 
 			template <typename U>
-			vector_iterator( vector_iterator<U> const& __other )
-			: _pointer(__other.base()) {}
+			vector_iterator( vector_iterator<U> const& __other,
+				typename enable_if<is_same<value_type,
+				typename remove_const<U>::type>::value>::type* = 0 )
+			{
+				_pointer = const_cast<pointer>(__other.base());
+			}
 
 			vector_iterator( pointer __p )
 			: _pointer(__p) {}
 
-			pointer const & base( void ) const {
+			pointer base( void ) const {
 				return _pointer;
 			}
 
