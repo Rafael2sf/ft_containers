@@ -7,8 +7,10 @@
 
 namespace ft
 {
+	struct RbBaseNode;
+
 	template <class T>
-	struct RbtNode;
+	struct RbNode : public RbBaseNode;
 
 	template <class T>
 	class RbtIterator: public iterator_traits<T*>
@@ -22,16 +24,14 @@ namespace ft
 
 		protected:
 
-			typedef RbtNode<value_type>				node;
-			typedef RbtNode<value_type> const		const_node;
-			typedef RbtNode<value_type> *			node_pointer;
-			typedef RbtNode<value_type> const *		const_node_pointer;
-
-			node_pointer *_base;
+			typedef RbBaseNode										base_node;
+			typedef RbBaseNode *									base_node_pointer;
+			typedef RbNode<value_type>								node;
+			typedef RbNode<value_type> *							node_pointer;
 
 		public:
 
-			node_pointer _M_node;
+			base_node_pointer _M_node;
 
 			~RbtIterator()
 			{}
@@ -40,8 +40,8 @@ namespace ft
 			: _base(NULL), _M_node(NULL)
 			{}
 
-			RbtIterator( node_pointer *__root, node_pointer __p = 0)
-			: _base(__root), _M_node(__p)
+			RbtIterator( base_node_pointer __p )
+			: _M_node(__p)
 			{}
 
 			RbtIterator( RbtIterator const& __other )
@@ -52,20 +52,26 @@ namespace ft
 			RbtIterator( RbtIterator<U> __other,
 				typename enable_if<is_same<value_type,
 				typename remove_const<U>::type>::value>::type* = 0 )
-			: _base(__other.base()), _M_node(__other._M_node)
+			: _base(__other.root_base()), _M_node(__other._M_node)
 			{}
 
-			node_pointer *
-			base( void ) const
+			base_node_pointer *
+			root_base( void ) const
 			{
 				return _base;
+			}
+
+			pointer
+			base( void ) const
+			{
+				return &_M_node->data;
 			}
 
 			RbtIterator & 
 			operator=( RbtIterator const& __rhs )
 			{
 				_M_node = __rhs._M_node;
-				_base = __rhs.base();
+				_base = __rhs.root_base();
 				return *this;
 			}
 
@@ -73,12 +79,6 @@ namespace ft
 			operator*( void )
 			{
 				return _M_node->data;
-			}
-
-			void
-			typeTest( void )
-			{
-				std::cout << (is_same<ft::pair<int,int>, value_type>::value ? "true" : "false") << std::endl;
 			}
 
 			pointer

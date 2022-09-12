@@ -1,11 +1,13 @@
 #pragma once
 
-#include <functional>
+#include <typeinfo> // ?
+#include <functional> // ?
 #include <memory>
+#include <iostream>
+#include "iterators.hpp"
 #include "utility.hpp"
 #include "type_traits.hpp"
-#include "RbtIterator.hpp"
-#include <iostream>
+//#include "RbtIterator.hpp"
 
 /**
  *	TODO:
@@ -16,30 +18,159 @@
 
 namespace ft
 {
-	enum RbtColor {
+	enum RbColor {
 		red = 0,
 		black = 1,
 		double_black = 2
 	};
 
-	template <class T>
-	struct RbtNode
+	struct RbBaseNode
 	{
-		typedef T					value_type;
-		typedef RbtNode<T> *		node_pointer;
-		typedef RbtNode<T> const*	const_node_pointer;
+		RbColor	color;
+		RbBaseNode	*left;
+		RbBaseNode	*right;
+		RbBaseNode	*parent;
 
-		T				data;
-		RbtColor		color;
-		node_pointer	left;
-		node_pointer	right;
-		node_pointer	parent;
-
-		RbtNode( value_type const& __val )
-		: color(red), left(0), right(0), parent(0)
+		static RbBaseNode *
+		min( RbBaseNode * __n )
 		{
-			data = __val;
+			while (__n->left)
+				__n = __n->left;
+			return __n;
 		}
+
+		static RbBaseNode *
+		max( RbBaseNode * __n )
+		{
+			while (__n->right)
+				__n = __n->right;
+			return __n;
+		}
+	};
+
+	template <class T>
+	struct RbNode : public RbBaseNode
+	{
+		T data;
+	};
+
+	template <class T>
+	class RbtIterator: public iterator_traits<T*>
+	{
+		public:
+			typedef std::bidirectional_iterator_tag					iterator_category;
+			typedef typename iterator_traits<T*>::value_type		value_type;
+			typedef typename iterator_traits<T*>::reference			reference;
+			typedef typename iterator_traits<T*>::pointer			pointer;
+			typedef typename iterator_traits<T*>::difference_type	difference_type;
+
+		protected:
+
+			typedef RbBaseNode										base_node;
+			typedef RbBaseNode *									base_node_pointer;
+			typedef RbNode<value_type>								node;
+			typedef RbNode<value_type> *							node_pointer;
+
+		public:
+
+			base_node_pointer _M_node;
+
+			~RbtIterator()
+			{}
+
+			RbtIterator( void )
+			: _M_node(NULL)
+			{}
+
+			RbtIterator( base_node_pointer __p )
+			: _M_node(__p)
+			{}
+
+			bool
+			operator==( RbtIterator const& __rhs )
+			{
+				return _M_node == __rhs._M_node;
+			}
+
+			bool
+			operator!=( RbtIterator const& __rhs )
+			{
+				return !(*this == __rhs);
+			}
+
+			typename remove_pointer<pointer>::type &
+			operator*( void )
+			{
+				return static_cast<node_pointer>(_M_node)->data;
+			}
+
+			RbtIterator	&
+			operator++( void )
+			{
+				base_node_pointer	tmp;
+
+				if (_M_node->right)
+				{
+					_M_node = _M_node->right;
+					while (_M_node->left)
+						_M_node = _M_node->left;
+				}
+				else
+				{
+					tmp = _M_node->parent;
+					while (tmp->parent && _M_node == tmp->right)
+					{
+						_M_node = tmp;
+						tmp = tmp->parent;
+					}
+					if (_M_node->right != tmp)
+						_M_node = tmp;
+				}
+				return *this;
+			}
+
+			RbtIterator 
+			operator++( int )
+			{
+				RbtIterator	it(*this);
+
+				++(*this);
+				return (it);
+			}
+
+			RbtIterator	&
+			operator--( void )
+			{
+				base_node_pointer	tmp;
+
+				if (_M_node->left)
+				{
+					_M_node = _M_node->left;
+					while (_M_node->right)
+						_M_node = _M_node->right;
+				}
+				else
+				{
+					tmp = _M_node->parent;
+					while (tmp->parent && _M_node == tmp->left)
+					{
+						_M_node = tmp;
+						tmp = tmp->parent;
+					}
+					if (_M_node->left != tmp)
+						_M_node = tmp;
+				}
+				return *this;
+			}
+
+			RbtIterator
+			operator--( int )
+			{
+				RbtIterator	it(*this);
+
+				--(*this);
+				return (it);
+			}
 	};
 
 	template	<class Key,
@@ -61,41 +192,47 @@ namespace ft
 			typedef typename allocator_type::const_pointer		const_pointer;
 			typedef size_t										size_type;
 			typedef RbtIterator<value_type>						iterator;
-			typedef RbtIterator<const value_type>				const_iterator;
+			// typedef RbtIterator<const value_type>				const_iterator;
 			// typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			// typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 			typedef typename iterator_traits<iterator>::difference_type
 																difference_type;
 
 		protected:
-			typedef RbtNode<value_type>							node;
-			typedef RbtNode<value_type> const					const_node;
-			typedef RbtNode<value_type> *						node_pointer;
-			typedef RbtNode<value_type> const*					const_node_pointer;
-			typedef typename Alloc::template rebind<RbtNode<value_type> >::other
+			typedef RbBaseNode									base_node;
+			typedef RbBaseNode *								base_node_pointer;
+			typedef RbNode<value_type>							node;
+			typedef RbNode<value_type> *						node_pointer;
+			typedef typename Alloc::template rebind<RbNode<value_type> >::other
 																node_allocator;
 
-			node_pointer	_root;
-			size_type		_count;
-			key_compare		_compare;
-			allocator_type	_allocator;
-			node_allocator	_node_allocator;
+			base_node			_head;
+			base_node_pointer	_root;
+			size_type			_count;
+			key_compare			_compare;
+			allocator_type		_allocator;
+			node_allocator		_node_allocator;
 
 		public:
-
 			~RedBlackTree()
 			{
 				if (_count)
-					_n_destroy(node_pointer(_root));
-				_count = 0;
+				{
+					_n_destroy(base_node_pointer(_root));
+					_count = 0;
+				}
 			}
 
 			explicit
 			RedBlackTree( key_compare const& __comp = key_compare(),
 				allocator_type const& __alloc = allocator_type() )
-			: _root(0), _count(0), _compare(__comp),
+			: _head(), _root(0), _count(0), _compare(__comp),
 				_allocator(__alloc),  _node_allocator()
-			{}
+			{
+				_head.left = NULL;
+				_head.parent = NULL;
+				_head.right = NULL;
+			}
 
 			template <class InputIterator>
 			RedBlackTree( InputIterator __first, InputIterator __last,
@@ -139,26 +276,26 @@ namespace ft
 			iterator
 			begin( void )
 			{
-				return iterator(&_root, _n_min(_root));
+				return iterator(base_node::min(&_head));
 			}
 
-			const_iterator
-			begin( void ) const
-			{
-				return const_iterator(&_root, _n_min(_root));
-			}
+			// const_iterator
+			// begin( void ) const
+			// {
+			// 	return const_iterator(&_root, _n_min(_root));
+			// }
 
 			iterator
 			end( void )
 			{
-				return iterator(&_root);
+				return iterator(base_node::max(&_head));
 			}
 
-			const_iterator
-			end( void ) const
-			{
-				return const_iterator(node_pointer(&_root)); // sadly not working
-			}
+			// const_iterator
+			// end( void ) const
+			// {
+			// 	return const_iterator(base_node_pointer(&_root));
+			// }
 
 			// reverse_iterator
 			// rbegin( void )
@@ -197,7 +334,7 @@ namespace ft
 			operator[]( Key const& __key )
 			{
 				return (_n_insert(_root,
-					make_pair(__key, mapped_type())).first->second);
+					ft::make_pair(__key, mapped_type())).first->second);
 			}
 
 			mapped_type & 
@@ -297,6 +434,7 @@ namespace ft
 			void
 			swap( RedBlackTree & __other )
 			{
+				//std::swap(this->_head.left, __other._head.left);
 				std::swap(this->_count, __other._count);
 				std::swap(this->_root, __other._root);
 				// undefined behavior
@@ -310,14 +448,14 @@ namespace ft
 			iterator
 			find( const key_type& k )
 			{
-				return this->find(k);
+				return _n_find(_root, k);
 			}
 
-			const_iterator
-			find( const key_type& k ) const
-			{
-				return this->find(k);
-			}
+			// const_iterator
+			// find( const key_type& k ) const
+			// {
+			// 	return _n_find(_root, k);
+			// }
 
 			size_type
 			count( key_type const& __key ) const
@@ -330,7 +468,7 @@ namespace ft
 			}
 
 			void
-			print( void )
+			print( void ) const
 			{
 				std::cout << "TREE (" << _count << ")" << '\n';
 				std::cout << "name |\tcolor |\tkey |\t~\tparent|\tleft|\tright|" << '\n';
@@ -340,7 +478,7 @@ namespace ft
 		private:
 
 			void
-			_in_order( node_pointer __curr )
+			_in_order( base_node_pointer __curr ) const
 			{
 				if (!__curr)
 					return ;
@@ -350,7 +488,7 @@ namespace ft
 			}
 
 			void
-			_n_print( std::string const& __s, node_pointer const& __n )
+			_n_print( std::string const& __s, base_node_pointer const& __n ) const
 			{
 				std::cout << __s << "\t";
 				if (__n)
@@ -361,9 +499,9 @@ namespace ft
 						std::cout << "d_black\t";
 					else
 						std::cout << "red\t";
-					std::cout << __n->data.first << "\t\t";
+					std::cout << static_cast<node_pointer>(__n)->data.first << "\t\t";
 					if (__n->parent)
-						std::cout << __n->parent->data.first;
+						std::cout << static_cast<node_pointer>(__n->parent)->data.first;
 					else
 					{
 						if (__n == _root)
@@ -373,12 +511,12 @@ namespace ft
 					}
 					std::cout << "\t";
 					if (__n->left)
-						std::cout << __n->left->data.first;
+						std::cout << static_cast<node_pointer>(__n->left)->data.first;
 					else
 						std::cout << "nil";
 					std::cout << "\t";
 					if (__n->right)
-						std::cout << __n->right->data.first;
+						std::cout << static_cast<node_pointer>(__n->right)->data.first;
 					else
 						std::cout << "nil";
 				}
@@ -390,15 +528,15 @@ namespace ft
 			/* erase */
 
 			bool
-			_n_erase( node_pointer __hint, key_type const& __key )
+			_n_erase( base_node_pointer __hint, key_type const& __key )
 			{
 				iterator		pos;
-				node_pointer	del;
-				node_pointer	rep;
+				base_node_pointer	del;
+				base_node_pointer	rep;
 
 				if (!_count)
 					return false;
-				pos = _n_find(node_pointer(__hint), __key);
+				pos = _n_find(base_node_pointer(__hint), __key);
 				if (pos == this->end())
 					return false;
 				del = pos._M_node;
@@ -407,7 +545,7 @@ namespace ft
 				if (del->color == black && (!rep || rep->color == black))
 					_n_erase_balance(del);
 				_n_remove(del);
-				/* Bring blackness to root or replacer node  */
+				/* Bring blackness to root or replacer  */
 				if (rep && (rep == _root
 					|| (rep->color == red && del->color == black)))
 					rep->color = black;
@@ -416,18 +554,19 @@ namespace ft
 				return true;
 			}
 
-			node_pointer
-			_n_erase_sucessor( node_pointer & __n )
+			base_node_pointer
+			_n_erase_sucessor( base_node_pointer & __n )
 			{
-				node_pointer	tmp;
+				base_node_pointer	tmp;
 
 				if (!__n)
 					return NULL;
 				if (__n->left && __n->right)
 				{
-					tmp = _n_max(__n->left);
-					_allocator.destroy(__n->data);
-					_allocator.construct(__n->data, *tmp->data);
+					tmp = base_node::max(__n->left);
+					_allocator.destroy(static_cast<node_pointer>(__n)->data);
+					_allocator.construct(static_cast<node_pointer>(__n)->data,
+						 *static_cast<node_pointer>(tmp)->data);
 					__n = tmp;
 					tmp = _n_erase_sucessor(__n);
 				}
@@ -439,15 +578,15 @@ namespace ft
 			}
 
 			void
-			_n_erase_balance( node_pointer __d )
+			_n_erase_balance( base_node_pointer __d )
 			{
-				node_pointer	s;
-				node_pointer	i;
+				base_node_pointer	s;
+				base_node_pointer	i;
 
 				i = __d;
 				i->color = double_black;
-				/* loop as long as i is not root and i is a double black node, in order to
-					balance the tree the db node must be removed */
+				/* loop as long as i is not root and i is a double black node, 
+					in order to	balance the tree the db node must be removed */
 				while (i != _root && i->color == double_black)
 				{
 					/* the sibling node will be used to decide which "case"
@@ -481,7 +620,8 @@ namespace ft
 					}
 					else if (i == i->parent->left)
 					{
-						/* if the near child of s from i is red, swap s color with s near child
+						/* if the near child of s from i is red, 
+							swap s color with s near child
 							and call the respective rotation */
 					 	if (s->left && s->left->color == red
 							&& (!s->right || s->right->color == black))
@@ -489,7 +629,8 @@ namespace ft
 							std::swap(s->color, s->left->color);
 							_n_rotate_ll(s->left, false);
 						}
-						/* if the far child of s from i is red, swap s color with s parent
+						/* if the far child of s from i is red,
+							swap s color with s parent
 							and call the respective rotation */
 						if (s->right && s->right->color == red)
 						{
@@ -525,7 +666,7 @@ namespace ft
 			/* insert a element incrementing size and balancing the red-black tree
 				return a iterator to the inserted element on sucess otherwise end() */
 			pair<iterator, bool>
-			_n_insert( node_pointer __hint, value_type const& __pair )
+			_n_insert( base_node_pointer __hint, value_type const& __pair )
 			{
 				pair<iterator, bool> tmp;
 
@@ -533,13 +674,16 @@ namespace ft
 				{
 					_root = _n_allocate(__pair);
 					_root->color = black;
-					tmp = make_pair(iterator(&_root, _root), true);
+					tmp = ft::make_pair(iterator(_root), true);
+					_head.left = _root;
+					_root->parent = &_head;
 				}
 				else
 				{
 					if (!__hint)
 						__hint = _root;
-					while (__hint->parent && _compare(__hint->data.first, __pair.first))
+					while (__hint != _root && __hint->parent && 
+						_compare(static_cast<node_pointer>(__hint)->data.first, __pair.first))
 						__hint = __hint->parent;
 					tmp = _n_insert_find(__hint, __pair);
 				}
@@ -550,9 +694,10 @@ namespace ft
 
 			/* recursevly find the insert position or duplicated */
 			pair<iterator, bool>
-			_n_insert_find( node_pointer __n, value_type const& __pair )
+			_n_insert_find( base_node_pointer __n, value_type const& __pair )
 			{
-				if (_compare(__n->data.first, __pair.first))
+				if (_compare(static_cast<node_pointer>(__n)->data.first,
+					 __pair.first))
 				{
 					if (!__n->right)
 					{
@@ -560,11 +705,12 @@ namespace ft
 						__n->right->parent = __n;
 						__n = __n->right;
 						_n_insert_balance(__n);
-						return make_pair(iterator(&_root, __n), true);
+						return ft::make_pair(iterator(__n), true);
 					}
 					return (_n_insert_find(__n->right, __pair));
 				}
-				else if (_compare(__pair.first, __n->data.first))
+				else if (_compare(__pair.first, 
+					static_cast<node_pointer>(__n)->data.first))
 				{
 					if (!__n->left)
 					{
@@ -572,16 +718,16 @@ namespace ft
 						__n->left->parent = __n;
 						__n = __n->left;
 						_n_insert_balance(__n);
-						return make_pair(iterator(&_root, __n), true);
+						return ft::make_pair(iterator(__n), true);
 					}
 					return (_n_insert_find(__n->left, __pair));
 				}
-				return make_pair(iterator(&_root, __n), false);
+				return ft::make_pair(iterator(__n), false);
 			}
 
 			/* insert_balance performs the required operations to balance the tree */
 			void
-			_n_insert_balance( node_pointer __n )
+			_n_insert_balance( base_node_pointer __n )
 			{
 				/* check for violations as long as parent color is red */
 				while (__n != _root 
@@ -628,7 +774,7 @@ namespace ft
 
 			/* insert_balance helper swaps color with uncle node */
 			void
-			_n_insert_cswap( node_pointer & __n, bool __left_swap )
+			_n_insert_cswap( base_node_pointer & __n, bool __left_swap )
 			{
 				__n->parent->color = black;
 				__n->parent->parent->color = red;
@@ -643,10 +789,10 @@ namespace ft
 				ll = left-left / rr = right-right 
 				lr = left-right / rl = right-left */
 
-			node_pointer
-			_n_rotate_ll( node_pointer __n, bool __recolor )
+			base_node_pointer
+			_n_rotate_ll( base_node_pointer __n, bool __recolor )
 			{
-				node_pointer	tmp;
+				base_node_pointer	tmp;
 
 				tmp = __n->parent;
 				tmp->left = __n->right;
@@ -677,9 +823,9 @@ namespace ft
 			}
 
 			void
-			_n_rotate_lr( node_pointer & __n )
+			_n_rotate_lr( base_node_pointer & __n )
 			{
-				node_pointer	tmp;
+				base_node_pointer	tmp;
 
 				tmp = __n;
 				__n = __n->parent;
@@ -692,10 +838,10 @@ namespace ft
 				__n->parent = tmp;
 			}
 
-			node_pointer
-			_n_rotate_rr( node_pointer __n, bool __recolor )
+			base_node_pointer
+			_n_rotate_rr( base_node_pointer __n, bool __recolor )
 			{
-				node_pointer	tmp;
+				base_node_pointer	tmp;
 
 				tmp = __n->parent;
 				tmp->right = __n->left;
@@ -726,9 +872,9 @@ namespace ft
 			}
 
 			void
-			_n_rotate_rl( node_pointer & __n )
+			_n_rotate_rl( base_node_pointer & __n )
 			{
-				node_pointer	tmp;
+				base_node_pointer	tmp;
 
 				tmp = __n;
 				__n = __n->parent;
@@ -743,7 +889,7 @@ namespace ft
 
 			/* detach a node and remove it */
 			void
-			_n_remove( node_pointer __n )
+			_n_remove( base_node_pointer __n )
 			{
 				if (!__n)
 					return ;
@@ -787,49 +933,60 @@ namespace ft
 			}
 
 			/* allocate a node using the given allocator
-				but rebinded to a new type (node_pointer) */
-			node_pointer
+				but rebinded to a new type (base_node_pointer) */
+			base_node_pointer
 			_n_allocate( value_type const& __pair )
 			{
 				node_pointer tmp = _node_allocator.allocate(1);
-				_node_allocator.construct(tmp, node(__pair));
-				// tmp->data = _allocator.allocate(1);
-				// _allocator.construct(tmp->data, __pair);
+				_node_allocator.construct(tmp, node());
+				tmp->data = __pair;
 				return tmp;
 			}
 
 			/* destroy a node and all its children */
 			void
-			_n_destroy( node_pointer __n )
+			_n_destroy( base_node_pointer __n )
 			{
 				if (!__n)
 					return ;
 				_n_destroy(__n->left);
 				_n_destroy(__n->right);
-				// _allocator.destroy(__n->data);
-				// _allocator.deallocate(__n->data, 1);
-				_node_allocator.destroy(__n);
-				_node_allocator.deallocate(__n, 1);
+				_node_allocator.destroy(static_cast<node_pointer>(__n));
+				_node_allocator.deallocate(static_cast<node_pointer>(__n), 1);
 			}
 
 			/* recursevly search for a key and
 				return it on sucess otherwise end() */
 			iterator
-			_n_find( node_pointer __n, key_type const& val )
+			_n_find( base_node_pointer __n, key_type const& val )
 			{
 				if (!__n)
 					return (this->end());
-				if (_compare(val, __n->data.first) 
-					&& !_compare(__n->data.first, val))
+				if (_compare(val, static_cast<node_pointer>(__n)->data.first) 
+					&& !_compare(static_cast<node_pointer>(__n)->data.first, val))
 					return (_n_find(__n->left, val));
-				else if (_compare(__n->data.first, val) 
-					&& !_compare(val, __n->data.first))
+				else if (_compare(static_cast<node_pointer>(__n)->data.first, val) 
+					&& !_compare(val, static_cast<node_pointer>(__n)->data.first))
 					return (_n_find(__n->right, val));
-				return (iterator(&_root, __n));
+				return (iterator(__n));
 			}
 
-			node_pointer
-			_n_min( node_pointer __n ) const
+			// const_iterator
+			// _n_find( base_node_pointer __n, key_type const& val ) const
+			// {
+			// 	if (!__n)
+			// 		return (this->end());
+			// 	if (_compare(val, static_cast<node_pointer>(__n)->data.first) 
+			// 		&& !_compare(static_cast<node_pointer>(__n)->data.first, val))
+			// 		return (_n_find(__n->left, val));
+			// 	else if (_compare(static_cast<node_pointer>(__n)->data.first, val) 
+			// 		&& !_compare(val, static_cast<node_pointer>(__n)->data.first))
+			// 		return (_n_find(__n->right, val));
+			// 	return (const_iterator(&_root, __n));
+			// }
+
+			base_node_pointer
+			_n_min( base_node_pointer __n ) const
 			{
 				if (!__n)
 					return NULL;
@@ -838,8 +995,8 @@ namespace ft
 				return (__n);
 			}
 
-			node_pointer
-			_n_max( node_pointer __n ) const
+			base_node_pointer
+			_n_max( base_node_pointer __n ) const
 			{
 				if (!__n)
 					return NULL;
@@ -858,4 +1015,5 @@ namespace ft
 					_n_insert(_root, *__first++);
 			}
 	};
+
 }

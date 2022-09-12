@@ -162,6 +162,8 @@ int	main( void )
 		ft::vector<int>::const_iterator cit;
 		ft::vector<int>::const_reverse_iterator crit;
 
+		it == cit;
+
 		std::cout << *(it = v0.begin()) << std::endl;
 		std::cout << *(it = v0.end() - 1) << std::endl;
 

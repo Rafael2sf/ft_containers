@@ -376,13 +376,13 @@ namespace ft
 		private:
 
 			void
-			vRangeCheck( size_type __n ) {
+			vRangeCheck( size_type __n ) const {
 				if (__n >= _size)
-					throw std::out_of_range("vector::_M_range_check: __n >= this->size()");
+					throw std::out_of_range("vector::range_check: __n >= this->size()");
 			}
 
 			void
-			vMaxCheck( size_type __n ) {
+			vMaxCheck( size_type __n ) const {
 				if (__n > max_size())
 					throw std::length_error("cannot create std::vector larger than max_size()");
 			}
