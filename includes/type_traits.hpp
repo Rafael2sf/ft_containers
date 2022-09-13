@@ -15,7 +15,6 @@ namespace ft
 		typedef T type;
 	};
 
-
 	/* ft::remove_cv */
 
 	template <class T>

@@ -209,6 +209,20 @@ namespace ft
 			}
 	};
 
+	template <class T>
+	bool
+	operator==( RbIterator<T> const& __lhs, RbIterator<const T> const&  __rhs )
+	{
+		return __lhs._N_ == __rhs._N_;
+	}
+
+	template <class T>
+	bool
+	operator!=( RbIterator<T> const& __lhs, RbIterator<const T> const&  __rhs )
+	{
+		return __lhs._N_ != __rhs._N_;
+	}
+
 	template	<class Key,
 				class T,
 				class Compare = std::less<Key>,
@@ -342,7 +356,8 @@ namespace ft
 			const_reverse_iterator
 			rbegin( void ) const
 			{
-				return const_reverse_iterator(const_iterator(base_node::max(&_head)));
+				return const_reverse_iterator(
+					const_iterator(base_node::max(&_head)));
 			}
 
 			reverse_iterator
@@ -354,7 +369,8 @@ namespace ft
 			const_reverse_iterator
 			rend( void ) const
 			{
-				return const_reverse_iterator(const_iterator(base_node::min(&_head)));
+				return const_reverse_iterator(
+					const_iterator(base_node::min(&_head)));
 			}
 
 			/* element acess */
@@ -600,9 +616,9 @@ namespace ft
 				if (__n->left && __n->right)
 				{
 					tmp = base_node::max(__n->left);
-					_allocator.destroy(static_cast<node_pointer>(__n)->data);
-					_allocator.construct(static_cast<node_pointer>(__n)->data,
-						 *static_cast<node_pointer>(tmp)->data);
+					_allocator.destroy(&static_cast<node_pointer>(__n)->data);
+					_allocator.construct(&static_cast<node_pointer>(__n)->data,
+						 static_cast<node_pointer>(tmp)->data);
 					__n = tmp;
 					tmp = _n_erase_sucessor(__n);
 				}
@@ -1008,19 +1024,19 @@ namespace ft
 				return (iterator(__n));
 			}
 
-			// const_iterator
-			// _n_find( base_node_pointer __n, key_type const& val ) const
-			// {
-			// 	if (!__n)
-			// 		return (this->end());
-			// 	if (_compare(val, static_cast<node_pointer>(__n)->data.first) 
-			// 		&& !_compare(static_cast<node_pointer>(__n)->data.first, val))
-			// 		return (_n_find(__n->left, val));
-			// 	else if (_compare(static_cast<node_pointer>(__n)->data.first, val) 
-			// 		&& !_compare(val, static_cast<node_pointer>(__n)->data.first))
-			// 		return (_n_find(__n->right, val));
-			// 	return (const_iterator(&_root, __n));
-			// }
+			const_iterator
+			_n_find( base_node_pointer __n, key_type const& val ) const
+			{
+				if (!__n)
+					return (this->end());
+				if (_compare(val, static_cast<node_pointer>(__n)->data.first) 
+					&& !_compare(static_cast<node_pointer>(__n)->data.first, val))
+					return (_n_find(__n->left, val));
+				else if (_compare(static_cast<node_pointer>(__n)->data.first, val) 
+					&& !_compare(val, static_cast<node_pointer>(__n)->data.first))
+					return (_n_find(__n->right, val));
+				return (const_iterator(__n));
+			}
 
 			/* other */
 
