@@ -65,67 +65,82 @@ namespace ft
 			: _current(__other.base())
 			{}
 
-			iterator_type base() const {
-				return (_current.base());
+			iterator_type
+			base() const {
+				return (_current);
 			}
 
-			reference	operator*( void ) {
-				return *(_current - 1);
+			reference
+			operator*( void ) {
+				iterator_type tmp(_current);
+				return *(--tmp);
 			}
 
-			pointer		operator->( void ) {
-				return (_current.base() - 1);
+			pointer
+			operator->( void ) {
+				iterator_type tmp(_current);
+				return (&*(--tmp));
 			}
 
-			reference	operator[](const int n) {
+			reference
+			operator[](const int n) {
 				return (_current[n - 1]);
 			}
 
-			reverse_iterator &	operator=( reverse_iterator const& __rhs ) {
+			reverse_iterator &
+			operator=( reverse_iterator const& __rhs ) {
 				_current = __rhs.base();
 				return (*this);
 			}
 
-			reverse_iterator &	operator++( void ) {
+			reverse_iterator &
+			operator++( void ) {
 				_current--;
 				return (*this);
 			}
 
-			reverse_iterator	operator++( int ) {
-				reverse_iterator	tmp(*this);
+			reverse_iterator
+			operator++( int ) {
+				reverse_iterator tmp(*this);
 				_current--;
 				return (tmp);
 			}
 
-			reverse_iterator &	operator--( void ) {
+			reverse_iterator &
+			operator--( void ) {
 				_current++;
 				return (*this);
 			}
 
-			reverse_iterator	operator--( int ) {
-				reverse_iterator	tmp(*this);
+			reverse_iterator
+			operator--( int ) {
+				reverse_iterator tmp(*this);
 				_current++;
 				return (tmp);
 			}
 
-			reverse_iterator	operator+( difference_type __rhs ) const {
-				reverse_iterator	tmp(*this);
+			reverse_iterator
+			operator+( difference_type __rhs ) const {
+				reverse_iterator tmp(*this);
 				tmp -= __rhs;
 				return (tmp);
 			}
 
-			reverse_iterator &	operator+=( difference_type __rhs ) {
+			reverse_iterator &
+			operator+=( difference_type __rhs ) {
 				_current -= __rhs;
 				return (*this);
 			}
 
-			reverse_iterator	operator-( difference_type __rhs ) const {
-				reverse_iterator	tmp(*this);
+			reverse_iterator
+			operator-( difference_type __rhs ) const {
+				reverse_iterator tmp(*this);
 				tmp += __rhs;
 				return (tmp);
 			}
 
-			reverse_iterator &	operator-=( difference_type __rhs ) {
+			reverse_iterator &
+			operator-=( difference_type __rhs ) {
 				_current += __rhs;
 				return (*this);
 			}
@@ -146,7 +161,7 @@ namespace ft
 	bool		operator!=(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
-		return (__lhs.base() != __rhs.base()); 
+		return (!(__lhs.base() == __rhs.base())); 
 	}
 
 	template <class Iter1, class Iter2>

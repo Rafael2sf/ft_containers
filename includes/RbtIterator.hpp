@@ -13,7 +13,7 @@ namespace ft
 	struct RbNode : public RbBaseNode;
 
 	template <class T>
-	class RbtIterator: public iterator_traits<T*>
+	class RbIterator: public iterator_traits<T*>
 	{
 		public:
 			typedef std::bidirectional_iterator_tag					iterator_category;
@@ -31,28 +31,28 @@ namespace ft
 
 		public:
 
-			base_node_pointer _M_node;
+			base_node_pointer _N_;
 
-			~RbtIterator()
+			~RbIterator()
 			{}
 
-			RbtIterator( void )
-			: _base(NULL), _M_node(NULL)
+			RbIterator( void )
+			: _base(NULL), _N_(NULL)
 			{}
 
-			RbtIterator( base_node_pointer __p )
-			: _M_node(__p)
+			RbIterator( base_node_pointer __p )
+			: _N_(__p)
 			{}
 
-			RbtIterator( RbtIterator const& __other )
-			: _base(__other._base), _M_node(__other._M_node)
+			RbIterator( RbIterator const& __other )
+			: _base(__other._base), _N_(__other._N_)
 			{}
 
 			template <typename U>
-			RbtIterator( RbtIterator<U> __other,
+			RbIterator( RbIterator<U> __other,
 				typename enable_if<is_same<value_type,
 				typename remove_const<U>::type>::value>::type* = 0 )
-			: _base(__other.root_base()), _M_node(__other._M_node)
+			: _base(__other.root_base()), _N_(__other._N_)
 			{}
 
 			base_node_pointer *
@@ -64,13 +64,13 @@ namespace ft
 			pointer
 			base( void ) const
 			{
-				return &_M_node->data;
+				return &_N_->data;
 			}
 
-			RbtIterator & 
-			operator=( RbtIterator const& __rhs )
+			RbIterator & 
+			operator=( RbIterator const& __rhs )
 			{
-				_M_node = __rhs._M_node;
+				_N_ = __rhs._N_;
 				_base = __rhs.root_base();
 				return *this;
 			}
@@ -78,105 +78,105 @@ namespace ft
 			typename remove_pointer<pointer>::type &
 			operator*( void )
 			{
-				return _M_node->data;
+				return _N_->data;
 			}
 
 			pointer
 			operator->( void )
 			{
-				return &_M_node->data;
+				return &_N_->data;
 			}
 
 			bool
-			operator==( RbtIterator const& __rhs )
+			operator==( RbIterator const& __rhs )
 			{
-				if (!_M_node && !__rhs._M_node)
+				if (!_N_ && !__rhs._N_)
 					return (_base == __rhs._base) && _base != NULL;
-				return _M_node == __rhs._M_node;
+				return _N_ == __rhs._N_;
 			}
 
 			bool
-			operator!=( RbtIterator const& __rhs )
+			operator!=( RbIterator const& __rhs )
 			{
 				return !(*this == __rhs);
 			}
 
-			RbtIterator	&
+			RbIterator	&
 			operator++( void )
 			{
-				if (!_M_node)
+				if (!_N_)
 				{
-					_M_node = *_base;
-					while (_M_node && _M_node->right)
-						_M_node = _M_node->right;
+					_N_ = *_base;
+					while (_N_ && _N_->right)
+						_N_ = _N_->right;
 					return *this;
 				}
-				if (_M_node->right)
+				if (_N_->right)
 				{
-					_M_node = _M_node->right;
-					while (_M_node->left)
-						_M_node = _M_node->left;
+					_N_ = _N_->right;
+					while (_N_->left)
+						_N_ = _N_->left;
 				}
-				else if (_M_node->parent && _M_node == _M_node->parent->left)
-					_M_node = _M_node->parent;
+				else if (_N_->parent && _N_ == _N_->parent->left)
+					_N_ = _N_->parent;
 				else
 				{
-					while (_M_node->parent && _M_node == _M_node->parent->right)
-						_M_node = _M_node->parent;
-					if (_M_node)
-						_M_node = _M_node->parent;
+					while (_N_->parent && _N_ == _N_->parent->right)
+						_N_ = _N_->parent;
+					if (_N_)
+						_N_ = _N_->parent;
 				}
 				return *this;
 			}
 
-			RbtIterator 
+			RbIterator 
 			operator++( int )
 			{
-				RbtIterator	it(*this);
+				RbIterator	it(*this);
 
 				++(*this);
 				return (it);
 			}
 
-			RbtIterator	&
+			RbIterator	&
 			operator--( void )
 			{
-				if (!_M_node)
+				if (!_N_)
 				{
-					_M_node = *_base;
-					while (_M_node && _M_node->right)
-						_M_node = _M_node->right;
+					_N_ = *_base;
+					while (_N_ && _N_->right)
+						_N_ = _N_->right;
 					return *this;
 				}
-				if (_M_node->left)
+				if (_N_->left)
 				{
-					_M_node = _M_node->left;
-					while (_M_node->right)
-						_M_node = _M_node->right;
+					_N_ = _N_->left;
+					while (_N_->right)
+						_N_ = _N_->right;
 				}
-				else if (_M_node->parent 
-					&& _M_node == _M_node->parent->right)
-					_M_node = _M_node->parent;
+				else if (_N_->parent 
+					&& _N_ == _N_->parent->right)
+					_N_ = _N_->parent;
 				else
 				{
-					while (_M_node->parent && _M_node == _M_node->parent->left)
-						_M_node = _M_node->parent;
-					if (_M_node)
-						_M_node = _M_node->parent;
+					while (_N_->parent && _N_ == _N_->parent->left)
+						_N_ = _N_->parent;
+					if (_N_)
+						_N_ = _N_->parent;
 				}
-				if (!_M_node)
+				if (!_N_)
 				{
-					_M_node = *_base;
-					while (_M_node && _M_node->right)
-						_M_node = _M_node->right;
+					_N_ = *_base;
+					while (_N_ && _N_->right)
+						_N_ = _N_->right;
 				}
 				return *this;
 			}
 
-			RbtIterator
+			RbIterator
 			operator--( int )
 			{
-				RbtIterator	it(*this);
+				RbIterator	it(*this);
 
 				--(*this);
 				return (it);

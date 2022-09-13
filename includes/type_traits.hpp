@@ -15,6 +15,7 @@ namespace ft
 		typedef T type;
 	};
 
+
 	/* ft::remove_cv */
 
 	template <class T>
@@ -118,6 +119,15 @@ namespace ft
 	{
 		typedef true_type type;
 	};
+
+	/* is_constt */
+
+	template <class T>
+	struct is_const : public false_type
+	{};
+	template <class T>
+	struct is_const<const T> : public true_type
+	{};
 
 	/* is_same */
 

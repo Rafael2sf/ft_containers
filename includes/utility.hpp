@@ -21,10 +21,6 @@ namespace ft
 		: first(__first), second(__second)
 		{}
 
-		// pair( std::pair<const T1, T2> const& __pair )
-		// : first(__pair.first), second(__pair.second)
-		// {}
- 
 		pair & operator=( pair const& __rhs ) {
 			this->first =  __rhs.first;
 			this->second = __rhs.second;
