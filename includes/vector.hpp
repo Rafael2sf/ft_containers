@@ -2,12 +2,227 @@
 
 #include <memory>
 #include <assert.h>
-#include "vector_iterator.hpp"
 #include "algorithm.hpp"
 #include "type_traits.hpp"
+#include "iterators.hpp"
 
 namespace ft
 {
+	template<class T>
+	class vector_iterator: public iterator_traits<T*>
+	{
+		public:
+
+			typedef typename iterator_traits<T*>::value_type		value_type;
+			typedef typename iterator_traits<T*>::reference			reference;
+			typedef typename iterator_traits<T*>::pointer			pointer;
+			typedef typename iterator_traits<T*>::difference_type	difference_type;
+
+		private:
+			pointer _pointer;
+
+		public:
+			~vector_iterator() {}
+
+			vector_iterator( void )
+			: _pointer(NULL) {}
+
+			vector_iterator( pointer __p )
+			: _pointer(__p) {}
+
+			vector_iterator( vector_iterator const& __other )
+			: _pointer(__other.base()) {}
+
+			template <typename U>
+			vector_iterator( vector_iterator<U> const& __other,
+				typename enable_if<
+					is_same<
+						value_type, typename remove_const<U>::type
+					>::value && !is_const<U>::value, U
+				>::type* = 0 )
+			:_pointer(__other.base())
+			{}
+
+			pointer
+			base( void ) const {
+				return _pointer;
+			}
+
+			vector_iterator &
+			operator=( vector_iterator const& __rhs ) {
+				_pointer = __rhs._pointer;
+				return (*this);
+			}
+
+			typename remove_pointer<pointer>::type &
+			operator*( void ) {
+				return *_pointer;
+			}
+
+			pointer
+			operator->( void ) {
+				return _pointer;
+			}
+
+			reference
+			operator[](const int n) {
+				return *(_pointer + n);
+			}
+
+			bool
+			operator==( vector_iterator const& __rhs ) const { 
+				return (_pointer == __rhs._pointer); 
+			}
+
+			bool
+			operator!=( vector_iterator const& __rhs ) const { 
+				return (_pointer != __rhs._pointer); 
+			}
+
+			bool
+			operator<( vector_iterator const& __rhs ) const { 
+				return (_pointer < __rhs._pointer); 
+			}
+
+			bool
+			operator>( vector_iterator const& __rhs ) const { 
+				return (_pointer > __rhs._pointer); 
+			}
+
+			bool
+			operator<=( vector_iterator const& __rhs ) const { 
+				return (_pointer <= __rhs._pointer); 
+			}
+
+			bool
+			operator>=( vector_iterator const& __rhs ) const { 
+				return (_pointer >= __rhs._pointer); 
+			}
+
+			vector_iterator &
+			operator++( void ) {
+				_pointer++;
+				return (*this);
+			}
+
+			vector_iterator
+			operator++( int ) {
+				vector_iterator	tmp(*this);
+				_pointer++;
+				return (tmp);
+			}
+
+			vector_iterator &
+			operator--( void ) {
+				_pointer--;
+				return (*this);
+			}
+
+			vector_iterator
+			operator--( int ) {
+				vector_iterator	tmp(*this);
+				_pointer--;
+				return (tmp);
+			}
+
+			vector_iterator
+			operator+( difference_type __rhs ) const {
+				vector_iterator	tmp(*this);
+				tmp._pointer += __rhs;
+				return (tmp);
+			}
+
+			vector_iterator &
+			operator+=( difference_type __rhs ) {
+				_pointer += __rhs;
+				return (*this);
+			}
+
+			vector_iterator
+			operator-( difference_type __rhs ) const {
+				vector_iterator	tmp(*this);
+				tmp._pointer -= __rhs;
+				return (tmp);
+			}
+
+			vector_iterator &
+			operator-=( difference_type __rhs ) {
+				_pointer -= __rhs;
+				return (*this);
+			}
+
+			difference_type
+			operator-( vector_iterator const& __rhs ) {
+				return (_pointer - __rhs._pointer);
+			}
+
+			template <class U>
+			friend bool
+			operator==( vector_iterator<U> const& __lhs,
+				vector_iterator<const U> const& __rhs );
+
+			template <class U>
+			friend bool
+			operator<( vector_iterator<U> const& __lhs,
+				vector_iterator<const U> const& __rhs );
+	};
+
+	template<typename T>
+	vector_iterator<T>	operator+(ptrdiff_t __lhs, vector_iterator<T> const& __rhs)
+	{
+		vector_iterator<T>	tmp(__rhs);
+		tmp += __lhs;
+		return (tmp);
+	}
+
+	template <class T>
+	bool
+	operator==( vector_iterator<T> const& __lhs,
+		vector_iterator<const T> const& __rhs )
+	{ 
+		return (__lhs._pointer == __rhs._pointer); 
+	}
+
+	template <class T>
+	bool
+	operator!=( vector_iterator<T> const& __lhs,
+		vector_iterator<const T> const& __rhs )
+	{ 
+		return !(__lhs == __rhs); 
+	}
+
+	template <class T>
+	bool
+	operator<( vector_iterator<T> const& __lhs,
+		vector_iterator<const T> const& __rhs )
+	{ 
+		return (__lhs._pointer < __rhs._pointer); 
+	}
+
+	template <class T>
+	bool
+	operator>( vector_iterator<T> const& __lhs,
+		vector_iterator<const T> const& __rhs )
+	{ 
+		return !(__lhs == __rhs) && !(__lhs < __rhs);
+	}
+
+	template <class T>
+	bool
+	operator<=( vector_iterator<T> const& __lhs,
+		vector_iterator<const T> const& __rhs )
+	{ 
+		return !(__lhs > __rhs);
+	}
+
+	template <class T>
+	bool
+	operator>=( vector_iterator<T> const& __lhs,
+		vector_iterator<const T> const& __rhs )
+	{ 
+		return !(__lhs < __rhs);
+	}
+
 	template < class T, class Alloc = std::allocator<T> >
 	class vector
 	{
@@ -36,6 +251,7 @@ namespace ft
 			allocator_type	_allocator;
 
 		public:
+
 		/* Constructors */
 
 			~vector()
@@ -295,8 +511,6 @@ namespace ft
 				return (__positon == this->end() - 1 ? this->end() : __positon);
 			}
 
-			/* Requires iterators */
-
 			iterator
 			erase( iterator __first, iterator __last )
 			{
@@ -370,7 +584,7 @@ namespace ft
 
 			allocator_type
 			get_allocator( void ) const {
-				return _allocator;
+				return allocator_type();
 			}
 
 		private:

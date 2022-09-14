@@ -1,7 +1,5 @@
 #pragma once
 
-// Fix integral not receive pointers
-
 namespace ft
 {
 	/* ft::enable_if */
