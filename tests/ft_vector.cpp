@@ -2,8 +2,8 @@
 #include "../includes/vector.hpp"
 #include <vector>
 
-template<class T, class Alloc >
-void	vInfo( std::string const& var, ft::vector<T, Alloc> const& v )
+template<class T>
+void	vInfo( std::string const& var, ft::vector<T> const& v )
 {
 	if (v.empty())
 	{
@@ -20,10 +20,10 @@ void	vInfo( std::string const& var, ft::vector<T, Alloc> const& v )
 	std::cout << std::endl;
 }
 
-template<class T, class Alloc >
-void	vPrint( std::string const& var, ft::vector<T, Alloc> & v )
+template<class T>
+void	vPrint( std::string const& var, ft::vector<T> & v )
 {
-	typename ft::vector<T, Alloc>::iterator it = v.begin();
+	typename ft::vector<T>::iterator it = v.begin();
 
 	std::cout << var << " = { ";
 	while(it != v.end())
