@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <functional>
 #include "iterators.hpp"
 #include "utility.hpp"
 #include "type_traits.hpp"
@@ -251,32 +252,47 @@ namespace ft
 	{
 		public:
 
-		typedef Key											key_type;
-		typedef T											mapped_type;
-		typedef pair<key_type, mapped_type>					value_type;
-		typedef Compare										key_compare;
-		typedef Compare										value_compare;
-		typedef Alloc										allocator_type;
-		typedef typename allocator_type::reference			reference;
-		typedef typename allocator_type::const_reference	const_reference;
-		typedef typename allocator_type::pointer			pointer;
-		typedef typename allocator_type::const_pointer		const_pointer;
-		typedef size_t										size_type;
-		typedef RbIterator<value_type>						iterator;
-		typedef RbIterator<const value_type>				const_iterator;
-		typedef ft::reverse_iterator<iterator>				reverse_iterator;
-		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
+		typedef Key
+			key_type;
+		typedef T
+			mapped_type;
+		typedef pair<key_type, mapped_type>
+			value_type;
+		typedef Compare
+			key_compare;
+		typedef Compare
+			value_compare;
+		typedef Alloc
+			allocator_type;
+		typedef typename allocator_type::reference
+			reference;
+		typedef typename allocator_type::const_reference
+			const_reference;
+		typedef typename allocator_type::pointer
+			pointer;
+		typedef typename allocator_type::const_pointer
+			const_pointer;
+		typedef size_t
+			size_type;
+		typedef RbIterator<value_type>
+			iterator;
+		typedef RbIterator<const value_type>
+			const_iterator;
+		typedef ft::reverse_iterator<iterator>
+			reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>
+			const_reverse_iterator;
 		typedef typename iterator_traits<iterator>::difference_type
-															difference_type;
+			difference_type;
 
 		protected:
 
-		typedef RbBaseNode									base_node;
-		typedef RbBaseNode *								base_node_pointer;
-		typedef RbNode<value_type>							node;
-		typedef RbNode<value_type> *						node_pointer;
+		typedef RbBaseNode				base_node;
+		typedef RbBaseNode *			base_node_pointer;
+		typedef RbNode<value_type>		node;
+		typedef RbNode<value_type> *	node_pointer;
 		typedef typename Alloc::template rebind<RbNode<value_type> >::other
-															node_allocator;
+			node_allocator;
 
 		RbNode<size_type>	_head;
 		base_node_pointer	_root;
@@ -368,25 +384,25 @@ namespace ft
 		reverse_iterator
 		rbegin( void )
 		{
-			return reverse_iterator(end());
+			return reverse_iterator(this->end());
 		}
 
 		const_reverse_iterator
 		rbegin( void ) const
 		{
-			return const_reverse_iterator(end());
+			return const_reverse_iterator(this->end());
 		}
 
 		reverse_iterator
 		rend( void )
 		{
-			return reverse_iterator(begin());
+			return reverse_iterator(this->begin());
 		}
 
 		const_reverse_iterator
 		rend( void ) const
 		{
-			return const_reverse_iterator(begin());
+			return const_reverse_iterator(this->begin());
 		}
 
 		/* element acess */
@@ -411,7 +427,7 @@ namespace ft
 
 			n = _n_find(_root, __key);
 			if (n == this->end())
-				throw std::out_of_range("RedBlackTree: at()");
+				throw std::out_of_range("RedBlackTree::at");
 			return n->second;
 		}
 
@@ -422,7 +438,7 @@ namespace ft
 
 			n = _n_find(_root, __key);
 			if (n == this->end())
-				throw std::out_of_range("RedBlackTree: at()");
+				throw std::out_of_range("RedBlackTree::at");
 			return n->second;
 		}
 
@@ -518,22 +534,22 @@ namespace ft
 		/* operations */
 
 		iterator
-		find( const key_type& k )
+		find( key_type const& __key )
 		{
-			return _n_find(_root, k);
+			return _n_find(_root, __key);
 		}
 
 		const_iterator
-		find( const key_type& k ) const
+		find( key_type const& __key ) const
 		{
-			return _n_find(_root, k);
+			return _n_find(_root, __key);
 		}
 
 		size_type
 		count( key_type const& __key ) const
 		{
 			try { this->at(__key); }
-			catch ( std::out_of_range const& ) {
+			catch ( std::out_of_range & ) {
 				return false;
 			}
 			return true;
@@ -544,21 +560,46 @@ namespace ft
 		{
 			base_node_pointer tmp = _root;
 
-			while (tmp->left && !_compare(static_cast<
-				node_pointer>(tmp->left)->data.first, __key))
-			{
-				tmp = tmp->left;
-			}
+			//this->print();
 			while (tmp)
 			{
-				if (!_compare(static_cast<
-					node_pointer>(tmp)->data.first, __key))
+				if (tmp->right && !_compare(__key, static_cast<
+					node_pointer>(tmp->right)->data.first))
 				{
-					return iterator(tmp);
+					tmp = tmp->right;
 				}
-				tmp = tmp->right;
+				else if (tmp->left && !_compare(static_cast<
+					node_pointer>(tmp->left)->data.first, __key))
+				{
+					tmp = tmp->left;
+				}
+				else
+					break ;
 			}
-			return this->end();
+
+			iterator min(tmp);
+			iterator prev(min);
+			if (_compare(__key, static_cast<
+					node_pointer>(min._N_)->data.first))
+			{
+				while (--prev != this->end() && _compare(static_cast<
+					node_pointer>(prev._N_)->data.first, __key))
+				{
+					min = prev;
+				}
+				if (prev == this->end() && _compare(static_cast<
+					node_pointer>(min._N_)->data.first, __key))
+					return this->end();
+			}
+			else
+			{
+				while (min != this->end() && _compare(static_cast<
+					node_pointer>(min._N_)->data.first, __key))
+				{
+					min++;
+				}
+			}
+			return (min);
 		}
 
 		const_iterator
@@ -566,21 +607,30 @@ namespace ft
 		{
 			base_node_pointer tmp = _root;
 
-			while (tmp->left && !_compare(static_cast<
-				node_pointer>(tmp->left)->data.first, __key))
+			while (1)
 			{
-				tmp = tmp->left;
-			}
-			while (tmp)
-			{
-				if (!_compare(static_cast<
-					node_pointer>(tmp)->data.first, __key))
+				if (tmp->left && !_compare(static_cast<
+					node_pointer>(tmp->left)->data.first, __key))
 				{
-					return const_iterator(tmp);
+					tmp = tmp->left;
 				}
-				tmp = tmp->right;
+				else if (tmp->right && _compare(__key, static_cast<
+					node_pointer>(tmp->right)->data.first))
+				{
+					tmp = tmp->right;
+				}
+				else
+					break ;
 			}
-			return this->end();
+			const_iterator min(tmp);
+			const_iterator prev(--min);
+			while (prev != this->end() && !_compare(static_cast<
+					node_pointer>(prev._N_)->data.first, __key))
+			{
+				min = prev;
+				prev--;
+			}
+			return (const_iterator(min));
 		}
 
 		iterator
@@ -642,7 +692,8 @@ namespace ft
 		void
 		print( void ) const
 		{
-			std::cout << "TREE (" << _head.data << ")" << '\n';
+			std::cout << "TREE (" << _head.data << ")" << "root = {";
+			std::cout << static_cast<node_pointer>(_root)->data.first << "}\n";
 			std::cout << "name |\tcolor |\tkey |\t~\tparent|\tleft|\tright|" << '\n';
 			_in_order(_root);
 		}
@@ -852,7 +903,7 @@ namespace ft
 			}
 			else
 			{
-				if (!__hint)
+				if (!__hint || __hint == this->end()._N_)
 					__hint = _root;
 				while (__hint != _root && __hint->parent && 
 					_compare(static_cast<
