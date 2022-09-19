@@ -51,17 +51,17 @@ test:
 
 $(_OBJ)%.o: $(_SRC)%.cpp
 	@$(MKD) $(_OBJ)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
-	@echo -e "$(--GRN)compiling\t$(<)\t->\t$(@)$(--WHT)"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+#echo -e "$(--GRN)compiling\t$(<)\t->\t$(@)$(--WHT)"
 
 $(_SRC)std_%.cpp: $(_SRC)ft_%.cpp
-	@cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
-	@echo -e "$(--GRN)creating\t$(<)\t->\t$(@)$(--WHT)"
+	cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
+#echo -e "$(--GRN)creating\t$(<)\t->\t$(@)$(--WHT)"
 
 $(_BIN)%: $(_OBJ)%.o
 	@$(MKD) $(_BIN)
-	@$(CXX) $(CXXFLAGS) $(<) -o $(@)
-	@echo -e "$(--GRN)executable\t$(<)\t->\t$(@)$(--WHT)"
+	$(CXX) $(CXXFLAGS) $(<) -o $(@)
+#echo -e "$(--GRN)executable\t$(<)\t->\t$(@)$(--WHT)"
 
 %/:
 	@$(MKD) $(@)

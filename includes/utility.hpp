@@ -36,4 +36,57 @@ namespace ft
 	{
 		return (pair<T1, T2>(__t, __u));
 	}
+
+	template< class T1, class T2 >
+	bool
+	operator==(	pair<T1,T2> const& __lhs,
+				pair<T1,T2> const& __rhs )
+	{
+		return (__lhs.first == __rhs.first
+			&& __lhs.second == __rhs.second);
+	}
+
+	template< class T1, class T2 >
+	bool
+	operator<(	pair<T1,T2> const& __lhs,
+				pair<T1,T2> const& __rhs )
+	{
+		if (__lhs.first < __rhs.first)
+			return true;
+		else if (__rhs.first < __lhs.first)
+			return false;
+		return (__lhs.second < __rhs.second);
+	}
+
+	template< class T1, class T2 >
+	bool
+	operator!=(	pair<T1,T2> const& __lhs,
+				pair<T1,T2> const& __rhs )
+	{
+		return !(__lhs == __rhs);
+	}
+
+	template< class T1, class T2 >
+	bool
+	operator>(	pair<T1,T2> const& __lhs,
+				pair<T1,T2> const& __rhs )
+	{
+		return __rhs < __lhs;
+	}
+
+	template< class T1, class T2 >
+	bool
+	operator<=(	pair<T1,T2> const& __lhs,
+				pair<T1,T2> const& __rhs )
+	{
+		return !(__rhs < __lhs);
+	}
+
+	template< class T1, class T2 >
+	bool
+	operator>=(	pair<T1,T2> const& __lhs,
+				pair<T1,T2> const& __rhs )
+	{
+		return !(__lhs < __rhs);
+	}
 };

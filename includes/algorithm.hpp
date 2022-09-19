@@ -14,7 +14,8 @@ namespace ft
 	}
 
 	template< class InputIt1, class InputIt2, class BinaryPredicate >
-	bool equal( InputIt1 __first1, InputIt1 __last1, InputIt2 __first2, BinaryPredicate __bp )
+	bool equal( InputIt1 __first1, InputIt1 __last1, 
+		InputIt2 __first2, BinaryPredicate __bp )
 	{
 		while (__first1 != __last1)
 		{

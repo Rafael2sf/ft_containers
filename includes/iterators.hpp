@@ -151,51 +151,58 @@ namespace ft
 	};
 
 	template <class Iter1, class Iter2>
-	bool		operator==(
+	bool
+	operator==(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
 		return (__lhs.base() == __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
-	bool		operator!=(
+	bool
+	operator!=(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
 		return (!(__lhs.base() == __rhs.base())); 
 	}
 
 	template <class Iter1, class Iter2>
-	bool		operator>(
+	bool
+	operator>(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
 		return (__lhs.base() < __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
-	bool		operator>=(
+	bool
+	operator>=(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
 		return (__lhs.base() <= __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
-	bool		operator<(
+	bool
+	operator<(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
 		return (__lhs.base() > __rhs.base()); 
 	}
 
 	template <class Iter1, class Iter2>
-	bool		operator<=(
+	bool
+	operator<=(
 		reverse_iterator<Iter1> const& __lhs,
 		reverse_iterator<Iter2> const& __rhs) { 
 		return (__lhs.base() >= __rhs.base()); 
 	}
 
 	template <class Iter>
-	reverse_iterator<Iter>	operator+(
+	reverse_iterator<Iter>
+	operator+(
 		typename reverse_iterator<Iter>::difference_type __n,
-		reverse_iterator<Iter> const& __rhs)
+		reverse_iterator<Iter> const& __rhs )
 	{
 		reverse_iterator<Iter>	tmp;
 		tmp + __n;
@@ -203,14 +210,16 @@ namespace ft
 	}
 
 	template <class Iter>
-	reverse_iterator<Iter>	operator-(
-		reverse_iterator<Iter> const& __lhs,
-		reverse_iterator<Iter> const& __rhs) {
+	reverse_iterator<Iter>
+	operator-( reverse_iterator<Iter> const& __lhs,
+			reverse_iterator<Iter> const& __rhs ) {
 		return (__rhs.base() - __lhs.base()); 
 	}
 
 	template<typename T>
-	reverse_iterator<T>	operator+(ptrdiff_t __lhs, reverse_iterator<T> const& __rhs)
+	reverse_iterator<T>
+	operator+( ptrdiff_t __lhs,
+			reverse_iterator<T> const& __rhs )
 	{
 		reverse_iterator<T>	tmp(__rhs);
 		tmp += __lhs;

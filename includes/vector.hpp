@@ -5,6 +5,11 @@
 #include "type_traits.hpp"
 #include "iterators.hpp"
 
+/** index
+	vector_iterator: line 16
+	vector: line 242
+*/
+
 namespace ft
 {
 	template<class T>
@@ -70,36 +75,6 @@ namespace ft
 			return *(_pointer + n);
 		}
 
-		bool
-		operator==( vector_iterator const& __rhs ) const { 
-			return (_pointer == __rhs._pointer); 
-		}
-
-		bool
-		operator!=( vector_iterator const& __rhs ) const { 
-			return (_pointer != __rhs._pointer); 
-		}
-
-		bool
-		operator<( vector_iterator const& __rhs ) const { 
-			return (_pointer < __rhs._pointer); 
-		}
-
-		bool
-		operator>( vector_iterator const& __rhs ) const { 
-			return (_pointer > __rhs._pointer); 
-		}
-
-		bool
-		operator<=( vector_iterator const& __rhs ) const { 
-			return (_pointer <= __rhs._pointer); 
-		}
-
-		bool
-		operator>=( vector_iterator const& __rhs ) const { 
-			return (_pointer >= __rhs._pointer); 
-		}
-
 		vector_iterator &
 		operator++( void ) {
 			_pointer++;
@@ -157,15 +132,25 @@ namespace ft
 			return (_pointer - __rhs._pointer);
 		}
 
-		template <class U>
+		template <class Iter>
 		friend bool
-		operator==( vector_iterator<U> const& __lhs,
-			vector_iterator<const U> const& __rhs );
+		operator==( vector_iterator<Iter> const& __lhs,
+			vector_iterator<Iter> const& __rhs );
 
-		template <class U>
+		template <class Iter>
 		friend bool
-		operator<( vector_iterator<U> const& __lhs,
-			vector_iterator<const U> const& __rhs );
+		operator<( vector_iterator<Iter> const& __lhs,
+			vector_iterator<Iter> const& __rhs );
+
+		template <class Iter1, class Iter2>
+		friend bool
+		operator==( vector_iterator<Iter1> const& __lhs,
+			vector_iterator<Iter2> const& __rhs );
+
+		template <class Iter1, class Iter2>
+		friend bool
+		operator<( vector_iterator<Iter1> const& __lhs,
+			vector_iterator<Iter2> const& __rhs );
 	};
 
 	template<typename T>
@@ -176,50 +161,98 @@ namespace ft
 		return (tmp);
 	}
 
-	template <class T>
+	template <class Iter1, class Iter2>
 	bool
-	operator==( vector_iterator<T> const& __lhs,
-		vector_iterator<const T> const& __rhs )
+	operator==( vector_iterator<Iter1> const& __lhs,
+		vector_iterator<Iter2> const& __rhs )
 	{ 
 		return (__lhs._pointer == __rhs._pointer); 
 	}
 
-	template <class T>
+	template <class Iter1, class Iter2>
 	bool
-	operator!=( vector_iterator<T> const& __lhs,
-		vector_iterator<const T> const& __rhs )
+	operator!=( vector_iterator<Iter1> const& __lhs,
+		vector_iterator<Iter2> const& __rhs )
 	{ 
 		return !(__lhs == __rhs); 
 	}
 
-	template <class T>
+	template <class Iter1, class Iter2>
 	bool
-	operator<( vector_iterator<T> const& __lhs,
-		vector_iterator<const T> const& __rhs )
+	operator<( vector_iterator<Iter1> const& __lhs,
+		vector_iterator<Iter2> const& __rhs )
 	{ 
 		return (__lhs._pointer < __rhs._pointer); 
 	}
 
-	template <class T>
+	template <class Iter1, class Iter2>
 	bool
-	operator>( vector_iterator<T> const& __lhs,
-		vector_iterator<const T> const& __rhs )
+	operator>( vector_iterator<Iter1> const& __lhs,
+		vector_iterator<Iter2> const& __rhs )
 	{ 
 		return !(__lhs == __rhs) && !(__lhs < __rhs);
 	}
 
-	template <class T>
+	template <class Iter1, class Iter2>
 	bool
-	operator<=( vector_iterator<T> const& __lhs,
-		vector_iterator<const T> const& __rhs )
+	operator<=( vector_iterator<Iter1> const& __lhs,
+		vector_iterator<Iter2> const& __rhs )
 	{ 
 		return !(__lhs > __rhs);
 	}
 
-	template <class T>
+	template <class Iter1, class Iter2>
 	bool
-	operator>=( vector_iterator<T> const& __lhs,
-		vector_iterator<const T> const& __rhs )
+	operator>=( vector_iterator<Iter1> const& __lhs,
+		vector_iterator<Iter2> const& __rhs )
+	{ 
+		return !(__lhs < __rhs);
+	}
+
+	template <class Iter>
+	bool
+	operator==( vector_iterator<Iter> const& __lhs,
+		vector_iterator<Iter> const& __rhs )
+	{ 
+		return (__lhs._pointer == __rhs._pointer); 
+	}
+
+	template <class Iter>
+	bool
+	operator!=( vector_iterator<Iter> const& __lhs,
+		vector_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs == __rhs); 
+	}
+
+	template <class Iter>
+	bool
+	operator<( vector_iterator<Iter> const& __lhs,
+		vector_iterator<Iter> const& __rhs )
+	{ 
+		return (__lhs._pointer < __rhs._pointer); 
+	}
+
+	template <class Iter>
+	bool
+	operator>( vector_iterator<Iter> const& __lhs,
+		vector_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs == __rhs) && !(__lhs < __rhs);
+	}
+
+	template <class Iter>
+	bool
+	operator<=( vector_iterator<Iter> const& __lhs,
+		vector_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs > __rhs);
+	}
+
+	template <class Iter>
+	bool
+	operator>=( vector_iterator<Iter> const& __lhs,
+		vector_iterator<Iter> const& __rhs )
 	{ 
 		return !(__lhs < __rhs);
 	}
@@ -411,7 +444,8 @@ namespace ft
 			return *_data;
 		}
 
-		const_reference	front( void ) const {
+		const_reference
+		front( void ) const {
 			return *_data;
 		}
 
@@ -757,41 +791,59 @@ namespace ft
 	};
 
 	template <class T, class Alloc>
-	bool operator==(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs)
-	{
+	bool
+	operator==( vector<T, Alloc> const& __lhs,
+				vector<T, Alloc> const& __rhs )
+		{
 		if (__lhs.size() != __rhs.size())
 			return (false);
 		return equal(__lhs.begin(), __lhs.end(), __rhs.begin());
 	}
 
 	template <class T, class Alloc>
-	bool operator<(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs)
-	{
-		return lexicographical_compare(__lhs.begin(), __lhs.end(), __rhs.begin(), __rhs.end());
+	bool
+	operator<( vector<T, Alloc> const& __lhs,
+				vector<T, Alloc> const& __rhs )
+		{
+		return lexicographical_compare(__lhs.begin(),
+			__lhs.end(), __rhs.begin(), __rhs.end());
 	}
 
 	template <class T, class Alloc>
-	bool operator!=(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
+	bool
+	operator!=( vector<T, Alloc> const& __lhs,
+				vector<T, Alloc> const& __rhs )
+	{
 		return !(__lhs == __rhs);
 	}
 
 	template <class T, class Alloc>
-	bool operator>(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
+	bool
+	operator>( vector<T, Alloc> const& __lhs,
+				vector<T, Alloc> const& __rhs )
+	{
 		return __rhs < __lhs;
 	}
 
 	template <class T, class Alloc>
-	bool operator<=(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
+	bool
+	operator<=( vector<T, Alloc> const& __lhs,
+				vector<T, Alloc> const& __rhs )
+	{
 		return !(__rhs < __lhs);
 	}
 
 	template <class T, class Alloc>
-	bool operator>=(vector<T, Alloc> const& __lhs, vector<T, Alloc> const& __rhs) {
+	bool
+	operator>=( vector<T, Alloc> const& __lhs,
+				vector<T, Alloc> const& __rhs )
+	{
 		return !(__lhs < __rhs);
 	}
 
 	template <class T, class Alloc>
-	void swap( vector<T,Alloc>& __x, vector<T,Alloc>& __y ) {
+	void
+	swap( vector<T,Alloc>& __x, vector<T,Alloc>& __y ) {
 		__x.swap(__y);
 	}
 }
