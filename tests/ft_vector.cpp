@@ -1,6 +1,6 @@
 #include <iostream>
-#include "../includes/vector.hpp"
 #include <vector>
+#include "../includes/vector.hpp"
 
 #define PRINT(X) { std::cout << X << std::endl; }
 #define INFO(X) { vector_info(X); }

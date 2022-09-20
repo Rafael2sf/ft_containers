@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ALGORITHM_HPP
+#define ALGORITHM_HPP
 
 namespace ft
 {
@@ -58,3 +59,5 @@ namespace ft
 		return (__first1 == __last1) && (__first2 != __last2);
 	}
 }
+
+#endif

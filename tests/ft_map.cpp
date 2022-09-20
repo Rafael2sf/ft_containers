@@ -4,7 +4,6 @@
 #include <vector>
 #include "../includes/map.hpp"
 #include "../includes/vector.hpp"
-#include "../includes/utility.hpp"
 
 #define PRINT(X) { std::cout << X << std::endl; }
 #define INFO(X) { map_info(X); }
@@ -41,7 +40,6 @@ void	map_iter( T const& x )
 	}
 	std::cout << "}" << std::endl;
 }
-
 int	main( void )
 {
 	/* for range testing */
@@ -264,13 +262,17 @@ int	main( void )
 		Local	v0;
 		Local	v1;
 		Local::iterator	it;
-		const size_t size = 10000000;
+		const size_t size = 1000000;
 
 		for (size_t i = 0; i < size; i++)
 			v0.insert(ft::make_pair(i, 42));
 		v1.insert(v0.begin(), v0.end());
 		for (size_t i = 0; i < size / 2; i++)
-			v0.upper_bound(v0.find(i)->first)->first;
+		{
+			v0.lower_bound(v0.find(i)->first);
+			v0.upper_bound(v0.find(i)->first);
+			v0.equal_range(v0.find(i)->first);
+		}
 		for (size_t i = 0; i < size; i++)
 			v0.erase(v0.begin());
 		v1.erase(v1.begin(), v1.end());

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ITERATORS_HPP
+#define ITERATORS_HPP
 
 #include <iterator>
 #include <cstddef>
@@ -226,3 +227,5 @@ namespace ft
 		return (tmp);
 	}
 }
+
+#endif

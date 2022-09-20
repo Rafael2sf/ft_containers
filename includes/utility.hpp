@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTILITY_HPP
+#define UTILITY_HPP
 
 namespace ft
 {
@@ -90,3 +91,5 @@ namespace ft
 		return !(__lhs < __rhs);
 	}
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VECTOR_HPP
+#define VECTOR_HPP
 
 #include <memory>
 #include "algorithm.hpp"
@@ -13,14 +14,14 @@
 namespace ft
 {
 	template<class T>
-	class vector_iterator: public iterator_traits<T*>
+	class vector_iterator: public ft::iterator_traits<T*>
 	{
 		public:
 
-		typedef typename iterator_traits<T*>::value_type		value_type;
-		typedef typename iterator_traits<T*>::reference			reference;
-		typedef typename iterator_traits<T*>::pointer			pointer;
-		typedef typename iterator_traits<T*>::difference_type	difference_type;
+		typedef typename ft::iterator_traits<T*>::value_type		value_type;
+		typedef typename ft::iterator_traits<T*>::reference			reference;
+		typedef typename ft::iterator_traits<T*>::pointer			pointer;
+		typedef typename ft::iterator_traits<T*>::difference_type	difference_type;
 
 		private:
 			
@@ -41,10 +42,10 @@ namespace ft
 
 		template <typename U>
 		vector_iterator( vector_iterator<U> const& __other,
-			typename enable_if<
-				is_same<
-					value_type, typename remove_const<U>::type
-				>::value && !is_const<U>::value, U
+			typename ft::enable_if<
+				ft::is_same<
+					value_type, typename ft::remove_const<U>::type
+				>::value && !ft::is_const<U>::value, U
 			>::type* = 0 )
 		:_pointer(__other.base())
 		{}
@@ -321,8 +322,8 @@ namespace ft
 			allocator_type const& __alloc = allocator_type() )
 		: _data(0), _size(0), _capacity(0), _allocator(__alloc)
 		{
-			typedef typename truth_type<
-				is_integral<InputIterator>::value>::type X;
+			typedef typename ft::truth_type<
+				ft::is_integral<InputIterator>::value>::type X;
 			this->vDispatch(__first, __last, X());
 		}
 
@@ -471,8 +472,8 @@ namespace ft
 		void
 		assign( InputIterator __first, InputIterator __last )
 		{
-			typedef typename truth_type<
-				is_integral<InputIterator>::value>::type X;
+			typedef typename ft::truth_type<
+				ft::is_integral<InputIterator>::value>::type X;
 			this->vDispatch(__first, __last, X());
 		}
 
@@ -792,58 +793,60 @@ namespace ft
 
 	template <class T, class Alloc>
 	bool
-	operator==( vector<T, Alloc> const& __lhs,
-				vector<T, Alloc> const& __rhs )
+	operator==( ft::vector<T, Alloc> const& __lhs,
+				ft::vector<T, Alloc> const& __rhs )
 		{
 		if (__lhs.size() != __rhs.size())
 			return (false);
-		return equal(__lhs.begin(), __lhs.end(), __rhs.begin());
+		return ft::equal(__lhs.begin(), __lhs.end(), __rhs.begin());
 	}
 
 	template <class T, class Alloc>
 	bool
-	operator<( vector<T, Alloc> const& __lhs,
-				vector<T, Alloc> const& __rhs )
+	operator<( ft::vector<T, Alloc> const& __lhs,
+				ft::vector<T, Alloc> const& __rhs )
 		{
-		return lexicographical_compare(__lhs.begin(),
+		return ft::lexicographical_compare(__lhs.begin(),
 			__lhs.end(), __rhs.begin(), __rhs.end());
 	}
 
 	template <class T, class Alloc>
 	bool
-	operator!=( vector<T, Alloc> const& __lhs,
-				vector<T, Alloc> const& __rhs )
+	operator!=( ft::vector<T, Alloc> const& __lhs,
+				ft::vector<T, Alloc> const& __rhs )
 	{
 		return !(__lhs == __rhs);
 	}
 
 	template <class T, class Alloc>
 	bool
-	operator>( vector<T, Alloc> const& __lhs,
-				vector<T, Alloc> const& __rhs )
+	operator>( ft::vector<T, Alloc> const& __lhs,
+				ft::vector<T, Alloc> const& __rhs )
 	{
 		return __rhs < __lhs;
 	}
 
 	template <class T, class Alloc>
 	bool
-	operator<=( vector<T, Alloc> const& __lhs,
-				vector<T, Alloc> const& __rhs )
+	operator<=( ft::vector<T, Alloc> const& __lhs,
+				ft::vector<T, Alloc> const& __rhs )
 	{
 		return !(__rhs < __lhs);
 	}
 
 	template <class T, class Alloc>
 	bool
-	operator>=( vector<T, Alloc> const& __lhs,
-				vector<T, Alloc> const& __rhs )
+	operator>=( ft::vector<T, Alloc> const& __lhs,
+				ft::vector<T, Alloc> const& __rhs )
 	{
 		return !(__lhs < __rhs);
 	}
 
 	template <class T, class Alloc>
 	void
-	swap( vector<T,Alloc>& __x, vector<T,Alloc>& __y ) {
+	swap( ft::vector<T,Alloc>& __x, ft::vector<T,Alloc>& __y ) {
 		__x.swap(__y);
 	}
 }
+
+#endif

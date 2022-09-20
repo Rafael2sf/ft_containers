@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REDBLACKTREE_HPP
+#define REDBLACKTREE_HPP
 
 #include <memory>
 #include <functional>
@@ -100,15 +101,15 @@ namespace ft
 	};
 
 	template <class T>
-	class RbIterator: public iterator_traits<T*>
+	class RbIterator: public ft::iterator_traits<T*>
 	{
 		public:
 
 		typedef std::bidirectional_iterator_tag					iterator_category;
-		typedef typename iterator_traits<T*>::value_type		value_type;
-		typedef typename iterator_traits<T*>::reference			reference;
-		typedef typename iterator_traits<T*>::pointer			pointer;
-		typedef typename iterator_traits<T*>::difference_type	difference_type;
+		typedef typename ft::iterator_traits<T*>::value_type		value_type;
+		typedef typename ft::iterator_traits<T*>::reference			reference;
+		typedef typename ft::iterator_traits<T*>::pointer			pointer;
+		typedef typename ft::iterator_traits<T*>::difference_type	difference_type;
 
 		protected:
 
@@ -137,15 +138,15 @@ namespace ft
 
 		template <class U>
 		RbIterator( RbIterator<U> const& __other,
-			typename enable_if<
-				is_same<
-					value_type, typename remove_const<U>::type
-				>::value && !is_const<U>::value, U
+			typename ft::enable_if<
+				ft::is_same<
+					value_type, typename ft::remove_const<U>::type
+				>::value && !ft::is_const<U>::value, U
 			>::type* = 0 )
 		: _N_(__other._N_)
 		{}
 
-		typename remove_pointer<pointer>::type &
+		typename ft::remove_pointer<pointer>::type &
 		operator*( void )
 		{
 			return static_cast<node_pointer>(_N_)->data;
@@ -262,7 +263,7 @@ namespace ft
 	template	<class Key,
 				class T,
 				class Compare = std::less<Key>,
-				class Alloc = std::allocator<pair<Key,T> >
+				class Alloc = std::allocator<ft::pair<Key,T> >
 	> class RedBlackTree
 	{
 		public:
@@ -271,7 +272,7 @@ namespace ft
 			key_type;
 		typedef T
 			mapped_type;
-		typedef pair<key_type, mapped_type>
+		typedef ft::pair<key_type, mapped_type>
 			value_type;
 		typedef Compare
 			key_compare;
@@ -297,7 +298,7 @@ namespace ft
 			reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>
 			const_reverse_iterator;
-		typedef typename iterator_traits<iterator>::difference_type
+		typedef typename ft::iterator_traits<iterator>::difference_type
 			difference_type;
 
 		protected:
@@ -632,77 +633,19 @@ namespace ft
 			return tmp;
 		}
 
-		pair<iterator, iterator>
+		ft::pair<iterator, iterator>
 		equal_range( key_type const& __key )
 		{
 			return ft::make_pair(this->lower_bound(__key), this->upper_bound(__key));
 		}
 
-		pair<const_iterator, const_iterator>
+		ft::pair<const_iterator, const_iterator>
 		equal_range( key_type const& __key ) const
 		{
 			return ft::make_pair(this->lower_bound(__key), this->upper_bound(__key));
 		}
 
-		void
-		print( void )
-		{
-			std::cout << "TREE (" << _head.data << ")" << "root = {";
-			std::cout << static_cast<node_pointer>(_root)->data.first << "}\n";
-			std::cout << "name |\tcolor |\tkey |\t~\tparent|\tleft|\tright|" << '\n';
-			_in_order(_root);
-		}
-
 		private:
-
-		void
-		_in_order( base_node_pointer __curr ) const
-		{
-			if (!__curr)
-				return ;
-			_in_order(__curr->left);
-			_n_print("", __curr);
-			_in_order(__curr->right);
-		}
-
-		void
-		_n_print( std::string const& __s, base_node_pointer const& __n ) const
-		{
-			std::cout << __s << "\t";
-			if (__n)
-			{
-				if (__n->color == black)
-					std::cout << "black\t";
-				else if (__n->color == double_black)
-					std::cout << "d_black\t";
-				else
-					std::cout << "red\t";
-				std::cout << static_cast<node_pointer>(__n)->data.first << "\t\t";
-				if (__n->parent)
-					std::cout << static_cast<node_pointer>(__n->parent)->data.first;
-				else
-				{
-					if (__n == _root)
-						std::cout << "root";
-					else
-						std::cout << "nil";
-				}
-				std::cout << "\t";
-				if (__n->left)
-					std::cout << static_cast<node_pointer>(__n->left)->data.first;
-				else
-					std::cout << "nil";
-				std::cout << "\t";
-				if (__n->right)
-					std::cout << static_cast<node_pointer>(__n->right)->data.first;
-				else
-					std::cout << "nil";
-			}
-			else
-				std::cout << "nil";
-			std::cout << '\n';
-		}
-
 		/* erase */
 
 		bool
@@ -843,7 +786,7 @@ namespace ft
 
 		/* insert a element incrementing size and balancing the red-black tree
 			return a iterator to the inserted element on sucess otherwise end() */
-		pair<iterator, bool>
+		ft::pair<iterator, bool>
 		_n_insert( base_node_pointer __hint, value_type const& __pair )
 		{
 			pair<iterator, bool> tmp;
@@ -874,7 +817,7 @@ namespace ft
 		}
 
 		/* recursevly find the insert position or duplicated */
-		pair<iterator, bool>
+		ft::pair<iterator, bool>
 		_n_insert_find( base_node_pointer __n, value_type const& __pair )
 		{
 			if (_compare(static_cast<node_pointer>(__n)->data.first,
@@ -1169,58 +1112,6 @@ namespace ft
 			return (const_iterator(__n));
 		}
 
-		/* (bounds) recursevly search for a key possible position and
-			return it on sucess otherwise end() */
-		iterator
-		_n_find_near( base_node_pointer __n, key_type const& __key )
-		{
-			base_node_pointer tmp = __n;
-
-			while (tmp)
-			{
-				if (tmp->left && !_compare(static_cast<
-					node_pointer>(tmp->left)->data.first, __key))
-				{
-					tmp = tmp->left;
-				}
-				else if (tmp->right && _compare(static_cast<
-					node_pointer>(tmp)->data.first, __key))
-				{
-					tmp = tmp->right;
-				}
-				else
-					break ;
-			}
-			if (!tmp)
-				return iterator(this->end());
-			return iterator(tmp);
-		}
-
-		const_iterator
-		_n_find_near( base_node_pointer __n, key_type const& __key ) const
-		{
-			base_node_pointer tmp = __n;
-
-			while (tmp)
-			{
-				if (tmp->left && !_compare(static_cast<
-					node_pointer>(tmp->left)->data.first, __key))
-				{
-					tmp = tmp->left;
-				}
-				else if (tmp->right && _compare(static_cast<
-					node_pointer>(tmp)->data.first, __key))
-				{
-					tmp = tmp->right;
-				}
-				else
-					break ;
-			}
-			if (!tmp)
-				return const_iterator(this->end());
-			return const_iterator(tmp);
-		}
-
 		/* other */
 
 		template <class InputIterator>
@@ -1235,3 +1126,5 @@ namespace ft
 		}
 	};
 }
+
+#endif
