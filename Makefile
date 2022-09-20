@@ -14,6 +14,8 @@ CPY		=		cp
 
 --GRN	=		[32m
 --RED	=		[31m
+--YEL	=		[33m
+--CYA	=		[36m
 --WHT	=		[39m
 
 # DIRS #
@@ -51,17 +53,17 @@ test:
 
 $(_OBJ)%.o: $(_SRC)%.cpp
 	@$(MKD) $(_OBJ)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-#echo -e "$(--GRN)compiling\t$(<)\t->\t$(@)$(--WHT)"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@echo -e "compiling\t:\t$(@)"
 
 $(_SRC)std_%.cpp: $(_SRC)ft_%.cpp
-	cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
-#echo -e "$(--GRN)creating\t$(<)\t->\t$(@)$(--WHT)"
+	@cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
+	@echo -e "Generating\t:\t$(@)"
 
 $(_BIN)%: $(_OBJ)%.o
 	@$(MKD) $(_BIN)
-	$(CXX) $(CXXFLAGS) $(<) -o $(@)
-#echo -e "$(--GRN)executable\t$(<)\t->\t$(@)$(--WHT)"
+	@$(CXX) $(CXXFLAGS) $(<) -o $(@)
+	@echo -e "building\t:\t$(@)"
 
 %/:
 	@$(MKD) $(@)
@@ -69,10 +71,14 @@ $(_BIN)%: $(_OBJ)%.o
 # CLEAN #
 
 clean:
-	$(RMV) $(OBJS) $(STD_SRCS) output.*
+	@echo -e -n "cleaning files ... "
+	@$(RMV) $(OBJS) $(STD_SRCS) output.*
+	@echo -e "OK"
 
 fclean: clean
-	$(RMV) -r $(_OBJ) $(_BIN) $(NAME)
+	@echo -e -n "erasing files ... "
+	@$(RMV) -r $(_OBJ) $(_BIN) $(NAME)
+	@echo -e "OK"
 
 re: fclean all
 

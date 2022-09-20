@@ -264,13 +264,13 @@ int	main( void )
 		Local	v0;
 		Local	v1;
 		Local::iterator	it;
-		const size_t size = 100000;
+		const size_t size = 10000000;
 
 		for (size_t i = 0; i < size; i++)
 			v0.insert(ft::make_pair(i, 42));
 		v1.insert(v0.begin(), v0.end());
-		// for (size_t i = 0; i < 500000; i += 2)
-		// 	v0.lower_bound(v0.find(i)->first);
+		for (size_t i = 0; i < size / 2; i++)
+			v0.upper_bound(v0.find(i)->first)->first;
 		for (size_t i = 0; i < size; i++)
 			v0.erase(v0.begin());
 		v1.erase(v1.begin(), v1.end());
