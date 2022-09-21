@@ -26,7 +26,7 @@ stack_info( T const& __s )
 
 int	main( void )
 {
-	typedef OBJ<std::string, ft::vector<std::string> > Local;
+	typedef OBJ<std::string, std::vector<std::string> > Local;
 	PRINT("%%> 0 :: all <%%");
 	Local	s1;
 

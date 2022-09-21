@@ -172,6 +172,7 @@ int	main( void )
 		Local	v0;
 		Local	v1;
 		Local::iterator	it;
+		Local::const_iterator	cit;
 
 		for (int i = 0; i < 26; i++)
 			v0.push_back('a' + i);
@@ -194,6 +195,8 @@ int	main( void )
 			PRINT(*it);
 			*it = 42;
 		}
+		(it == cit);
+		(cit == it);
 
 		for (Local::iterator iter = --v0.end(); iter != v0.begin(); iter--)
 			PRINT(*iter);
@@ -207,6 +210,8 @@ int	main( void )
 	{
 		typedef const OBJ<int> Local;
 		PRINT("%%> 6 :: const <%%");
+
+		ft::vector<int> x(10, 420);
 
 		Local v0;
 		try { v0.at(42); } catch ( std::exception & ) {}

@@ -35,7 +35,8 @@ CXXFLAGS=		-Wall -Werror -Wextra -std=c++98
 
 SRCS_	=		ft_vector.cpp \
 				ft_map.cpp \
-				ft_stack.cpp
+				ft_stack.cpp \
+				ft_set.cpp
 
 SRCS	=		$(addprefix $(_SRC), $(SRCS_))
 STD_SRCS=		$(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $(SRCS))))

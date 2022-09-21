@@ -262,6 +262,7 @@ namespace ft
 
 	template	<class Key,
 				class T,
+				class KeyOfValue,
 				class Compare = std::less<Key>,
 				class Alloc = std::allocator<ft::pair<Key,T> >
 	> class RedBlackTree
@@ -271,8 +272,6 @@ namespace ft
 		typedef Key
 			key_type;
 		typedef T
-			mapped_type;
-		typedef ft::pair<key_type, mapped_type>
 			value_type;
 		typedef Compare
 			key_compare;
@@ -313,6 +312,7 @@ namespace ft
 		RbNode<size_type>	_head;
 		base_node_pointer	_root;
 		key_compare			_compare;
+		KeyOfValue			_key_of;
 		allocator_type		_allocator;
 		node_allocator		_node_allocator;
 
@@ -429,14 +429,7 @@ namespace ft
 			return _allocator;
 		}
 
-		mapped_type &
-		operator[]( Key const& __key )
-		{
-			return (_n_insert(_root,
-				ft::make_pair(__key, mapped_type())).first->second);
-		}
-
-		mapped_type &
+		value_type &
 		at( key_type const& __key )
 		{
 			iterator	n;
@@ -444,10 +437,10 @@ namespace ft
 			n = _n_find(_root, __key);
 			if (n == this->end())
 				throw std::out_of_range("RedBlackTree::at");
-			return n->second;
+			return *n;
 		}
 
-		mapped_type const&
+		value_type const&
 		at( key_type const& __key ) const
 		{
 			const_iterator	n;
@@ -455,7 +448,7 @@ namespace ft
 			n = _n_find(_root, __key);
 			if (n == this->end())
 				throw std::out_of_range("RedBlackTree::at");
-			return n->second;
+			return *n;
 		}
 
 		/* Capacity */
@@ -498,7 +491,7 @@ namespace ft
 		iterator
 		insert( iterator __position, value_type const& __val )
 		{
-			return (_n_insert(__position._N_, __val)).first;
+			return (_n_insert(__position._N_, __val).first);
 		}
 
 		template <class InputIterator>
@@ -512,7 +505,7 @@ namespace ft
 		erase( iterator __pos )
 		{
 			if (__pos != this->end())
-				_n_erase(__pos._N_, __pos->first);
+				_n_erase(__pos._N_, _key_of(*__pos));
 		}
 
 		size_type
@@ -530,7 +523,7 @@ namespace ft
 			{
 				tmp = __first;
 				__first++;
-				_n_erase(tmp._N_, tmp->first);
+				_n_erase(tmp._N_, _key_of(*tmp));
 			}
 		}
 
@@ -538,10 +531,11 @@ namespace ft
 		swap( RedBlackTree & __other )
 		{
 			std::swap(this->_head.left, __other._head.left);
-			std::swap(this->_root->parent, __other._root->parent);
+			if (_root)
+				std::swap(this->_root->parent, __other._root->parent);
 			std::swap(this->_head.data, __other._head.data);
 			std::swap(this->_root, __other._root);
-			// undefined behavior
+			std::swap(this->_key_of, __other._key_of);
 			std::swap(this->_allocator, __other._allocator);
 			std::swap(this->_node_allocator, __other._node_allocator);
 			std::swap(this->_compare, __other._compare);
@@ -579,7 +573,8 @@ namespace ft
 
 			while (x)
 			{
-				if (!_compare(static_cast<node_pointer>(x)->data.first, __key))
+				if (!_compare(_key_of(
+						static_cast<node_pointer>(x)->data), __key))
 				{
 					y = x;
 					x = x->left;
@@ -598,7 +593,8 @@ namespace ft
 
 			while (x)
 			{
-				if (!_compare(static_cast<node_pointer>(x)->data.first, __key))
+				if (!_compare(_key_of(
+					static_cast<node_pointer>(x)->data), __key))
 				{
 					y = x;
 					x = x->left;
@@ -613,10 +609,15 @@ namespace ft
 		upper_bound( key_type const& __key )
 		{
 			iterator tmp = this->lower_bound(__key);
-			if (!_compare(static_cast<node_pointer>(tmp._N_)->data.first, __key)
-				&& !_compare(__key, static_cast<node_pointer>(tmp._N_)->data.first))
+			if (tmp != this->end())
 			{
-				return ++tmp;
+				if (!_compare(_key_of( static_cast<
+						node_pointer>(tmp._N_)->data), __key)
+					&& !_compare(__key, _key_of(static_cast<
+						node_pointer>(tmp._N_)->data)))
+				{
+					return ++tmp;
+				}
 			}
 			return tmp;
 		}
@@ -625,10 +626,15 @@ namespace ft
 		upper_bound( key_type const& __key ) const
 		{
 			const_iterator tmp = this->lower_bound(__key);
-			if (!_compare(static_cast<node_pointer>(tmp._N_)->data.first, __key)
-				&& !_compare(__key, static_cast<node_pointer>(tmp._N_)->data.first))
+			if (tmp != this->end())
 			{
-				return ++tmp;
+				if (!_compare(_key_of( static_cast<
+						node_pointer>(tmp._N_)->data), __key)
+					&& !_compare(__key, _key_of(static_cast<
+						node_pointer>(tmp._N_)->data)))
+				{
+					return ++tmp;
+				}
 			}
 			return tmp;
 		}
@@ -645,9 +651,8 @@ namespace ft
 			return ft::make_pair(this->lower_bound(__key), this->upper_bound(__key));
 		}
 
-		private:
+		protected:
 		/* erase */
-
 		bool
 		_n_erase( base_node_pointer __hint, key_type const& __key )
 		{
@@ -787,13 +792,13 @@ namespace ft
 		/* insert a element incrementing size and balancing the red-black tree
 			return a iterator to the inserted element on sucess otherwise end() */
 		ft::pair<iterator, bool>
-		_n_insert( base_node_pointer __hint, value_type const& __pair )
+		_n_insert( base_node_pointer __hint, value_type const& __val )
 		{
 			pair<iterator, bool> tmp;
 
 			if (!_head.data)
 			{
-				_root = _n_allocate(__pair);
+				_root = _n_allocate(__val);
 				_root->color = black;
 				tmp = ft::make_pair(iterator(_root), true);
 				_head.left = _root;
@@ -803,13 +808,12 @@ namespace ft
 			{
 				if (!__hint || __hint == this->end()._N_)
 					__hint = _root;
-				while (__hint != _root && __hint->parent && 
-					_compare(static_cast<
-					node_pointer>(__hint)->data.first, __pair.first))
+				while (__hint != _root && __hint->parent && _compare(_key_of(
+					static_cast<node_pointer>(__hint)->data), _key_of(__val)))
 				{
 					__hint = __hint->parent;
 				}
-				tmp = _n_insert_find(__hint, __pair);
+				tmp = _n_insert_find(__hint, __val);
 			}
 			if (tmp.second)
 				_head.data++;
@@ -818,35 +822,35 @@ namespace ft
 
 		/* recursevly find the insert position or duplicated */
 		ft::pair<iterator, bool>
-		_n_insert_find( base_node_pointer __n, value_type const& __pair )
+		_n_insert_find( base_node_pointer __n, value_type const& __val )
 		{
-			if (_compare(static_cast<node_pointer>(__n)->data.first,
-					__pair.first))
+			if (_compare(_key_of(static_cast<
+				node_pointer>(__n)->data), _key_of(__val)))
 			{
 				if (!__n->right)
 				{
-					__n->right = _n_allocate(__pair);
+					__n->right = _n_allocate(__val);
 					__n->right->parent = __n;
 					__n = __n->right;
 					_n_insert_balance(__n);
 					return ft::make_pair(iterator(__n), true);
 				}
-				return (_n_insert_find(__n->right, __pair));
+				return (_n_insert_find(__n->right, __val));
 			}
-			else if (_compare(__pair.first, 
-				static_cast<node_pointer>(__n)->data.first))
+			else if (_compare(_key_of(__val),
+				_key_of(static_cast<node_pointer>(__n)->data)))
 			{
 				if (!__n->left)
 				{
-					__n->left = _n_allocate(__pair);
+					__n->left = _n_allocate(__val);
 					__n->left->parent = __n;
 					__n = __n->left;
 					_n_insert_balance(__n);
 					return ft::make_pair(iterator(__n), true);
 				}
-				return (_n_insert_find(__n->left, __pair));
+				return (_n_insert_find(__n->left, __val));
 			}
-			return ft::make_pair(iterator(__n), false);
+			return ft::make_pair(__n, false);
 		}
 
 		/* insert_balance performs the required operations to balance */
@@ -1089,11 +1093,9 @@ namespace ft
 		{
 			if (!__n)
 				return (this->end());
-			if (_compare(__key, static_cast<node_pointer>(__n)->data.first) 
-				&& !_compare(static_cast<node_pointer>(__n)->data.first, __key))
+			if (_compare(__key, _key_of(static_cast<node_pointer>(__n)->data)))
 				return (_n_find(__n->left, __key));
-			else if (_compare(static_cast<node_pointer>(__n)->data.first, __key)
-				&& !_compare(__key, static_cast<node_pointer>(__n)->data.first))
+			else if (_compare(_key_of(static_cast<node_pointer>(__n)->data), __key))
 				return (_n_find(__n->right, __key));
 			return (iterator(__n));
 		}
@@ -1103,11 +1105,9 @@ namespace ft
 		{
 			if (!__n)
 				return (this->end());
-			if (_compare(__key, static_cast<node_pointer>(__n)->data.first) 
-				&& !_compare(static_cast<node_pointer>(__n)->data.first, __key))
+			if (_compare(__key, _key_of(static_cast<node_pointer>(__n)->data)))
 				return (_n_find(__n->left, __key));
-			else if (_compare(static_cast<node_pointer>(__n)->data.first, __key) 
-				&& !_compare(__key, static_cast<node_pointer>(__n)->data.first))
+			else if (_compare(_key_of(static_cast<node_pointer>(__n)->data), __key))
 				return (_n_find(__n->right, __key));
 			return (const_iterator(__n));
 		}

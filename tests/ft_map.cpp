@@ -40,13 +40,13 @@ void	map_iter( T const& x )
 	}
 	std::cout << "}" << std::endl;
 }
+
 int	main( void )
 {
 	/* for range testing */
 	ft::vector< ft::pair<int, std::string> > v;
 		for (int i = 0; i < 10; i++)
 			v.push_back(ft::make_pair(i, "^-^"));
-
 	{
 		typedef OBJ< int, std::string, std::greater<int> > Local;
 		PRINT("%%> 0 :: Constructors <%%");
@@ -81,12 +81,11 @@ int	main( void )
 		for (int i = 0; i < 10; i++)
 		{
 			ret = m0.insert(ft::make_pair(42 - i, "UwU"));
-			std::cout << ret.first->first << " " << ret.first->second;
-			std::cout << " " << std::boolalpha << ret.second << std::endl;
+			PRINT(ret.first->first << " " << ret.first->second);
+			PRINT(" " << std::boolalpha << ret.second << std::endl);
 			ret = m0.insert(ft::make_pair(42 - i, "UwU"));
-			std::cout << ret.first->first << " " << ret.first->second;
-			std::cout << " " << std::boolalpha << ret.second << std::endl;
-			std::cout << std::endl;
+			PRINT(ret.first->first << " " << ret.first->second);
+			PRINT(" " << std::boolalpha << ret.second);
 		}
 		LOG(m0);
 		it = m0.insert(m0.end(), ft::make_pair(0, "begin"));
@@ -117,6 +116,8 @@ int	main( void )
 
 		PRINT("%%> 3 :: operations <%%");
 
+		PRINT(m0.value_comp()(*it, *++it));
+
 		it = m0.lower_bound(-1); if (it != m0.end()) PRINT(it->first << " " << it->second);
 		it = m0.lower_bound(0); if (it != m0.end()) PRINT(it->first << " " << it->second);
 		it = m0.lower_bound(33); if (it != m0.end()) PRINT(it->first << " " << it->second);
@@ -134,6 +135,8 @@ int	main( void )
 		it = m0.upper_bound(51); if (it != m0.end()) PRINT(it->first << " " << it->second);
 		it = m0.upper_bound(420); if (it != m0.end()) PRINT(it->first << " " << it->second);
 		it = m0.upper_bound(1000); if (it != m0.end()) PRINT(it->first << " " << it->second);
+
+		std::cout << "here" << std::endl;
 
 		PRINT(m0.count(-1));
 		PRINT(m0.count(0));
