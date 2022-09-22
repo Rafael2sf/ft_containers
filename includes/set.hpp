@@ -193,7 +193,7 @@ namespace ft
 		iterator
 		insert( iterator __position, value_type const& __val )
 		{
-			return (_rb_tree.insert(__position, __val));
+			return (_rb_tree.insert(__position._N_const_cast(), __val));
 		}
 
 		template <class InputIterator>
@@ -206,7 +206,7 @@ namespace ft
 		void
 		erase( iterator __pos )
 		{
-			_rb_tree.erase(__pos);
+			_rb_tree.erase(__pos._N_const_cast());
 		}
 
 		size_type
@@ -218,7 +218,7 @@ namespace ft
 		void
 		erase(iterator __first, iterator __last)
 		{
-			_rb_tree.erase(__first, __last);
+			_rb_tree.erase(__first._N_const_cast(), __last._N_const_cast());
 		}
 
 		void

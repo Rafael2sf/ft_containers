@@ -3,17 +3,10 @@
 
 #include <memory>
 #include <functional>
+#include <stdexcept>
 #include "iterators.hpp"
 #include "utility.hpp"
 #include "type_traits.hpp"
-
-/** index
-	RbColor: line 19
-	RbBaseNode: line 25
-	RbNode: line 66
-	RbIterator: line 103
-	RedBlackTree: line 266
-*/
 
 namespace ft
 {
@@ -96,16 +89,17 @@ namespace ft
 			left = __rhs.left;
 			right = __rhs.right;
 			parent = __rhs.parent;
+			color = __rhs.color;
 			return *this;
 		}
 	};
 
 	template <class T>
-	class RbIterator: public ft::iterator_traits<T*>
+	class rb_tree_iterator: public ft::iterator_traits<T*>
 	{
 		public:
 
-		typedef std::bidirectional_iterator_tag					iterator_category;
+		typedef std::bidirectional_iterator_tag						iterator_category;
 		typedef typename ft::iterator_traits<T*>::value_type		value_type;
 		typedef typename ft::iterator_traits<T*>::reference			reference;
 		typedef typename ft::iterator_traits<T*>::pointer			pointer;
@@ -113,38 +107,32 @@ namespace ft
 
 		protected:
 
-		typedef RbBaseNode										base_node;
-		typedef RbBaseNode *									base_node_pointer;
-		typedef RbNode<value_type>								node;
-		typedef RbNode<value_type> *							node_pointer;
+		typedef RbBaseNode				base_node;
+		typedef RbBaseNode *			base_node_pointer;
+		typedef RbNode<value_type>		node;
+		typedef RbNode<value_type> *	node_pointer;
 
 		public:
 
 		base_node_pointer _N_;
 
-		~RbIterator()
+		rb_tree_iterator( void )
 		{}
 
-		RbIterator( void )
-		{}
-
-		RbIterator( base_node_pointer __p )
+		explicit rb_tree_iterator( base_node_pointer __p )
 		: _N_(__p)
 		{}
 
-		RbIterator( RbIterator const& __other )
+		rb_tree_iterator( rb_tree_iterator const& __other )
 		: _N_(__other._N_)
 		{}
 
-		template <class U>
-		RbIterator( RbIterator<U> const& __other,
-			typename ft::enable_if<
-				ft::is_same<
-					value_type, typename ft::remove_const<U>::type
-				>::value && !ft::is_const<U>::value, U
-			>::type* = 0 )
-		: _N_(__other._N_)
-		{}
+		rb_tree_iterator &
+		operator=( rb_tree_iterator const& __rhs )
+		{
+			_N_ = __rhs._N_;
+			return *this;
+		}
 
 		typename ft::remove_pointer<pointer>::type &
 		operator*( void )
@@ -158,7 +146,7 @@ namespace ft
 			return &static_cast<node_pointer>(_N_)->data;
 		}
 
-		RbIterator	&
+		rb_tree_iterator	&
 		operator++( void )
 		{
 			base_node_pointer	tmp;
@@ -188,16 +176,16 @@ namespace ft
 			return *this;
 		}
 
-		RbIterator 
+		rb_tree_iterator 
 		operator++( int )
 		{
-			RbIterator	it(*this);
+			rb_tree_iterator	it(*this);
 
 			++(*this);
 			return (it);
 		}
 
-		RbIterator	&
+		rb_tree_iterator	&
 		operator--( void )
 		{
 			base_node_pointer	tmp;
@@ -222,40 +210,197 @@ namespace ft
 			return *this;
 		}
 
-		RbIterator
+		rb_tree_iterator
 		operator--( int )
 		{
-			RbIterator	it(*this);
+			rb_tree_iterator	it(*this);
 
 			--(*this);
 			return (it);
 		}
 	};
 
-	template <class Iter1, class Iter2>
+	template <class T>
+	class rb_tree_const_iterator: public ft::iterator_traits<const T*>
+	{
+		public:
+
+		typedef std::bidirectional_iterator_tag							iterator_category;
+		typedef typename ft::iterator_traits<const T*>::value_type		value_type;
+		typedef typename ft::iterator_traits<const T*>::reference		reference;
+		typedef typename ft::iterator_traits<const T*>::pointer			pointer;
+		typedef typename ft::iterator_traits<const T*>::difference_type	difference_type;
+
+		protected:
+
+		typedef RbBaseNode			base_node;
+		typedef RbBaseNode 	*		base_node_pointer;
+		typedef RbNode<const T>		node;
+		typedef RbNode<const T> *	node_pointer;
+
+		public:
+
+		base_node_pointer _N_;
+
+		rb_tree_const_iterator( void )
+		{}
+
+		explicit rb_tree_const_iterator( base_node_pointer __p )
+		: _N_(__p)
+		{}
+
+		rb_tree_const_iterator( rb_tree_const_iterator const& __other )
+		: _N_(__other._N_)
+		{}
+
+		template <class U>
+		rb_tree_const_iterator( ft::rb_tree_iterator<U> const& __other )
+		: _N_(__other._N_)
+		{}
+
+		ft::rb_tree_iterator<T>
+		_N_const_cast( void )
+		{
+			return ft::rb_tree_iterator<T>(_N_);
+		}
+
+		rb_tree_const_iterator &
+		operator=( rb_tree_const_iterator const& __rhs )
+		{
+			_N_ = __rhs._N_;
+			return *this;
+		}
+
+		typename ft::remove_pointer<pointer>::type &
+		operator*( void )
+		{
+			return static_cast<node_pointer>(_N_)->data;
+		}
+
+		pointer
+		operator->( void )
+		{
+			return &static_cast<node_pointer>(_N_)->data;
+		}
+
+		rb_tree_const_iterator	&
+		operator++( void )
+		{
+			base_node_pointer	tmp;
+
+			if (_N_->right)
+			{
+				_N_ = _N_->right;
+				while (_N_->left)
+					_N_ = _N_->left;
+			}
+			else
+			{
+				tmp = _N_->parent;
+				if (!tmp)
+				{
+					_N_ = _N_->max(_N_->left);
+					return *this;
+				}
+				while (tmp->parent && _N_ == tmp->right)
+				{
+					_N_ = tmp;
+					tmp = tmp->parent;
+				}
+				if (_N_->right != tmp)
+					_N_ = tmp;
+			}
+			return *this;
+		}
+
+		rb_tree_const_iterator 
+		operator++( int )
+		{
+			rb_tree_const_iterator	it(*this);
+
+			++(*this);
+			return (it);
+		}
+
+		rb_tree_const_iterator	&
+		operator--( void )
+		{
+			base_node_pointer	tmp;
+
+			if (_N_->left)
+			{
+				_N_ = _N_->left;
+				while (_N_->right)
+					_N_ = _N_->right;
+			}
+			else
+			{
+				tmp = _N_->parent;
+				while (tmp && tmp->parent && _N_ == tmp->left)
+				{
+					_N_ = tmp;
+					tmp = tmp->parent;
+				}
+				if (_N_->left != tmp)
+					_N_ = tmp;
+			}
+			return *this;
+		}
+
+		rb_tree_const_iterator
+		operator--( int )
+		{
+			rb_tree_const_iterator	it(*this);
+
+			--(*this);
+			return (it);
+		}
+	};
+
+	template <class Iter1>
 	bool
-	operator==( RbIterator<Iter1> const& __lhs, RbIterator<Iter2> const&  __rhs )
+	operator==( ft::rb_tree_const_iterator<Iter1> const& __lhs,
+				ft::rb_tree_iterator<Iter1> const&  __rhs )
 	{
 		return __lhs._N_ == __rhs._N_;
 	}
 
-	template <class Iter1, class Iter2>
+	template <class Iter1>
 	bool
-	operator!=( RbIterator<Iter1> const& __lhs, RbIterator<Iter2> const&  __rhs )
+	operator!=( ft::rb_tree_const_iterator<Iter1> const& __lhs,
+				ft::rb_tree_iterator<Iter1> const&  __rhs )
 	{
 		return __lhs._N_ != __rhs._N_;
 	}
 
 	template <class Iter>
 	bool
-	operator==( RbIterator<Iter> const& __lhs, RbIterator<Iter> const&  __rhs )
+	operator==( ft::rb_tree_iterator<Iter> const& __lhs,
+				ft::rb_tree_iterator<Iter> const&  __rhs )
 	{
 		return __lhs._N_ == __rhs._N_;
 	}
 
 	template <class Iter>
 	bool
-	operator!=( RbIterator<Iter> const& __lhs, RbIterator<Iter> const&  __rhs )
+	operator!=( ft::rb_tree_iterator<Iter> const& __lhs,
+				ft::rb_tree_iterator<Iter> const&  __rhs )
+	{
+		return __lhs._N_ != __rhs._N_;
+	}
+
+	template <class Iter>
+	bool
+	operator==( ft::rb_tree_const_iterator<Iter> const& __lhs,
+				ft::rb_tree_const_iterator<Iter> const&  __rhs )
+	{
+		return __lhs._N_ == __rhs._N_;
+	}
+
+	template <class Iter>
+	bool
+	operator!=( ft::rb_tree_const_iterator<Iter> const& __lhs, 
+				ft::rb_tree_const_iterator<Iter> const&  __rhs )
 	{
 		return __lhs._N_ != __rhs._N_;
 	}
@@ -289,9 +434,9 @@ namespace ft
 			const_pointer;
 		typedef size_t
 			size_type;
-		typedef RbIterator<value_type>
+		typedef ft::rb_tree_iterator<value_type>
 			iterator;
-		typedef RbIterator<const value_type>
+		typedef ft::rb_tree_const_iterator<value_type>
 			const_iterator;
 		typedef ft::reverse_iterator<iterator>
 			reverse_iterator;

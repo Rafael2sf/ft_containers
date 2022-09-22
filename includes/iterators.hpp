@@ -1,9 +1,8 @@
 #ifndef ITERATORS_HPP
 #define ITERATORS_HPP
 
-#include <iterator>
 #include <cstddef>
-#include <iostream>
+#include "type_traits.hpp"
 
 namespace ft
 {
@@ -22,7 +21,7 @@ namespace ft
 	{
 		typedef std::random_access_iterator_tag	iterator_category;
 		typedef T								value_type;
-		typedef ptrdiff_t						difference_type;
+		typedef ptrdiff_t					difference_type;
 		typedef T *								pointer;
 		typedef T &								reference;
 	};
@@ -32,7 +31,7 @@ namespace ft
 	{
 		typedef std::random_access_iterator_tag	iterator_category;
 		typedef T								value_type;
-		typedef ptrdiff_t						difference_type;
+		typedef ptrdiff_t					difference_type;
 		typedef T const *						pointer;
 		typedef T const&						reference;
 	};
@@ -225,6 +224,231 @@ namespace ft
 		reverse_iterator<T>	tmp(__rhs);
 		tmp += __lhs;
 		return (tmp);
+	}
+
+	template<class T>
+	class random_iterator: public ft::iterator_traits<T*>
+	{
+		public:
+
+		typedef typename ft::iterator_traits<T*>::value_type		value_type;
+		typedef typename ft::iterator_traits<T*>::reference			reference;
+		typedef typename ft::iterator_traits<T*>::pointer			pointer;
+		typedef typename ft::iterator_traits<T*>::difference_type	difference_type;
+
+		private:
+			
+		pointer _pointer;
+
+		public:
+
+		~random_iterator() {}
+
+		random_iterator( void )
+		: _pointer(NULL) {}
+
+		random_iterator( pointer __p )
+		: _pointer(__p) {}
+
+		random_iterator( random_iterator const& __other )
+		: _pointer(__other.base()) {}
+
+		template <typename U>
+		random_iterator( ft::random_iterator<U> const& __other,
+			typename ft::enable_if<
+				ft::is_same<
+					value_type, typename ft::remove_const<U>::type
+				>::value && !ft::is_const<U>::value, U
+			>::type* = 0 )
+		:_pointer(__other.base())
+		{}
+
+		pointer
+		base( void ) const {
+			return _pointer;
+		}
+
+		random_iterator &
+		operator=( random_iterator const& __rhs ) {
+			_pointer = __rhs._pointer;
+			return (*this);
+		}
+
+		typename remove_pointer<pointer>::type &
+		operator*( void ) {
+			return *_pointer;
+		}
+
+		pointer
+		operator->( void ) {
+			return _pointer;
+		}
+
+		reference
+		operator[](const int n) {
+			return *(_pointer + n);
+		}
+
+		random_iterator &
+		operator++( void ) {
+			_pointer++;
+			return (*this);
+		}
+
+		random_iterator
+		operator++( int ) {
+			random_iterator	tmp(*this);
+			_pointer++;
+			return (tmp);
+		}
+
+		random_iterator &
+		operator--( void ) {
+			_pointer--;
+			return (*this);
+		}
+
+		random_iterator
+		operator--( int ) {
+			random_iterator	tmp(*this);
+			_pointer--;
+			return (tmp);
+		}
+
+		random_iterator
+		operator+( difference_type __rhs ) const {
+			random_iterator	tmp(*this);
+			tmp._pointer += __rhs;
+			return (tmp);
+		}
+
+		random_iterator &
+		operator+=( difference_type __rhs ) {
+			_pointer += __rhs;
+			return (*this);
+		}
+
+		random_iterator
+		operator-( difference_type __rhs ) const {
+			random_iterator	tmp(*this);
+			tmp._pointer -= __rhs;
+			return (tmp);
+		}
+
+		random_iterator &
+		operator-=( difference_type __rhs ) {
+			_pointer -= __rhs;
+			return (*this);
+		}
+
+		difference_type
+		operator-( random_iterator const& __rhs ) {
+			return (_pointer - __rhs._pointer);
+		}
+	};
+
+	template<typename T>
+	random_iterator<T>	operator+(ptrdiff_t __lhs, random_iterator<T> const& __rhs)
+	{
+		random_iterator<T>	tmp(__rhs);
+		tmp += __lhs;
+		return (tmp);
+	}
+
+	template <class Iter1, class Iter2>
+	bool
+	operator==( random_iterator<Iter1> const& __lhs,
+		random_iterator<Iter2> const& __rhs )
+	{ 
+		return (__lhs.base() == __rhs.base()); 
+	}
+
+	template <class Iter1, class Iter2>
+	bool
+	operator!=( random_iterator<Iter1> const& __lhs,
+		random_iterator<Iter2> const& __rhs )
+	{ 
+		return !(__lhs == __rhs); 
+	}
+
+	template <class Iter1, class Iter2>
+	bool
+	operator<( random_iterator<Iter1> const& __lhs,
+		random_iterator<Iter2> const& __rhs )
+	{ 
+		return (__lhs.base() < __rhs.base()); 
+	}
+
+	template <class Iter1, class Iter2>
+	bool
+	operator>( random_iterator<Iter1> const& __lhs,
+		random_iterator<Iter2> const& __rhs )
+	{ 
+		return !(__lhs == __rhs) && !(__lhs < __rhs);
+	}
+
+	template <class Iter1, class Iter2>
+	bool
+	operator<=( random_iterator<Iter1> const& __lhs,
+		random_iterator<Iter2> const& __rhs )
+	{ 
+		return !(__lhs > __rhs);
+	}
+
+	template <class Iter1, class Iter2>
+	bool
+	operator>=( random_iterator<Iter1> const& __lhs,
+		random_iterator<Iter2> const& __rhs )
+	{ 
+		return !(__lhs < __rhs);
+	}
+
+	template <class Iter>
+	bool
+	operator==( random_iterator<Iter> const& __lhs,
+		random_iterator<Iter> const& __rhs )
+	{ 
+		return (__lhs.base() == __rhs.base()); 
+	}
+
+	template <class Iter>
+	bool
+	operator!=( random_iterator<Iter> const& __lhs,
+		random_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs == __rhs); 
+	}
+
+	template <class Iter>
+	bool
+	operator<( random_iterator<Iter> const& __lhs,
+		random_iterator<Iter> const& __rhs )
+	{ 
+		return (__lhs.base() < __rhs.base()); 
+	}
+
+	template <class Iter>
+	bool
+	operator>( random_iterator<Iter> const& __lhs,
+		random_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs == __rhs) && !(__lhs < __rhs);
+	}
+
+	template <class Iter>
+	bool
+	operator<=( random_iterator<Iter> const& __lhs,
+		random_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs > __rhs);
+	}
+
+	template <class Iter>
+	bool
+	operator>=( random_iterator<Iter> const& __lhs,
+		random_iterator<Iter> const& __rhs )
+	{ 
+		return !(__lhs < __rhs);
 	}
 }
 

@@ -240,7 +240,7 @@ int	main( void )
 		Local	v0;
 		Local	v1;
 		Local::iterator	it;
-		const size_t size = 10000000;
+		const size_t size = 1000000;
 
 		for (size_t i = 0; i < size; i++)
 			v0.insert(i);
