@@ -8,13 +8,14 @@ set -m
 # -t (show runtime)
 
 #options
-__D=""
+__D=0
 __H=0
 __T=0
 
 #initialize
 FT_OUT=""
 STD_OUT=""
+DIFF_OUT=""
 
 function time_program ()
 {
@@ -56,7 +57,7 @@ then
 	show_usage
 fi
 
-while getopts "htd:" options; do
+while getopts "htd" options; do
 	case "${options}" in
 		h)
 			__H=1
@@ -65,7 +66,7 @@ while getopts "htd:" options; do
 			__T=1
 			;;
 		d)
-			__D="${OPTARG}"
+			__D=1
 			;;
 		:)
 			printf "error: -${OPTARG} requires an argument.\n"
@@ -86,12 +87,13 @@ make $STD
 is_executable $FT
 is_executable $STD
 
-if [ ! -z "$__D" ]
+if [ $__D -eq 1 ]
 then
-	STD_OUT=$(mktemp $1.output.XXXX)
+	STD_OUT=$(mktemp output.std.$1.XXXX)
 	printf "$STD > $STD_OUT\n"
-	FT_OUT=$(mktemp $1.output.XXXX)
+	FT_OUT=$(mktemp output.ft.$1.XXXX)
 	printf "$FT > $FT_OUT\n"
+	DIFF_OUT=$(mktemp diff.$1.XXXX)
 fi
 
 time_program "$FT" "$FT_OUT"
@@ -99,10 +101,10 @@ FT_RUNTIME="$RUNTIME"
 time_program "$STD" "$STD_OUT"
 STD_RUNTIME="$RUNTIME"
 
-if [ ! -z "$__D" ]
+if [ $__D -eq 1 ]
 then
-	diff $FT_OUT $STD_OUT > $__D
-	printf "diff $FT_OUT $STD_OUT > $__D\n"
+	diff $FT_OUT $STD_OUT > $DIFF_OUT
+	printf "diff $FT_OUT $STD_OUT > $DIFF_OUT\n"
 fi
 
 if [ $__T -eq 1 ]

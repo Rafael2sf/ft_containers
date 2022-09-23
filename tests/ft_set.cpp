@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include "set.hpp"
 #include <vector>
-#include "../includes/set.hpp"
-#include "../includes/vector.hpp"
+#include "vector.hpp"
 
 #define PRINT(X) { std::cout << X << std::endl; }
 #define INFO(X) { set_info(X); }
@@ -137,14 +137,18 @@ int	main( void )
 
 		PRINT("%%> 3 :: iterators <%%");
 
-		for (Local::iterator iter = m0.begin(); iter != m0.end(); iter++)
-			PRINT(*iter);
-		for (Local::const_iterator iter = m0.begin(); iter != m0.end(); iter++)
-			PRINT(*iter);
-		for (Local::reverse_iterator iter = m0.rbegin(); iter != m0.rend(); iter++)
-			PRINT(*iter);
-		for (Local::const_reverse_iterator iter = m0.rbegin(); iter != m0.rend(); iter++)
-			PRINT(*iter);
+		Local::const_iterator	cit;
+		Local::reverse_iterator	rit;
+		Local::const_reverse_iterator	rcit;
+
+		for (it = m0.begin(); it != m0.end(); it++)
+			PRINT(*it);
+		for (cit = m0.begin(); cit != m0.end(); cit++)
+			PRINT(*cit);
+		for (rit = m0.rbegin(); rit != m0.rend(); rit++)
+			PRINT(*rit);
+		for (rcit = m0.rbegin(); rcit != m0.rend(); rcit++)
+			PRINT(*rcit);
 
 		it = --m0.begin();
 		if (it == m0.end())
@@ -153,15 +157,26 @@ int	main( void )
 		++it;
 		if (it != m0.end())
 			PRINT(*it);
+		cit = it;
+		rcit = rit;
 
-		for (Local::iterator iter = --m0.end(); iter != m0.begin(); iter--)
-			PRINT(*iter);
-		for (Local::const_iterator iter = --m0.end(); iter != m0.begin(); iter--)
-			PRINT(*iter);
-		for (Local::reverse_iterator iter = --m0.rend(); iter != m0.rbegin(); iter--)
-			PRINT(*iter);
-		for (Local::const_reverse_iterator iter = --m0.rend(); iter != m0.rbegin(); iter--)
-			PRINT(*iter);
+		(void)(it == cit);
+		(void)(cit == it);
+		(void)(it != cit);
+		(void)(cit != it);
+		(void)(rit == rcit);
+		(void)(rcit == rit);
+		(void)(rit != rcit);
+		(void)(rcit != rit);
+
+		for (it = --m0.end(); it != m0.begin(); it--)
+			PRINT(*it);
+		for (cit = --m0.end(); cit != m0.begin(); cit--)
+			PRINT(*cit);
+		for (rit = --m0.rend(); rit != m0.rbegin(); rit--)
+			PRINT(*rit);
+		for (rcit = --m0.rend(); rcit != m0.rbegin(); rcit--)
+			PRINT(*rcit);
 
 		PRINT("%%> 4 :: erasing <%%");
 
@@ -237,22 +252,18 @@ int	main( void )
 		typedef OBJ<int> Local;
 		PRINT("%%> 7 :: performance <%%");
 
-		Local	v0;
+		Local	m0;
 		Local	v1;
 		Local::iterator	it;
 		const size_t size = 1000000;
 
 		for (size_t i = 0; i < size; i++)
-			v0.insert(i);
-		v1.insert(v0.begin(), v0.end());
+			m0.insert(i);
+		v1.insert(m0.begin(), m0.end());
 		for (size_t i = 0; i < size / 2; i++)
-		{
-			v0.lower_bound(*v0.find(i));
-			v0.upper_bound(*v0.find(i));
-			v0.equal_range(*v0.find(i));
-		}
+			m0.lower_bound(*m0.find(i));
 		for (size_t i = 0; i < size; i++)
-			v0.erase(v0.begin());
+			m0.erase(m0.begin());
 		v1.erase(v1.begin(), v1.end());
 	}
 	return (0);

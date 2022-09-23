@@ -373,6 +373,22 @@ namespace ft
 		return __lhs._N_ != __rhs._N_;
 	}
 
+	template <class Iter1>
+	bool
+	operator==( ft::rb_tree_iterator<Iter1> const& __lhs,
+				ft::rb_tree_const_iterator<Iter1> const&  __rhs )
+	{
+		return __lhs._N_ == __rhs._N_;
+	}
+
+	template <class Iter1>
+	bool
+	operator!=( ft::rb_tree_iterator<Iter1> const& __lhs,
+				ft::rb_tree_const_iterator<Iter1> const&  __rhs )
+	{
+		return __lhs._N_ != __rhs._N_;
+	}
+
 	template <class Iter>
 	bool
 	operator==( ft::rb_tree_iterator<Iter> const& __lhs,
@@ -797,7 +813,9 @@ namespace ft
 		}
 
 		protected:
+
 		/* erase */
+
 		bool
 		_n_erase( base_node_pointer __hint, key_type const& __key )
 		{

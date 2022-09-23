@@ -1,12 +1,12 @@
 #include <iostream>
-#include <stack>
 #include <vector>
-#include "../includes/stack.hpp"
-#include "../includes/vector.hpp"
+#include <deque>
+#include <list>
+#include <stack>
+#include "stack.hpp"
 
 #define LOG(X) { stack_info(X); }
 #define PRINT(X) { std::cout << X << std::endl; }
-#define OBJ ft::stack
 
 template <class T>
 void
@@ -26,61 +26,62 @@ stack_info( T const& __s )
 
 int	main( void )
 {
-	typedef OBJ<std::string, std::vector<std::string> > Local;
 	PRINT("%%> 0 :: all <%%");
-	Local	s1;
 
-	LOG(s1);
-	s1.push("a");
-	LOG(s1);
-	s1.push("bb");
-	LOG(s1);
-	s1.push("ccc");
-	LOG(s1);
-	s1.push("dddd");
-	LOG(s1);
+	ft::stack< int, std::deque<int> > s0;
+	LOG(s0);
+	s0.push(1);
+	LOG(s0);
+	s0.push(2);
+	LOG(s0);
+	s0.push(3);
+	LOG(s0);
+	s0.push(4);
+	LOG(s0);
+	PRINT(s0.top());
 
-	Local	s2(s1);
+	ft::stack< int, std::deque<int> > s1(s0);
+	LOG(s1);
+	s1.pop();
+	s0.push(5);
+	s0 = s1;
+	LOG(s0);
+	s1.pop();
+	LOG(s1);
+	PRINT(s1.top());
+
+	ft::stack< int, std::list<int> > s2;
+	while (s2.size() != 42)
+		s2.push(42);
 	LOG(s2);
-	
-	Local	s3;
-	s3 = s2;
-	LOG(s2);
-
-	s3.pop();
-	LOG(s1);
-	LOG(s2);
-	LOG(s3);
-
-	while (!s3.empty())
+	while (!s2.empty())
 	{
-		s3.pop();
-		LOG(s3);
+		PRINT(s2.top());
+		s2.pop();
 	}
 
 	std::vector<int> v(100000000, 42);
-	OBJ<int, std::vector<int> > s4(v);
-	LOG(s4);
-	while (!s4.empty())
-		s4.pop();
-	while (s4.size() != 100000000)
-		s4.push(42);
-	LOG(s4);
+	ft::stack< int, std::vector<int> > s3(v);
+	LOG(s3);
+	while (!s3.empty())
+		s3.pop();
+	while (s3.size() != 100000000)
+		s3.push(42);
+	LOG(s3);
+	s3.pop();
 
-	s1.pop();
-	PRINT(std::boolalpha << (s1 == s2));
-	PRINT(std::boolalpha << (s1 != s2));
-	PRINT(std::boolalpha << (s1 < s2));
-	PRINT(std::boolalpha << (s1 <= s2));
-	PRINT(std::boolalpha << (s1 > s2));
-	PRINT(std::boolalpha << (s1 >= s2));
-	std::swap(s1, s2);
-	PRINT(std::boolalpha << (s1 == s2));
-	PRINT(std::boolalpha << (s1 != s2));
-	PRINT(std::boolalpha << (s1 < s2));
-	PRINT(std::boolalpha << (s1 <= s2));
-	PRINT(std::boolalpha << (s1 > s2));
-	PRINT(std::boolalpha << (s1 >= s2));
-
+	PRINT(std::boolalpha << (s0 == s1));
+	PRINT(std::boolalpha << (s0 != s1));
+	PRINT(std::boolalpha << (s0 < s1));
+	PRINT(std::boolalpha << (s0 <= s1));
+	PRINT(std::boolalpha << (s0 > s1));
+	PRINT(std::boolalpha << (s0 >= s1));
+	std::swap(s0, s1);
+	PRINT(std::boolalpha << (s0 == s1));
+	PRINT(std::boolalpha << (s0 != s1));
+	PRINT(std::boolalpha << (s0 < s1));
+	PRINT(std::boolalpha << (s0 <= s1));
+	PRINT(std::boolalpha << (s0 > s1));
+	PRINT(std::boolalpha << (s0 >= s1));
 	return (0);
 }

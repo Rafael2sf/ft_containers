@@ -2,8 +2,8 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "../includes/map.hpp"
-#include "../includes/vector.hpp"
+#include "map.hpp"
+#include "vector.hpp"
 
 #define PRINT(X) { std::cout << X << std::endl; }
 #define INFO(X) { map_info(X); }
@@ -155,14 +155,18 @@ int	main( void )
 
 		PRINT("%%> 4 :: iterators <%%");
 
-		for (Local::iterator iter = m0.begin(); iter != m0.end(); iter++)
-			PRINT(iter->first << " " << iter->second);
-		for (Local::const_iterator iter = m0.begin(); iter != m0.end(); iter++)
-			PRINT(iter->first << " " << iter->second);
-		for (Local::reverse_iterator iter = m0.rbegin(); iter != m0.rend(); iter++)
-			PRINT(iter->first << " " << iter->second);
-		for (Local::const_reverse_iterator iter = m0.rbegin(); iter != m0.rend(); iter++)
-			PRINT(iter->first << " " << iter->second);
+		Local::const_iterator	cit;
+		Local::reverse_iterator	rit;
+		Local::const_reverse_iterator	rcit;
+
+		for (it = m0.begin(); it != m0.end(); it++)
+			PRINT(it->first << " " << it->second);
+		for (cit = m0.begin(); cit != m0.end(); cit++)
+			PRINT(cit->first << " " << cit->second);
+		for (rit = m0.rbegin(); rit != m0.rend(); rit++)
+			PRINT(rit->first << " " << rit->second);
+		for (rcit = m0.rbegin(); rcit != m0.rend(); rcit++)
+			PRINT(rcit->first << " " << rcit->second);
 
 		it = --m0.begin();
 		if (it == m0.end())
@@ -175,14 +179,25 @@ int	main( void )
 			it->second = "this mapped_type has been overwritten";
 		}
 
-		for (Local::iterator iter = --m0.end(); iter != m0.begin(); iter--)
-			PRINT(iter->first << " " << iter->second);
-		for (Local::const_iterator iter = --m0.end(); iter != m0.begin(); iter--)
-			PRINT(iter->first << " " << iter->second);
-		for (Local::reverse_iterator iter = --m0.rend(); iter != m0.rbegin(); iter--)
-			PRINT(iter->first << " " << iter->second);
-		for (Local::const_reverse_iterator iter = --m0.rend(); iter != m0.rbegin(); iter--)
-			PRINT(iter->first << " " << iter->second);
+		rcit = rit;
+		cit = it;
+		(void)(it == cit);
+		(void)(cit == it);
+		(void)(it != cit);
+		(void)(cit != it);
+		(void)(rit == rcit);
+		(void)(rcit == rit);
+		(void)(rit != rcit);
+		(void)(rcit != rit);
+
+		for (it = --m0.end(); it != m0.begin(); it--)
+			PRINT(it->first << " " << it->second);
+		for (cit = --m0.end(); cit != m0.begin(); cit--)
+			PRINT(cit->first << " " << cit->second);
+		for (rit = --m0.rend(); rit != m0.rbegin(); rit--)
+			PRINT(rit->first << " " << rit->second);
+		for (rcit = --m0.rend(); rcit != m0.rbegin(); rcit--)
+			PRINT(rcit->first << " " << rcit->second);
 
 		PRINT("%%> 5 :: erasing <%%");
 
@@ -262,22 +277,18 @@ int	main( void )
 		typedef OBJ<int, int> Local;
 		PRINT("%%> 8 :: performance <%%");
 
-		Local	v0;
+		Local	m0;
 		Local	v1;
 		Local::iterator	it;
 		const size_t size = 1000000;
 
 		for (size_t i = 0; i < size; i++)
-			v0.insert(ft::make_pair(i, 42));
-		v1.insert(v0.begin(), v0.end());
-		for (size_t i = 0; i < size / 2; i++)
-		{
-			v0.lower_bound(v0.find(i)->first);
-			v0.upper_bound(v0.find(i)->first);
-			v0.equal_range(v0.find(i)->first);
-		}
+			m0.insert(ft::make_pair(i, 42));
+		v1.insert(m0.begin(), m0.end());
 		for (size_t i = 0; i < size; i++)
-			v0.erase(v0.begin());
+			m0.lower_bound(m0.find(i)->first);
+		for (size_t i = 0; i < size; i++)
+			m0.erase(m0.begin());
 		v1.erase(v1.begin(), v1.end());
 	}
 	return (0);

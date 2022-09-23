@@ -40,6 +40,7 @@ SRCS_	=		ft_vector.cpp \
 
 SRCS	=		$(addprefix $(_SRC), $(SRCS_))
 STD_SRCS=		$(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $(SRCS))))
+INCS	=		-I ./includes
 
 OBJS	=		$(patsubst $(_SRC)%.cpp,$(_OBJ)%.o,$(SRCS))
 OBJS	+=		$(patsubst $(_SRC)%.cpp,$(_OBJ)%.o,$(STD_SRCS))
@@ -55,11 +56,13 @@ test:
 
 $(_OBJ)%.o: $(_SRC)%.cpp
 	@$(MKD) $(_OBJ)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCS)
 	@echo -e "compiling\t:\t$(@)"
 
 $(_SRC)std_%.cpp: $(_SRC)ft_%.cpp
-	@cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
+	@sed 's/ft::/std::/g' -i $<
+	@sed 's/#include "/#include </g' -i $@
+	@sed 's/.hpp"/>/g' -i $@
 	@echo -e "Generating\t:\t$(@)"
 
 $(_BIN)%: $(_OBJ)%.o
@@ -74,12 +77,12 @@ $(_BIN)%: $(_OBJ)%.o
 
 clean:
 	@echo -e -n "cleaning files ... "
-	@$(RMV) $(OBJS) $(STD_SRCS) *.output.*
+	@$(RMV) $(OBJS) $(STD_SRCS) output.*
 	@echo -e "OK"
 
 fclean: clean
 	@echo -e -n "erasing files ... "
-	@$(RMV) -r $(_OBJ) $(_BIN) $(NAME)
+	@$(RMV) -r $(_OBJ) $(_BIN) $(NAME) diff.*
 	@echo -e "OK"
 
 re: fclean all

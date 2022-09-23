@@ -204,7 +204,7 @@ namespace ft
 		typename reverse_iterator<Iter>::difference_type __n,
 		reverse_iterator<Iter> const& __rhs )
 	{
-		reverse_iterator<Iter>	tmp;
+		reverse_iterator<Iter>	tmp(__rhs);
 		tmp + __n;
 		return (tmp); 
 	}
