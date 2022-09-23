@@ -3,7 +3,7 @@ set -m
 
 # ./run_test.sh vector
 #
-# -d (output the diferrence of output) with file
+# -d (output the diferrence of output)
 # -h (hide output)
 # -t (show runtime)
 
@@ -39,7 +39,7 @@ function time_program ()
 
 function show_usage()
 {
-	printf "Usage: ./run_test.sh [ -t # showtime ] [ -h # hide output ] [ -d <file> # diff output ] <file_basename>\n"
+	printf "Usage: ./run_test.sh [ -t # showtime ] [ -h # hide output ] [ -d diff output ] <file_basename>\n"
 	exit 1
 }
 

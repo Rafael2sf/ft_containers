@@ -60,9 +60,8 @@ $(_OBJ)%.o: $(_SRC)%.cpp
 	@echo -e "compiling\t:\t$(@)"
 
 $(_SRC)std_%.cpp: $(_SRC)ft_%.cpp
-	@sed 's/ft::/std::/g' -i $<
-	@sed 's/#include "/#include </g' -i $@
-	@sed 's/.hpp"/>/g' -i $@
+	@cat $< | sed 's/ft::/std::/g' > $(addprefix $(_SRC), $(patsubst ft_%, std_%, $(notdir $<)))
+	@sed 's/#include "/#include </g' -i $@ && sed 's/.hpp"/>/g' -i $@
 	@echo -e "Generating\t:\t$(@)"
 
 $(_BIN)%: $(_OBJ)%.o

@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
-#include <set>
 #include "set.hpp"
-#include <vector>
 #include "vector.hpp"
 
 #define PRINT(X) { std::cout << X << std::endl; }

@@ -2,7 +2,6 @@
 #include <vector>
 #include <deque>
 #include <list>
-#include <stack>
 #include "stack.hpp"
 
 #define LOG(X) { stack_info(X); }
