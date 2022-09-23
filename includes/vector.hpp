@@ -5,6 +5,9 @@
 #include "algorithm.hpp"
 #include "type_traits.hpp"
 #include "iterators.hpp"
+#include "utility.hpp"
+#include <stdexcept>
+#include <iterator>
 
 namespace ft
 {
@@ -53,7 +56,7 @@ namespace ft
 
 		~vector()
 		{
-			this->_v_Destroy();
+			_v_Destroy();
 		}
 
 		explicit vector ( allocator_type const& __alloc = allocator_type() )
@@ -64,7 +67,7 @@ namespace ft
 			allocator_type const& __alloc = allocator_type() )
 		: _data(0), _size(0), _capacity(0), _allocator(__alloc)
 		{
-			this->_v_Fill(__n, __val);
+			_v_Fill(__n, __val);
 		}
 
 		template <class InputIterator>
@@ -74,7 +77,7 @@ namespace ft
 		{
 			typedef typename ft::truth_type<
 				ft::is_integral<InputIterator>::value>::type X;
-			this->_v_Dispatch(__first, __last, X());
+			_v_Dispatch(__first, __last, X());
 		}
 
 		vector( vector const& __rhs )
@@ -90,14 +93,14 @@ namespace ft
 		{
 			if (__rhs._capacity < _capacity)
 			{
-				this->_v_Erase(this->begin(), this->end());
+				_v_Erase(this->begin(), this->end());
 				for (size_type i = 0; i < __rhs._size; i++)
 					_allocator.construct(_data + i, __rhs._data[i]);
 				_size = __rhs._size;
 			}
 			else
 			{
-				this->_v_Destroy();
+				_v_Destroy();
 				if (__rhs._size)
 				{
 					_data = _allocator.allocate(__rhs._capacity);
@@ -190,7 +193,7 @@ namespace ft
 		{
 			if (__n > max_size())
 				throw std::length_error("vector::_M_fill_insert");
-			this->_v_Resize(__n);
+			_v_Resize(__n);
 			for (size_type i = _size; i < __n; i++)
 				_allocator.construct(_data + i, __val);
 			_size = __n;
@@ -203,7 +206,7 @@ namespace ft
 			{
 				if (__n > max_size())
 					throw std::length_error("vector::reserve");
-				this->_v_Resize(__n);
+				_v_Resize(__n);
 			}
 		}
 
@@ -221,13 +224,13 @@ namespace ft
 
 		reference
 		at( size_type __n ) {
-			this->_v_RangeCheck(__n);
+			_v_RangeCheck(__n);
 			return _data[__n];
 		}
 
 		const_reference
 		at( size_type __n ) const {
-			this->_v_RangeCheck(__n);
+			_v_RangeCheck(__n);
 			return _data[__n];
 		}
 
@@ -256,7 +259,7 @@ namespace ft
 		void
 		assign( size_type __n, const_reference __val )
 		{
-			this->_v_Fill(__n, __val);
+			_v_Fill(__n, __val);
 		}
 
 		template< class InputIterator >
@@ -265,14 +268,14 @@ namespace ft
 		{
 			typedef typename ft::truth_type<
 				ft::is_integral<InputIterator>::value>::type X;
-			this->_v_Dispatch(__first, __last, X());
+			_v_Dispatch(__first, __last, X());
 		}
 
 		void
 		push_back( const_reference __val )
 		{
 			if (_size == _capacity)
-				this->_v_Resize(_size == 0 ? 1 : _capacity * 2);
+				_v_Resize(_size == 0 ? 1 : _capacity * 2);
 			_allocator.construct(_data + _size++, __val);
 		}
 
@@ -289,10 +292,10 @@ namespace ft
 			if (_size == _capacity)
 			{
 				pos = std::distance(this->begin(), __positon);
-				this->_v_Resize(_capacity == 0 ? 1 : _capacity * 2);
+				_v_Resize(_capacity == 0 ? 1 : _capacity * 2);
 				__positon = begin() + pos;
 			}
-			this->_v_Move(__positon + 1,
+			_v_Move(__positon + 1,
 				__positon, std::distance(__positon, this->end()));
 			_allocator.construct(&*__positon, __val);
 			this->_size++;
@@ -307,12 +310,12 @@ namespace ft
 			if (_size + n >= _capacity)
 			{
 				pos = std::distance(this->begin(), __positon);
-				this->_v_Resize(
+				_v_Resize(
 					_capacity * 2 > _size + n ? _capacity * 2 : _size + n);
 				__positon = begin() + pos;
 			}
 			if (_size)
-				this->_v_Move(__positon + n,
+				_v_Move(__positon + n,
 					__positon, std::distance(__positon, this->end()));
 			_size += n;
 			while (n--)
@@ -321,30 +324,37 @@ namespace ft
 
 		template< class InputIterator >
 		void
-		insert( iterator __positon,
+		insert( iterator __position,
 			InputIterator __first, InputIterator __last,
 			typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type* = 0 )
 		{
 			size_type	pos;
 			size_type	len;
-
+			ft::pair<pointer, size_type> new_block;
 			len = std::distance(__first, __last);
 			if (len == 0)
 				return ;
 			if (_size + len >= _capacity)
 			{
-				pos = std::distance(begin(), __positon);
-				this->_v_Resize(
-					_capacity * 2 > _size + len ? _capacity * 2 : _size + len);
-				__positon = begin() + pos;
+				pos = std::distance(begin(), __position);
+				new_block.second = ( _size + len > _size * 2 ?
+					_size + len : _size * 2);
+				new_block.first = _allocator.allocate(new_block.second);
+				_v_Copy(iterator(new_block.first), this->begin(), pos);
+				_v_Copy(iterator(new_block.first + pos), __first, len);
+				_v_Copy(iterator(new_block.first + pos + len),
+					__position, std::distance(__position, this->end()));
+				_v_Erase(begin(), end());
+				_allocator.deallocate(_data, _capacity);
+				_data = new_block.first;
+				_capacity = new_block.second;
 			}
-			if (_size > 0)
-				this->_v_Move(__positon + len,
-					__positon, std::distance(__positon, this->end()));
-			while (__first != __last)
+			else
 			{
-				_allocator.construct(&*__positon++, *__first);
-				__first++;
+				if (_size > 0)
+					_v_Move(__position + len,
+						__position, std::distance(__position, this->end()));
+				_v_Copy(__position, __first, len);
 			}
 			_size += len;
 		}
@@ -357,7 +367,7 @@ namespace ft
 				_allocator.destroy(&_data[--_size]);
 				return (this->end());
 			}
-			this->_v_Move(__positon,
+			_v_Move(__positon,
 				 __positon + 1, std::distance(__positon, this->end()));
 			_size--;
 			return (__positon == this->end() - 1 ? this->end() : __positon);
@@ -372,8 +382,8 @@ namespace ft
 			len = std::distance(__first, __last);
 			if (!len)
 				return (__first);
-			this->_v_Erase(__first, __last);
-			this->_v_Move(__first, __last, std::distance(__last, this->end()));
+			_v_Erase(__first, __last);
+			_v_Move(__first, __last, std::distance(__last, this->end()));
 			_size -= len;
 			return (__last == this->end() - 1 ? this->end() : __last);
 		}
@@ -388,7 +398,7 @@ namespace ft
 
 		void
 		clear( void ) {
-			this->_v_Erase(this->begin(), this->end());
+			_v_Erase(this->begin(), this->end());
 			_size = 0;
 		}
 
@@ -430,10 +440,10 @@ namespace ft
 			}
 			else if (__n > _capacity)
 			{
-				this->_v_MaxCheck(__n);
+				_v_MaxCheck(__n);
 				tmp = _allocator.allocate(__n);
 				if (_size)
-					this->_v_Move(iterator(tmp), this->begin(), _size);
+					_v_Move(iterator(tmp), this->begin(), _size);
 				if (_capacity)
 					_allocator.deallocate(_data, _capacity);
 				_data = tmp;
@@ -468,11 +478,25 @@ namespace ft
 			}
 		}
 
+		/* Moves internal data memory from src to __dst of len size,
+			dst must be allocated, src is kept */
+		void
+		_v_Copy( iterator __dst, iterator __src, size_type __len )
+		{
+			if (__src == __dst || __len == 0)
+				return ;
+			while (__len)
+			{
+				_allocator.construct(&*__dst++, *__src++);
+				__len--;
+			}
+		}
+
 		template <typename X>
 		void
 		_v_Dispatch( X __n, X __val, true_type )
 		{
-			this->_v_Fill(static_cast<size_type>(__n),
+			_v_Fill(static_cast<size_type>(__n),
 				static_cast<value_type>(__val));
 		}
 
@@ -480,7 +504,7 @@ namespace ft
 		void
 		_v_Dispatch( X __first, X __last, false_type )
 		{
-			this->_v_Range(__first , __last);
+			_v_Range(__first , __last);
 		}
 
 		/* Destroy the current vector,
@@ -489,8 +513,8 @@ namespace ft
 		_v_Fill( size_type __n, const_reference __val )
 		{
 			if (_capacity)
-				this->_v_Erase(this->begin(), this->end());
-			this->_v_Resize(__n);
+				_v_Erase(this->begin(), this->end());
+			_v_Resize(__n);
 			for (size_type i = 0; i < __n; i++)
 				_allocator.construct(_data + i, __val);
 			_size = __n;
@@ -504,14 +528,27 @@ namespace ft
 		{
 			size_t	n;
 
-			if (_capacity)
-				this->_v_Erase(this->begin(), this->end());
+			if (__first == this->begin() && __last == this->end())
+				return ;
 			n = std::distance(__first, __last);
-			this->_v_Resize(n);
-			for (size_type i = 0; i < n; i++)
+			if (n > _capacity)
 			{
-				_allocator.construct(_data + i, *__first);
-				__first++;
+				_v_Erase(this->begin(), this->end());
+				_size = 0;
+				_v_Resize(n);
+				_v_Copy(this->begin(), __first, n);
+			}
+			else
+			{
+				if (_size >= n)
+					_v_Move(this->begin(), __first, n);
+				else
+				{
+					_v_Move(this->begin(), __first, _size);
+					std::advance(__first, _size);
+					_v_Copy(this->end(), __first, n - _size);
+				}
+				_v_Erase(this->begin() + n, this->end());
 			}
 			_size = n;
 		}
@@ -535,7 +572,7 @@ namespace ft
 		{
 			if (_capacity)
 			{
-				this->_v_Erase(this->begin(), this->end());
+				_v_Erase(this->begin(), this->end());
 				_allocator.deallocate(_data, _capacity);
 				_size = 0;
 				_capacity = 0;
