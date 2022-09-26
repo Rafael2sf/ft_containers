@@ -53,6 +53,8 @@ int	main( void )
 		LOG(v3);
 		Local v4;
 		v4 = v2;
+		v4 = v4;
+		LOG(v4);
 		v2.push_back(0);
 		LOG(v4);
 	}

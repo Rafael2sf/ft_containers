@@ -57,6 +57,8 @@ int	main( void )
 		m1.clear();
 		LOG(m1);
 		LOG(m2);
+		m0 = m0;
+		LOG(m0);
 		m0 = m2;
 		m2.clear();
 		LOG(m0);

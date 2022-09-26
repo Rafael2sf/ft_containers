@@ -515,8 +515,11 @@ namespace ft
 		RedBlackTree &
 		operator=( RedBlackTree const& __rhs )
 		{
-			this->clear();
-			_n_range(__rhs.begin(), __rhs.end());
+			if (_root != __rhs._root)
+			{
+				this->clear();
+				_n_range(__rhs.begin(), __rhs.end());
+			}
 			return *this;
 		}
 

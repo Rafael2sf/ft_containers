@@ -76,12 +76,12 @@ $(_BIN)%: $(_OBJ)%.o
 
 clean:
 	@echo -e -n "cleaning files ... "
-	@$(RMV) $(OBJS) $(STD_SRCS) output.*
+	@$(RMV) $(OBJS) $(STD_SRCS) output.* diff.*
 	@echo -e "OK"
 
 fclean: clean
 	@echo -e -n "erasing files ... "
-	@$(RMV) -r $(_OBJ) $(_BIN) $(NAME) diff.*
+	@$(RMV) -r $(_OBJ) $(_BIN) $(NAME)
 	@echo -e "OK"
 
 re: fclean all

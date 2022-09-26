@@ -91,23 +91,26 @@ namespace ft
 		vector &
 		operator=( vector const& __rhs )
 		{
-			if (__rhs._capacity < _capacity)
+			if (_data != __rhs._data)
 			{
-				_v_Erase(this->begin(), this->end());
-				for (size_type i = 0; i < __rhs._size; i++)
-					_allocator.construct(_data + i, __rhs._data[i]);
-				_size = __rhs._size;
-			}
-			else
-			{
-				_v_Destroy();
-				if (__rhs._size)
+				if (__rhs._capacity < _capacity)
 				{
-					_data = _allocator.allocate(__rhs._capacity);
+					_v_Erase(this->begin(), this->end());
 					for (size_type i = 0; i < __rhs._size; i++)
 						_allocator.construct(_data + i, __rhs._data[i]);
 					_size = __rhs._size;
-					_capacity = __rhs._capacity;
+				}
+				else
+				{
+					_v_Destroy();
+					if (__rhs._size)
+					{
+						_data = _allocator.allocate(__rhs._capacity);
+						for (size_type i = 0; i < __rhs._size; i++)
+							_allocator.construct(_data + i, __rhs._data[i]);
+						_size = __rhs._size;
+						_capacity = __rhs._capacity;
+					}
 				}
 			}
 			return *this;
@@ -275,7 +278,7 @@ namespace ft
 		push_back( const_reference __val )
 		{
 			if (_size == _capacity)
-				_v_Resize(_size == 0 ? 1 : _capacity * 2);
+				_v_Resize(_capacity * 2 + (_capacity == 0));
 			_allocator.construct(_data + _size++, __val);
 		}
 
@@ -292,7 +295,7 @@ namespace ft
 			if (_size == _capacity)
 			{
 				pos = std::distance(this->begin(), __positon);
-				_v_Resize(_capacity == 0 ? 1 : _capacity * 2);
+				_v_Resize(_capacity * 2 + (_capacity == 0));
 				__positon = begin() + pos;
 			}
 			_v_Move(__positon + 1,
@@ -307,7 +310,7 @@ namespace ft
 		{
 			size_type	pos = 0;
 
-			if (_size + n >= _capacity)
+			if (_size + n > _capacity)
 			{
 				pos = std::distance(this->begin(), __positon);
 				_v_Resize(
@@ -334,7 +337,7 @@ namespace ft
 			len = std::distance(__first, __last);
 			if (len == 0)
 				return ;
-			if (_size + len >= _capacity)
+			if (_size + len > _capacity)
 			{
 				pos = std::distance(begin(), __position);
 				new_block.second = ( _size + len > _size * 2 ?
