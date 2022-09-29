@@ -93,7 +93,7 @@ namespace ft
 		{
 			if (_data != __rhs._data)
 			{
-				if (__rhs._capacity < _capacity)
+				if (__rhs._size < _capacity)
 				{
 					_v_Erase(this->begin(), this->end());
 					for (size_type i = 0; i < __rhs._size; i++)
@@ -105,11 +105,11 @@ namespace ft
 					_v_Destroy();
 					if (__rhs._size)
 					{
-						_data = _allocator.allocate(__rhs._capacity);
+						_data = _allocator.allocate(__rhs._size);
 						for (size_type i = 0; i < __rhs._size; i++)
 							_allocator.construct(_data + i, __rhs._data[i]);
 						_size = __rhs._size;
-						_capacity = __rhs._capacity;
+						_capacity = _size;
 					}
 				}
 			}
@@ -314,7 +314,7 @@ namespace ft
 			{
 				pos = std::distance(this->begin(), __positon);
 				_v_Resize(
-					_capacity * 2 > _size + n ? _capacity * 2 : _size + n);
+					_size * 2 > _size + n ? _size * 2 : _size + n);
 				__positon = begin() + pos;
 			}
 			if (_size)

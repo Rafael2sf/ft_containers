@@ -122,7 +122,7 @@ namespace ft
 			reverse_iterator
 			operator+( difference_type __rhs ) const {
 				reverse_iterator tmp(*this);
-				tmp -= __rhs;
+				tmp += __rhs;
 				return (tmp);
 			}
 
@@ -135,7 +135,7 @@ namespace ft
 			reverse_iterator
 			operator-( difference_type __rhs ) const {
 				reverse_iterator tmp(*this);
-				tmp += __rhs;
+				tmp -= __rhs;
 				return (tmp);
 			}
 
