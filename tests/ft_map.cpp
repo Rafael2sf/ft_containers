@@ -216,6 +216,12 @@ int	main( void )
 		PRINT(m0.erase(100));
 		m0.erase(--m0.end());
 		LOG(m0);
+		it = m0.begin();
+		m0.erase(++m0.begin());
+		m0.erase(++m0.begin());
+		m0.erase(++m0.begin());
+		for ( ; it != m0.end(); it++)
+			PRINT(it->first << " " << it->second);
 		while (m0.begin() != m0.end())
 			m0.erase(m0.begin());
 		LOG(m0);

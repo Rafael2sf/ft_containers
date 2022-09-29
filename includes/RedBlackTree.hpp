@@ -114,36 +114,36 @@ namespace ft
 
 		public:
 
-		base_node_pointer _N_;
+		base_node_pointer _M_node;
 
 		rb_tree_iterator( void )
 		{}
 
 		explicit rb_tree_iterator( base_node_pointer __p )
-		: _N_(__p)
+		: _M_node(__p)
 		{}
 
 		rb_tree_iterator( rb_tree_iterator const& __other )
-		: _N_(__other._N_)
+		: _M_node(__other._M_node)
 		{}
 
 		rb_tree_iterator &
 		operator=( rb_tree_iterator const& __rhs )
 		{
-			_N_ = __rhs._N_;
+			_M_node = __rhs._M_node;
 			return *this;
 		}
 
 		typename ft::remove_pointer<pointer>::type &
 		operator*( void )
 		{
-			return static_cast<node_pointer>(_N_)->data;
+			return static_cast<node_pointer>(_M_node)->data;
 		}
 
 		pointer
 		operator->( void )
 		{
-			return &static_cast<node_pointer>(_N_)->data;
+			return &static_cast<node_pointer>(_M_node)->data;
 		}
 
 		rb_tree_iterator	&
@@ -151,27 +151,27 @@ namespace ft
 		{
 			base_node_pointer	tmp;
 
-			if (_N_->right)
+			if (_M_node->right)
 			{
-				_N_ = _N_->right;
-				while (_N_->left)
-					_N_ = _N_->left;
+				_M_node = _M_node->right;
+				while (_M_node->left)
+					_M_node = _M_node->left;
 			}
 			else
 			{
-				tmp = _N_->parent;
+				tmp = _M_node->parent;
 				if (!tmp)
 				{
-					_N_ = _N_->max(_N_->left);
+					_M_node = _M_node->max(_M_node->left);
 					return *this;
 				}
-				while (tmp->parent && _N_ == tmp->right)
+				while (tmp->parent && _M_node == tmp->right)
 				{
-					_N_ = tmp;
+					_M_node = tmp;
 					tmp = tmp->parent;
 				}
-				if (_N_->right != tmp)
-					_N_ = tmp;
+				if (_M_node->right != tmp)
+					_M_node = tmp;
 			}
 			return *this;
 		}
@@ -190,22 +190,22 @@ namespace ft
 		{
 			base_node_pointer	tmp;
 
-			if (_N_->left)
+			if (_M_node->left)
 			{
-				_N_ = _N_->left;
-				while (_N_->right)
-					_N_ = _N_->right;
+				_M_node = _M_node->left;
+				while (_M_node->right)
+					_M_node = _M_node->right;
 			}
 			else
 			{
-				tmp = _N_->parent;
-				while (tmp && tmp->parent && _N_ == tmp->left)
+				tmp = _M_node->parent;
+				while (tmp && tmp->parent && _M_node == tmp->left)
 				{
-					_N_ = tmp;
+					_M_node = tmp;
 					tmp = tmp->parent;
 				}
-				if (_N_->left != tmp)
-					_N_ = tmp;
+				if (_M_node->left != tmp)
+					_M_node = tmp;
 			}
 			return *this;
 		}
@@ -240,47 +240,47 @@ namespace ft
 
 		public:
 
-		base_node_pointer _N_;
+		base_node_pointer _M_node;
 
 		rb_tree_const_iterator( void )
 		{}
 
 		explicit rb_tree_const_iterator( base_node_pointer __p )
-		: _N_(__p)
+		: _M_node(__p)
 		{}
 
 		rb_tree_const_iterator( rb_tree_const_iterator const& __other )
-		: _N_(__other._N_)
+		: _M_node(__other._M_node)
 		{}
 
 		template <class U>
 		rb_tree_const_iterator( ft::rb_tree_iterator<U> const& __other )
-		: _N_(__other._N_)
+		: _M_node(__other._M_node)
 		{}
 
 		ft::rb_tree_iterator<T>
-		_N_const_cast( void )
+		_M_const_cast( void )
 		{
-			return ft::rb_tree_iterator<T>(_N_);
+			return ft::rb_tree_iterator<T>(_M_node);
 		}
 
 		rb_tree_const_iterator &
 		operator=( rb_tree_const_iterator const& __rhs )
 		{
-			_N_ = __rhs._N_;
+			_M_node = __rhs._M_node;
 			return *this;
 		}
 
 		typename ft::remove_pointer<pointer>::type &
 		operator*( void )
 		{
-			return static_cast<node_pointer>(_N_)->data;
+			return static_cast<node_pointer>(_M_node)->data;
 		}
 
 		pointer
 		operator->( void )
 		{
-			return &static_cast<node_pointer>(_N_)->data;
+			return &static_cast<node_pointer>(_M_node)->data;
 		}
 
 		rb_tree_const_iterator	&
@@ -288,27 +288,27 @@ namespace ft
 		{
 			base_node_pointer	tmp;
 
-			if (_N_->right)
+			if (_M_node->right)
 			{
-				_N_ = _N_->right;
-				while (_N_->left)
-					_N_ = _N_->left;
+				_M_node = _M_node->right;
+				while (_M_node->left)
+					_M_node = _M_node->left;
 			}
 			else
 			{
-				tmp = _N_->parent;
+				tmp = _M_node->parent;
 				if (!tmp)
 				{
-					_N_ = _N_->max(_N_->left);
+					_M_node = _M_node->max(_M_node->left);
 					return *this;
 				}
-				while (tmp->parent && _N_ == tmp->right)
+				while (tmp->parent && _M_node == tmp->right)
 				{
-					_N_ = tmp;
+					_M_node = tmp;
 					tmp = tmp->parent;
 				}
-				if (_N_->right != tmp)
-					_N_ = tmp;
+				if (_M_node->right != tmp)
+					_M_node = tmp;
 			}
 			return *this;
 		}
@@ -327,22 +327,22 @@ namespace ft
 		{
 			base_node_pointer	tmp;
 
-			if (_N_->left)
+			if (_M_node->left)
 			{
-				_N_ = _N_->left;
-				while (_N_->right)
-					_N_ = _N_->right;
+				_M_node = _M_node->left;
+				while (_M_node->right)
+					_M_node = _M_node->right;
 			}
 			else
 			{
-				tmp = _N_->parent;
-				while (tmp && tmp->parent && _N_ == tmp->left)
+				tmp = _M_node->parent;
+				while (tmp && tmp->parent && _M_node == tmp->left)
 				{
-					_N_ = tmp;
+					_M_node = tmp;
 					tmp = tmp->parent;
 				}
-				if (_N_->left != tmp)
-					_N_ = tmp;
+				if (_M_node->left != tmp)
+					_M_node = tmp;
 			}
 			return *this;
 		}
@@ -362,7 +362,7 @@ namespace ft
 	operator==( ft::rb_tree_const_iterator<Iter1> const& __lhs,
 				ft::rb_tree_iterator<Iter1> const&  __rhs )
 	{
-		return __lhs._N_ == __rhs._N_;
+		return __lhs._M_node == __rhs._M_node;
 	}
 
 	template <class Iter1>
@@ -370,7 +370,7 @@ namespace ft
 	operator!=( ft::rb_tree_const_iterator<Iter1> const& __lhs,
 				ft::rb_tree_iterator<Iter1> const&  __rhs )
 	{
-		return __lhs._N_ != __rhs._N_;
+		return __lhs._M_node != __rhs._M_node;
 	}
 
 	template <class Iter1>
@@ -378,7 +378,7 @@ namespace ft
 	operator==( ft::rb_tree_iterator<Iter1> const& __lhs,
 				ft::rb_tree_const_iterator<Iter1> const&  __rhs )
 	{
-		return __lhs._N_ == __rhs._N_;
+		return __lhs._M_node == __rhs._M_node;
 	}
 
 	template <class Iter1>
@@ -386,7 +386,7 @@ namespace ft
 	operator!=( ft::rb_tree_iterator<Iter1> const& __lhs,
 				ft::rb_tree_const_iterator<Iter1> const&  __rhs )
 	{
-		return __lhs._N_ != __rhs._N_;
+		return __lhs._M_node != __rhs._M_node;
 	}
 
 	template <class Iter>
@@ -394,7 +394,7 @@ namespace ft
 	operator==( ft::rb_tree_iterator<Iter> const& __lhs,
 				ft::rb_tree_iterator<Iter> const&  __rhs )
 	{
-		return __lhs._N_ == __rhs._N_;
+		return __lhs._M_node == __rhs._M_node;
 	}
 
 	template <class Iter>
@@ -402,7 +402,7 @@ namespace ft
 	operator!=( ft::rb_tree_iterator<Iter> const& __lhs,
 				ft::rb_tree_iterator<Iter> const&  __rhs )
 	{
-		return __lhs._N_ != __rhs._N_;
+		return __lhs._M_node != __rhs._M_node;
 	}
 
 	template <class Iter>
@@ -410,7 +410,7 @@ namespace ft
 	operator==( ft::rb_tree_const_iterator<Iter> const& __lhs,
 				ft::rb_tree_const_iterator<Iter> const&  __rhs )
 	{
-		return __lhs._N_ == __rhs._N_;
+		return __lhs._M_node == __rhs._M_node;
 	}
 
 	template <class Iter>
@@ -418,7 +418,7 @@ namespace ft
 	operator!=( ft::rb_tree_const_iterator<Iter> const& __lhs, 
 				ft::rb_tree_const_iterator<Iter> const&  __rhs )
 	{
-		return __lhs._N_ != __rhs._N_;
+		return __lhs._M_node != __rhs._M_node;
 	}
 
 	template	<class Key,
@@ -655,7 +655,7 @@ namespace ft
 		iterator
 		insert( iterator __position, value_type const& __val )
 		{
-			return (_n_insert(__position._N_, __val).first);
+			return (_n_insert(__position._M_node, __val).first);
 		}
 
 		template <class InputIterator>
@@ -669,7 +669,7 @@ namespace ft
 		erase( iterator __pos )
 		{
 			if (__pos != this->end())
-				_n_erase(__pos._N_, _key_of(*__pos));
+				_n_erase(__pos._M_node, _key_of(*__pos));
 		}
 
 		size_type
@@ -687,7 +687,7 @@ namespace ft
 			{
 				tmp = __first;
 				__first++;
-				_n_erase(tmp._N_, _key_of(*tmp));
+				_n_erase(tmp._M_node, _key_of(*tmp));
 			}
 		}
 
@@ -733,7 +733,7 @@ namespace ft
 		lower_bound( key_type const& __key )
 		{
 			base_node_pointer	x = _root;
-			base_node_pointer	y = this->end()._N_;
+			base_node_pointer	y = this->end()._M_node;
 
 			while (x)
 			{
@@ -753,7 +753,7 @@ namespace ft
 		lower_bound( key_type const& __key ) const
 		{
 			base_node_pointer	x = _root;
-			base_node_pointer	y = this->end()._N_;
+			base_node_pointer	y = this->end()._M_node;
 
 			while (x)
 			{
@@ -776,9 +776,9 @@ namespace ft
 			if (tmp != this->end())
 			{
 				if (!_compare(_key_of( static_cast<
-						node_pointer>(tmp._N_)->data), __key)
+						node_pointer>(tmp._M_node)->data), __key)
 					&& !_compare(__key, _key_of(static_cast<
-						node_pointer>(tmp._N_)->data)))
+						node_pointer>(tmp._M_node)->data)))
 				{
 					return ++tmp;
 				}
@@ -793,9 +793,9 @@ namespace ft
 			if (tmp != this->end())
 			{
 				if (!_compare(_key_of( static_cast<
-						node_pointer>(tmp._N_)->data), __key)
+						node_pointer>(tmp._M_node)->data), __key)
 					&& !_compare(__key, _key_of(static_cast<
-						node_pointer>(tmp._N_)->data)))
+						node_pointer>(tmp._M_node)->data)))
 				{
 					return ++tmp;
 				}
@@ -831,7 +831,7 @@ namespace ft
 			pos = _n_find(base_node_pointer(__hint), __key);
 			if (pos == this->end())
 				return false;
-			del = pos._N_;
+			del = pos._M_node;
 			rep = _n_erase_sucessor(del);
 			/* double black requires tree rebalance */
 			if (del->color == black && (!rep || rep->color == black))
@@ -856,17 +856,57 @@ namespace ft
 			if (__n->left && __n->right)
 			{
 				tmp = base_node::max(__n->left);
-				_allocator.destroy(&static_cast<node_pointer>(__n)->data);
-				_allocator.construct(&static_cast<node_pointer>(__n)->data,
-						static_cast<node_pointer>(tmp)->data);
-				__n = tmp;
+				_n_erase_swap(tmp, __n);
+				std::swap(tmp->color, __n->color);
 				tmp = _n_erase_sucessor(__n);
+				return tmp;
 			}
 			if (!__n->left)
 				return __n->right;
 			if (!__n->right)
 				return __n->left;
 			return NULL;
+		}
+
+		/* swap any node with 2 chidlren (y) with a edge node (x) */
+		void
+		_n_erase_swap( base_node_pointer & __x, base_node_pointer & __y )
+		{
+				base_node_pointer	ptr;
+
+				ptr = __y->left;
+				__y->left = __x->left;
+				if (__y->left)
+					__y->left->parent = __y;
+				if (ptr == __x)
+					__x->left = __y;
+				else
+				{
+					__x->left = ptr;
+					ptr->parent = __x;
+				}
+				ptr = __x->parent;
+				__x->parent = __y->parent;
+				if (__y->parent->left == __y)
+					__y->parent->left = __x;
+				else
+					__y->parent->right = __x;
+				if (ptr == __y)
+					__y->parent = __x;
+				else
+				{
+					__y->parent = ptr;
+					ptr->right = __y;
+				}
+				__x->right = __y->right;
+				if (__x->right)
+					__x->right->parent = __x;
+				__y->right = 0;
+				if (_root == __y)
+				{
+					_root = __x;
+					_head.left = _root;
+				}
 		}
 
 		void
@@ -972,7 +1012,7 @@ namespace ft
 			}
 			else
 			{
-				if (!__hint || __hint == this->end()._N_)
+				if (!__hint || __hint == this->end()._M_node)
 					__hint = _root;
 				while (__hint != _root && __hint->parent && _compare(_key_of(
 					static_cast<node_pointer>(__hint)->data), _key_of(__val)))

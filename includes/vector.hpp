@@ -371,7 +371,7 @@ namespace ft
 				return (this->end());
 			}
 			_v_Move(__positon,
-				 __positon + 1, std::distance(__positon, this->end()));
+				 __positon + 1, std::distance(__positon, this->end()) - 1);
 			_size--;
 			return (__positon == this->end() - 1 ? this->end() : __positon);
 		}
